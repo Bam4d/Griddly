@@ -42,7 +42,8 @@ NB_MODULE(python_griddly, m) {
   gdy.def("get_avatar_object", &Py_GDYWrapper::getAvatarObject);
   gdy.def("create_game", &Py_GDYWrapper::createGame);
   gdy.def("create_vectorized", &Py_GDYWrapper::createVectorized,
-          py::arg("num_envs"), py::arg("num_threads") = 0, py::arg("observer_name") = "Sprite2D");
+          py::arg("num_envs"), py::arg("num_threads") = 0, py::arg("observer_name") = "Sprite2D",
+          py::arg("render_backend") = "auto");
   gdy.def("get_level_count", &Py_GDYWrapper::getLevelCount);
   gdy.def("get_observer_type", &Py_GDYWrapper::getObserverType);
 
@@ -55,7 +56,8 @@ NB_MODULE(python_griddly, m) {
       .def("reset_from_snapshot", &Py_VectorizedWrapper::resetFromSnapshotAll)
       .def("seed", &Py_VectorizedWrapper::seed)
       .def("step", &Py_VectorizedWrapper::step)
-      .def("observe", &Py_VectorizedWrapper::observe, py::arg("parallel") = true)
+      .def("observe", &Py_VectorizedWrapper::observe, py::arg("parallel") = true, py::arg("device") = false)
+      .def("render_backend", &Py_VectorizedWrapper::renderBackend)
       .def("frame_width", &Py_VectorizedWrapper::frameWidth)
       .def("frame_height", &Py_VectorizedWrapper::frameHeight);
 

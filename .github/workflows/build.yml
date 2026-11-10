@@ -43,6 +43,11 @@ jobs:
         run: ./Release/bin/Griddly_Test
         working-directory: ${{ github.workspace }}
 
+      - name: Tiled renderer parity (python bindings)
+        run: |
+          pip install numpy
+          PYTHONPATH=Release/bin python tests/python_tiled_parity.py
+
       - name: Python smoke test
         run: |
           pip install numpy gymnasium pyyaml pillow
@@ -63,3 +68,42 @@ jobs:
           assert img.shape[2] == 4
           print("python smoke test OK, obs", obs.shape, "img", img.shape)
           PY
+
+  # Renderer parity on a GPU machine: SDL GPU and CUDA must match the SDL CPU
+  # reference (TiledRendererTest + tests/python_tiled_parity.py). Requires a
+  # self-hosted runner labelled `gpu` with the NVIDIA driver, CUDA toolkit
+  # and EGL; enable it by setting the repository variable GPU_RUNNER=true.
+  # GRIDDLY_REQUIRE_TILED_BACKENDS turns "backend unavailable" skips into
+  # failures so a broken driver or build cannot hide a rendering regression.
+  gpu-render-parity:
+    if: vars.GPU_RUNNER == 'true'
+    runs-on: [self-hosted, gpu]
+    timeout-minutes: 60
+    env:
+      GRIDDLY_REQUIRE_TILED_BACKENDS: cuda,sdl_gpu
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Conan install
+        run: conan install deps/conanfile.txt -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build=missing -of build
+
+      - name: Configure (CUDA on)
+        run: |
+          cmake -S . -B build -GNinja \
+            -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc \
+            -DGRIDDLY_ENABLE_CUDA=ON \
+            -DENABLE_PYTHON_BINDINGS=ON -DENABLE_TESTING=ON \
+            -DPython_EXECUTABLE="$(which python3)"
+
+      - name: Build
+        run: cmake --build build -j "$(nproc)"
+
+      - name: Tiled renderer parity (C++)
+        run: env -u SDL_VIDEODRIVER ./Release/bin/Griddly_Test --gtest_filter='TiledRendererTest.*'
+
+      - name: Tiled renderer parity (python bindings)
+        run: env -u SDL_VIDEODRIVER PYTHONPATH=Release/bin python3 tests/python_tiled_parity.py

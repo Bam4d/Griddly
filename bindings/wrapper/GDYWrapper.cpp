@@ -88,8 +88,8 @@ class Py_GDYWrapper {
     return std::make_shared<Py_GameWrapper>(Py_GameWrapper(globalObserverName, gdyFactory_));
   }
 
-  std::shared_ptr<Py_VectorizedWrapper> createVectorized(uint32_t numEnvs, uint32_t numThreads, std::string observerName) {
-    return std::make_shared<Py_VectorizedWrapper>(Py_VectorizedWrapper(gdyFactory_, numEnvs, numThreads, observerName));
+  std::shared_ptr<Py_VectorizedWrapper> createVectorized(uint32_t numEnvs, uint32_t numThreads, std::string observerName, std::string renderBackend) {
+    return std::make_shared<Py_VectorizedWrapper>(Py_VectorizedWrapper(gdyFactory_, numEnvs, numThreads, observerName, renderBackend));
   }
 
  private:

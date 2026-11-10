@@ -7,6 +7,11 @@ SRC="$ROOT/benchmarks/$1.cpp"
 OBJ="/tmp/$1.o"
 BIN="$ROOT/benchmarks/$1"
 CONAN="$HOME/.conan2/p"
+# libGriddly_static.a contains the CUDA tiled renderer when it was built with CUDA
+CUDA_LIBS=""
+if nm -C "$ROOT/Release/bin/libGriddly_static.a" 2>/dev/null | grep -q "TiledCUDARenderer"; then
+  CUDA_LIBS="-L/usr/local/cuda/lib64 -lcudart_static -ldl -lrt"
+fi
 
 /usr/bin/c++ -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSTB_TEXTEDIT_KEYTYPE=unsigned \
   -I"$ROOT/tests/src" -I"$ROOT/src" \
@@ -32,5 +37,5 @@ CONAN="$HOME/.conan2/p"
   $CONAN/b/sdl8c0255475fc2e/p/lib/libSDL3.a \
   $CONAN/b/gtest5419f336abeeb/p/lib/libgmock.a \
   $CONAN/b/gtest5419f336abeeb/p/lib/libgtest.a \
-  -lm -lpthread
+  $CUDA_LIBS -lm -lpthread
 echo "built $BIN"

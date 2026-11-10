@@ -83,10 +83,11 @@ std::vector<int32_t> SDLGridObserver::getExposedVariableValues(std::shared_ptr<O
 }
 
 void SDLGridObserver::updateRenderItems() {
-  globalOrientation_ = DiscreteOrientation();
-  if (avatarObject_ != nullptr && config_.rotateWithAvatar) {
-    globalOrientation_ = avatarObject_->getObjectOrientation();
-  }
+  // setOrientation reuses the existing storage; assigning a fresh
+  // DiscreteOrientation would allocate two shared_ptr cells every frame
+  globalOrientation_.setOrientation(avatarObject_ != nullptr && config_.rotateWithAvatar
+                                        ? avatarObject_->getObjectOrientation().getDirection()
+                                        : Direction::NONE);
 
   PartialObservableGrid observableGrid = getObservableGrid();
 

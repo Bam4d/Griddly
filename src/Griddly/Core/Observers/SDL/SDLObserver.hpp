@@ -46,6 +46,8 @@ struct SDLObserverConfig : ObserverConfig {
   GlobalObserverAvatarMode globalObserverAvatarMode = GlobalObserverAvatarMode::NONE;
 };
 
+using SpriteTextureMap = std::map<std::string, SDL_Texture*>;
+
 // A single textured quad (or tiled fill) to draw for one frame
 struct SDLRenderItem {
   SDL_Texture* texture = nullptr;
@@ -64,6 +66,13 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   ~SDLObserver() override;
 
   uint8_t& update() override;
+  // update() split in two for the tiled GPU renderer: prepareFrame() builds
+  // the render items (CPU only, safe to run on worker threads once the
+  // observer is ready), drawPreparedFrame() issues the draw calls and must run
+  // on the renderer's thread. ensureReady() does first-frame SDL setup.
+  void ensureReady();
+  void prepareFrame();
+  void drawPreparedFrame();
   void init(std::vector<std::weak_ptr<Observer>> playerObservers) override;
   void reset(std::shared_ptr<ObjectRules> avatarObject = nullptr) override;
   void release() override;
@@ -73,17 +82,40 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   // Sprite texture registry (replaces the Vulkan sprite array layers)
   SDL_Texture* getSpriteTexture(const std::string& spriteName) const;
   SDL_Texture* loadSpriteTexture(const std::string& spriteName, const std::string& imageFilename, glm::ivec2 tileSize);
+  // Load an image file as tightly packed RGBA8 resized to tileSize (shared with the CUDA tiled renderer)
+  static std::vector<uint8_t> loadSpriteImage(const std::string& absoluteFilePath, glm::ivec2 tileSize);
 
   bool isUsingGPU() const { return usingGPU_; }
   SDL_Texture* getTargetTexture() const { return usingGPU_ ? targetTexture_ : nullptr; }
   SDL_Renderer* getRenderer() const { return renderer_; }
 
-  // GPU batch mode: when a shared renderer + composite target are installed,
-  // drawFrame() renders this env's tile straight into the shared target at the
-  // given viewport offset instead of its own target texture. All envs then
-  // render into one target as a single batch of GPU commands.
-  void setSharedRenderTarget(SDL_Renderer* renderer, SDL_Texture* target, float offsetX, float offsetY);
-  void clearSharedRenderTarget();
+  // Tiled rendering (TiledSDLRenderer). Both must be called before the first update().
+  //
+  // GPU: draw with a renderer owned by the caller into `target` at the given
+  // offset, with sprite textures shared between all observers using that
+  // renderer. SDL textures belong to one renderer, so per-observer renderers
+  // cannot be composited on the GPU.
+  void setSharedRenderTarget(SDL_Renderer* renderer, SDL_Texture* target, float offsetX, float offsetY, SpriteTextureMap* sharedSprites);
+  // CPU: the software renderer draws straight into a caller-owned RGBA8 region
+  // (top-left at `pixels`, row pitch `pitch` bytes), e.g. this env's rect of a
+  // tiled composite, so no copy is needed afterwards.
+  void setExternalPixelTarget(uint8_t* pixels, int pitch);
+
+  // The clear colour + background tile are identical every frame. When a base
+  // layer is set the observer skips them: CPU mode copies `pixels` (this env's
+  // pre-rendered base, tightly packed RGBA8) into its target before drawing,
+  // GPU mode draws `texture` (blend NONE) instead of clear + tiled background.
+  void setBaseLayer(const uint8_t* pixels, SDL_Texture* texture);
+  // Draw only the clear colour + background tile into this observer's target
+  // (used once to capture the base layer)
+  void drawBaseLayerOnly();
+  bool hasBaseLayer() const { return basePixels_ != nullptr || baseTexture_ != nullptr; }
+
+  // Items built by prepareFrame(), sorted in draw order (for batching callers)
+  const std::vector<SDLRenderItem>& preparedItems() const { return renderItems_; }
+  // Drop the prepared items without drawing them (caller drew them itself)
+  void discardPreparedFrame();
+  glm::vec3 clearColor() const { return clearColor_; }
 
   // Actual size of the RGBA pixel buffer (for safe zero-copy views from JS)
   size_t bufferSize() const { return pixelBuffer_.size(); }
@@ -100,17 +132,52 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   void resetRenderSurface();
   void drawFrame();
   void drawItems(SDL_Renderer* r);
+  void sortItems();
 
   SDL_Renderer* renderer_ = nullptr;
   SDL_Window* window_ = nullptr;
   SDL_Texture* targetTexture_ = nullptr;  // GPU path: render into this, then read back
   SDL_Surface* surface_ = nullptr;         // CPU path: software renderer draws straight into pixelBuffer_
 
-  // GPU batch mode (tiled renderer): when set, drawFrame renders into the
-  // shared composite target at (sharedOffX_, sharedOffY_) instead of targetTexture_
+  // Tiled GPU mode: drawFrame renders into the shared composite target at
+  // (sharedOffX_, sharedOffY_) instead of targetTexture_
   SDL_Renderer* sharedRenderer_ = nullptr;
   SDL_Texture* sharedTarget_ = nullptr;
   float sharedOffX_ = 0, sharedOffY_ = 0;
+
+  SpriteTextureMap* sharedSprites_ = nullptr;
+
+  uint8_t* externalPixels_ = nullptr;
+  int externalPitch_ = 0;
+  uint8_t emptyPixel_ = 0;
+
+  const uint8_t* basePixels_ = nullptr;
+  SDL_Texture* baseTexture_ = nullptr;
+
+  // CPU tiled mode with a base layer keeps its pixels between frames, so only
+  // pixel cells (tileSize blocks) whose items changed are repainted. Valid
+  // while every item lies inside one cell; otherwise the frame is redrawn.
+  struct CellItem {
+    SDL_Texture* texture;
+    float sx, sy, sw, sh;
+    float dx, dy, dw, dh;
+    float angle;
+    uint32_t rgba;
+    bool operator==(const CellItem& o) const {
+      return texture == o.texture && sx == o.sx && sy == o.sy && sw == o.sw && sh == o.sh && dx == o.dx && dy == o.dy &&
+             dw == o.dw && dh == o.dh && angle == o.angle && rgba == o.rgba;
+    }
+  };
+  // returns false when some item is not inside a single cell
+  bool bucketItemsByCell();
+  void restoreBaseCell(uint32_t cell);
+  std::vector<uint32_t> cellStart_, prevCellStart_;     // per cell offsets into cellItems_ (size cells + 1)
+  std::vector<CellItem> cellItems_, prevCellItems_;     // items grouped by cell, draw order kept
+  std::vector<uint32_t> itemCell_;                      // cell of renderItems_[i]
+  std::vector<uint8_t> cellDirty_;
+  std::vector<uint32_t> itemFill_;
+  std::vector<SDLRenderItem> dirtyItems_;
+  bool prevCellsValid_ = false;
 
   std::vector<uint8_t> pixelBuffer_;  // RGBA8, tightly packed, this is what update() returns
 
@@ -132,7 +199,10 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   void initSDL();
   void destroySDL();
 
-  std::map<std::string, SDL_Texture*> spriteTextures_;
+  SpriteTextureMap& sprites() { return sharedSprites_ != nullptr ? *sharedSprites_ : spriteTextures_; }
+  SDL_Renderer* activeRenderer() const { return sharedRenderer_ != nullptr ? sharedRenderer_ : renderer_; }
+
+  SpriteTextureMap spriteTextures_;
 };
 
 // When true, SDL observers create a visible window (used by the WASM/JS app,

@@ -12,26 +12,26 @@
 
 #include "../../src/Griddly/Core/GDY/GDYFactory.hpp"
 #include "../../src/Griddly/Core/VectorizedEnv.hpp"
-#include "../../src/Griddly/Core/Observers/TiledSDLRenderer.hpp"
+#include "../../src/Griddly/Core/Observers/TiledRenderer.hpp"
 
 namespace py = nanobind;
 
 namespace griddly {
 
-// Python wrapper around VectorizedEnv (+ optional TiledSDLRenderer).
+// Python wrapper around VectorizedEnv (+ optional TiledRenderer, SDL or CUDA backend).
 //
 // step() takes an ndarray of shape (num_envs, num_actions, action_len) with
 // the external action input format, releases the GIL while the C++ thread
 // pool runs, and returns (rewards, terminated, wins) as ndarrays.
 //
 // observe() renders all envs into one tiled frame and returns a torch tensor
-// via DLPack (zero-copy on CPU; on GPU nodes the SDL surface can be wrapped
-// the same way once GPU rendering is enabled).
+// via DLPack: a host tensor, or with device=True a CUDA tensor that is never
+// copied off the GPU (CUDA backend only).
 class Py_VectorizedWrapper {
  public:
   Py_VectorizedWrapper(std::shared_ptr<GDYFactory> gdyFactory, uint32_t numEnvs, uint32_t numThreads,
-                       std::string observerName)
-      : gdyFactory_(gdyFactory), observerName_(observerName) {
+                       std::string observerName, std::string renderBackend = "auto")
+      : gdyFactory_(gdyFactory), observerName_(observerName), renderBackend_(parseBackend(renderBackend)) {
     env_ = std::make_unique<VectorizedEnv>(gdyFactory, numEnvs, numThreads);
     {
       py::gil_scoped_release release;
@@ -124,32 +124,44 @@ class Py_VectorizedWrapper {
 
   // Render all envs into one tiled frame; return as a torch tensor via DLPack.
   // Shape: (rows*envH + gaps, cols*envW + gaps, 4) uint8 RGBA.
-  py::object observe(bool parallel = true) {
+  // device=True returns the CUDA-resident frame (valid until the next observe).
+  py::object observe(bool parallel = true, bool device = false) {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!renderer_) {
       std::vector<std::shared_ptr<Grid>> grids;
       grids.reserve(env_->numEnvs());
       for (uint32_t i = 0; i < env_->numEnvs(); i++) grids.push_back(env_->grid(i));
-      TiledSDLRendererConfig cfg;
+      TiledRendererConfig cfg;
       cfg.observerName = observerName_;
-      renderer_ = std::make_unique<TiledSDLRenderer>(gdyFactory_, env_->numEnvs(), grids, cfg);
+      cfg.backend = renderBackend_;
+      renderer_ = createTiledRenderer(gdyFactory_, env_->numEnvs(), grids, cfg);
+    }
+    if (device && renderer_->backend() != TiledRenderBackend::CUDA) {
+      throw std::invalid_argument("observe(device=True) requires the CUDA render backend");
     }
     const uint8_t* buf;
     {
       py::gil_scoped_release release;
-      buf = renderer_->render(parallel, 0);
+      buf = device ? renderer_->renderDevice(parallel, 0) : renderer_->render(parallel, 0);
     }
     const uint32_t w = renderer_->width();
     const uint32_t h = renderer_->height();
 
     // DLPack capsule: torch.from_dlpack() / torch.utils.dlpack.from_dlpack()
-    // build a torch tensor that shares this memory (CPU today; same path
-    // works for a GPU-resident surface later).
+    // build a torch tensor that shares this memory.
     size_t shape[3] = {h, w, 4};
     size_t strides[3] = {w * 4, 4, 1};
-    constexpr int kDLUInt = 0;   // DLDataTypeCode::kDLUInt
+    constexpr int kDLUInt = 1;   // DLDataTypeCode::kDLUInt (kDLInt is 0)
     constexpr int kDLCPU = 1;    // DLDeviceType::kDLCPU
+    constexpr int kDLCUDA = 2;   // DLDeviceType::kDLCUDA
+    if (device) return makeDlpackTensor(buf, shape, strides, 3, kDLUInt, kDLCUDA, renderer_->deviceId());
     return makeDlpackTensor(buf, shape, strides, 3, kDLUInt, kDLCPU, 0);
+  }
+
+  // "sdl" or "cuda" once observe() has created the renderer, else ""
+  std::string renderBackend() const {
+    if (!renderer_) return "";
+    return renderer_->backend() == TiledRenderBackend::CUDA ? "cuda" : "sdl";
   }
 
   uint32_t frameWidth() const { return renderer_ ? renderer_->width() : 0; }
@@ -160,11 +172,19 @@ class Py_VectorizedWrapper {
   Py_VectorizedWrapper(Py_VectorizedWrapper&& o) noexcept
       : gdyFactory_(std::move(o.gdyFactory_)),
         observerName_(std::move(o.observerName_)),
+        renderBackend_(o.renderBackend_),
         env_(std::move(o.env_)),
         renderer_(std::move(o.renderer_)) {}
   Py_VectorizedWrapper& operator=(Py_VectorizedWrapper&&) = delete;
 
  private:
+  static TiledRenderBackend parseBackend(const std::string& name) {
+    if (name == "auto") return TiledRenderBackend::AUTO;
+    if (name == "sdl") return TiledRenderBackend::SDL;
+    if (name == "cuda") return TiledRenderBackend::CUDA;
+    throw std::invalid_argument("render_backend must be 'auto', 'sdl' or 'cuda', got '" + name + "'");
+  }
+
   // Build a DLPack capsule wrapping `ptr` with the given shape/strides.
   // Uses the standard DLPack C ABI so torch.from_dlpack() accepts it.
   static py::object makeDlpackTensor(const void* ptr, size_t* shape, size_t* strides,
@@ -191,7 +211,7 @@ class Py_VectorizedWrapper {
     mt->dl_tensor.data = const_cast<void*>(ptr);
     mt->dl_tensor.device = {(int)deviceType, (int)deviceId};
     mt->dl_tensor.ndim = ndim;
-    mt->dl_tensor.dtype = {(uint8_t)dtypeCode, 8, 1};  // kDLUInt=0 -> uint8
+    mt->dl_tensor.dtype = {(uint8_t)dtypeCode, 8, 1};  // kDLUInt=1 -> uint8
     mt->dl_tensor.shape = new int64_t[ndim];
     mt->dl_tensor.strides = new int64_t[ndim];
     for (int i = 0; i < ndim; i++) {
@@ -212,8 +232,9 @@ class Py_VectorizedWrapper {
 
   std::shared_ptr<GDYFactory> gdyFactory_;
   std::string observerName_;
+  TiledRenderBackend renderBackend_ = TiledRenderBackend::AUTO;
   std::unique_ptr<VectorizedEnv> env_;
-  std::unique_ptr<TiledSDLRenderer> renderer_;
+  std::unique_ptr<TiledRenderer> renderer_;
  private:
   std::mutex mutex_;
 };

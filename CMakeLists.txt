@@ -57,6 +57,7 @@ option(ENABLE_PYTHON_BINDINGS "Enable to build the bindings to other languages."
 option(ENABLE_TESTING "Enable Test Builds" ON)
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(WASM "Enable Web-assembly build" OFF)
+option(GRIDDLY_ENABLE_CUDA "Build the CUDA tiled renderer backend when a CUDA toolchain is found" ON)
 
 if(WASM)
   # keep wasm artifacts out of the native Release/bin
@@ -155,6 +156,24 @@ if(NOT WASM)
 
   # SDL3 for rendering (GPU if available, CPU software renderer otherwise)
   find_package(SDL3 REQUIRED)
+
+  # Optional CUDA tiled renderer backend
+  set(GRIDDLY_HAS_CUDA OFF)
+  if(GRIDDLY_ENABLE_CUDA)
+    include(CheckLanguage)
+    check_language(CUDA)
+    if(CMAKE_CUDA_COMPILER)
+      if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+        set(CMAKE_CUDA_ARCHITECTURES 80 86 89 90)
+      endif()
+      enable_language(CUDA)
+      find_package(CUDAToolkit REQUIRED)
+      set(GRIDDLY_HAS_CUDA ON)
+      message(STATUS "Griddly: CUDA tiled renderer enabled (archs ${CMAKE_CUDA_ARCHITECTURES})")
+    else()
+      message(STATUS "Griddly: no CUDA compiler found, CUDA tiled renderer disabled")
+    endif()
+  endif()
 
 endif()
 
