@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Generate the "Spiders Garden" GDY: hand-drawn level layouts + seeded terrain decoration.
+"""Generate the "Spiders Garden" GDY: big, themed, seeded levels built from terrain primitives.
 
 Writes resources/games/Single-Player/Mini-Grid/minigrid-spiders-garden.yaml (source of truth) and
 the demo's bundled copy at studio/griddly-demo/apps/web/src/games/minigrid-spiders-garden.yaml.
 
-Layout characters (one per cell):
-  W stone wall   H hedge      ~ water      = bridge     . floor
-  b bush         T tree       t tombstone               (obstacles, drawn over the ground)
-  A gnome        G spider     g gem
-Ground decoration (grass / moss / dirt / bones / mushrooms / skulls) is sprinkled with a seeded RNG
-onto walkable cells, so levels look organic but are reproducible. Every level is validated: rectangular,
-one gnome, one gem reachable from the gnome, no spider within 3 tiles of the start.
+Structure characters (layout layer):
+  W stone wall   H hedge   R cave rock   ~ water   = bridge   D door (needs a key)
+  b bush   T tree   t tombstone   i torch   N spider nest            (solid props)
+  A gnome   G spider   g gem   K key   . floor
+Ground decoration (on walkable cells):  , grass  m moss  d dirt  o bones  u mushroom  x skull
+
+Every level is validated: rectangular, one gnome, every gem/key reachable (doors opened by keys
+that are themselves reachable), and no spider or nest within 4 tiles of the start.
 """
 from __future__ import annotations
 
@@ -25,160 +26,310 @@ OUT = [
     ROOT / "studio/griddly-demo/apps/web/src/games/minigrid-spiders-garden.yaml",
 ]
 
-BLOCKING = set("WH~btT")
-OBSTACLE_OVER_GROUND = set("btT")  # obstacles that sit on top of ground decoration
-ENTITIES = set("AGg")
+STRUCTURE = set("WHR~=D")
+SOLID_PROPS = set("bTtiN")
+BLOCKING = STRUCTURE - {"="} | SOLID_PROPS  # for the gnome, before doors are opened
 
-# name, decoration recipe, layout
-LEVELS: list[tuple[str, dict, str]] = [
-    ("Pond", dict(grass=4, moss=2, mush=3), """
-WWWWWWWWWWWWW
-W...........W
-W.A..~~~....W
-W...~~~~~.G.W
-W..b~~~~~...W
-W....~~~..b.W
-W.G.......g.W
-W...........W
-WWWWWWWWWWWWW
-"""),
-    ("Moat", dict(grass=5, moss=3, mush=3, skull=1), """
-WWWWWWWWWWWWWWWWW
-WWWWW.......WWWWW
-WWW.....G.....WWW
-WW...~~~~~~~...WW
-WW.~~~~~~~~~~~.WW
-W..~~~~~~~~~~~..W
-WA.~~~~g.===...GW
-W..~~~~~~~~~~~..W
-WW.~~~~~~~~~~~.WW
-WW...~~~~~~~...WW
-WWW...........WWW
-WWWWW...G...WWWWW
-WWWWWWWWWWWWWWWWW
-"""),
-    ("Hedge cross", dict(grass=7, dirt=2, mush=2), """
-HHHHHHHHHHHHHHHHH
-HHHHHH.....HHHHHH
-HHHHHH..g..HHHHHH
-HHHHHH.b.b.HHHHHH
-HHHHHH..G..HHHHHH
-HHHHHH.....HHHHHH
-H......T.T......H
-HA.....G.G.....GH
-H......T.T......H
-HHHHHH.....HHHHHH
-HHHHHH..G..HHHHHH
-HHHHHH.~~~.HHHHHH
-HHHHHHHHHHHHHHHHH
-"""),
-    ("Lake islands", dict(grass=6, moss=2, mush=2), """
-~~~~~~~~~~~~~~~~~~~~~
-~.....~~~~~~~~~..b..~
-~.A...=========..G..~
-~...T.~~~~~~~~~.....~
-~~=~~~~~~~~~~~~~~=~~~
-~~=~~~~~~~~~~~~~~=~~~
-~~=~~~~~~~~~~~~~~=~~~
-~.b...~~~~~~~~~...T.~
-~..G..=========..g..~
-~.....~~~~~~~~~.....~
-~~~~~~~~~~~~~~~~~~~~~
-"""),
-    ("Mossy tunnel", dict(moss=9, bones=4, skull=3, mush=2), """
-WWWWWWWWWWWWWWWWWWWWW
-WA..............WWWWW
-W.......W..W.....WWWW
-WWWWWWWWWWWWWW....WWW
-WWWWWWWWWWWWWW..G.WWW
-WWW..G...W..........W
-WW.................WW
-WW...WWWWWWWWWWWWWWWW
-WW..WWWWWWWWWWWWWWWWW
-WW...........W....WWW
-WWW...WW...G.....G.WW
-WWWWWWWWWWWWWWW....WW
-Wg..............G..WW
-W.......W.....W....WW
-WWWWWWWWWWWWWWWWWWWWW
-"""),
-    ("Crypt", dict(dirt=6, bones=5, skull=4, moss=2), """
-WWWWWWWWWWWWWWW
-W..t...A...t..W
-WW...........WW
-WWW..t...t..WWW
-WWWW......GWWWW
-WWWWW.....WWWWW
-WWWWWW.G.WWWWWW
-WWWWWWW.WWWWWWW
-WWWWWW...WWWWWW
-WWWWW..G..WWWWW
-WWWW.t...t.WWWW
-WWW...G.....WWW
-WW..t.....t..WW
-W......g......W
-WWWWWWWWWWWWWWW
-"""),
-    ("Spider pens", dict(grass=8, dirt=3, mush=3), """
-HHHHHHHHHHHHHHHHHHHHHHH
-HHHHH.HHHHH.HHHHH.HHHHH
-HHH.G..bH.G...H.G..bHHH
-HHH.....H.....H.....HHH
-HHHHH.HHHHH.HHHHH.HHHHH
-HA...................gH
-HHHHH.HHHHH.HHHHH.HHHHH
-HHHb....H.....H.....HHH
-HHH...G.H...G.H...G.HHH
-HHHHH.HHHHH.HHHHH.HHHHH
-HHHHHHHHHHHHHHHHHHHHHHH
-"""),
-    ("Swamp", dict(grass=6, moss=7, mush=4, bones=2), """
-WWWWWWWWWWWWWWWWWWWWW
-WA..~~....T....~~...W
-W...~~..G.....~~~.G.W
-W.......~~~.......T.W
-WT..~.....~~..b.....W
-W..~~~..G.....~~~...W
-W...~~.....T...~~.G.W
-W.b.....~~~.........W
-W....G..~~~..~~..b..W
-W..T.........~~.....W
-W.....~~..G......~~gW
-W....~~~.........~~.W
-WWWWWWWWWWWWWWWWWWWWW
-"""),
+
+# ----------------------------------------------------------------------------- grid primitives
+class Map:
+    def __init__(self, w: int, h: int, seed: int, fill: str = ".", border: str = "W"):
+        self.w, self.h, self.rng = w, h, random.Random(seed)
+        self.g = [[fill] * w for _ in range(h)]
+        self.rect(0, 0, w - 1, h - 1, border, filled=False)
+
+    def inside(self, x, y, margin=1):
+        return margin <= x < self.w - margin and margin <= y < self.h - margin
+
+    def get(self, x, y):
+        return self.g[y][x]
+
+    def set(self, x, y, c, margin=1):
+        if self.inside(x, y, margin):
+            self.g[y][x] = c
+
+    def rect(self, x0, y0, x1, y1, c, filled=True):
+        for y in range(y0, y1 + 1):
+            for x in range(x0, x1 + 1):
+                if filled or x in (x0, x1) or y in (y0, y1):
+                    self.set(x, y, c, margin=0)
+
+    def blob(self, cx, cy, r, c, jitter=0.35, only=None):
+        for y in range(int(cy - r - 1), int(cy + r + 2)):
+            for x in range(int(cx - r - 1), int(cx + r + 2)):
+                if not self.inside(x, y):
+                    continue
+                d = ((x - cx) ** 2 + ((y - cy) * 1.15) ** 2) ** 0.5
+                if d <= r * (1 - jitter / 2 + self.rng.random() * jitter) and (only is None or self.g[y][x] in only):
+                    self.g[y][x] = c
+
+    def walk(self, p0, p1, c, width=1, wobble=0.35, only=None):
+        """Biased random walk from p0 to p1 painting a brush of `width` radius."""
+        x, y = p0
+        tx, ty = p1
+        for _ in range(4 * (self.w + self.h)):
+            for dy in range(-width + 1, width):
+                for dx in range(-width + 1, width):
+                    if self.inside(x + dx, y + dy) and (only is None or self.g[y + dy][x + dx] in only):
+                        self.g[y + dy][x + dx] = c
+            if (x, y) == (tx, ty):
+                return
+            if self.rng.random() < wobble:
+                x += self.rng.choice((-1, 0, 1))
+                y += self.rng.choice((-1, 0, 1))
+            elif abs(tx - x) > abs(ty - y) or (abs(tx - x) == abs(ty - y) and self.rng.random() < 0.5):
+                x += (tx > x) - (tx < x)
+            else:
+                y += (ty > y) - (ty < y)
+            x = min(max(x, 1), self.w - 2)
+            y = min(max(y, 1), self.h - 2)
+
+    def maze(self, x0, y0, x1, y1, wall="H", braid=0.5):
+        """Perfect maze (corridor width 1) in the box, then braid dead ends into loops."""
+        self.rect(x0, y0, x1, y1, wall)
+        cells = [(x, y) for y in range(y0 + 1, y1, 2) for x in range(x0 + 1, x1, 2)]
+        start = self.rng.choice(cells)
+        seen, stack = {start}, [start]
+        self.g[start[1]][start[0]] = "."
+        while stack:
+            x, y = stack[-1]
+            nbrs = [(x + dx, y + dy) for dx, dy in ((2, 0), (-2, 0), (0, 2), (0, -2))
+                    if (x + dx, y + dy) in set(cells) and (x + dx, y + dy) not in seen]
+            if not nbrs:
+                stack.pop()
+                continue
+            nx, ny = self.rng.choice(nbrs)
+            self.g[(y + ny) // 2][(x + nx) // 2] = "."
+            self.g[ny][nx] = "."
+            seen.add((nx, ny))
+            stack.append((nx, ny))
+        for x, y in cells:  # braid
+            walls = [(dx, dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))
+                     if self.g[y + dy][x + dx] == wall and x0 < x + 2 * dx < x1 and y0 < y + 2 * dy < y1]
+            if len(walls) >= 3 and self.rng.random() < braid:
+                dx, dy = self.rng.choice(walls)
+                self.g[y + dy][x + dx] = "."
+
+    def free(self, region=None, ch="."):
+        x0, y0, x1, y1 = region or (1, 1, self.w - 2, self.h - 2)
+        return [(x, y) for y in range(y0, y1 + 1) for x in range(x0, x1 + 1) if self.g[y][x] == ch]
+
+    def scatter(self, c, n, region=None, away_from=None, min_dist=0, clear=0):
+        """Place n of c on free floor, optionally away from a point and with `clear` free neighbours."""
+        spots = self.free(region)
+        self.rng.shuffle(spots)
+        placed = 0
+        for x, y in spots:
+            if placed >= n:
+                break
+            if away_from and abs(x - away_from[0]) + abs(y - away_from[1]) < min_dist:
+                continue
+            if clear and sum(self.g[y + dy][x + dx] == "." for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))) < clear:
+                continue
+            self.g[y][x] = c
+            placed += 1
+
+    def rows(self):
+        """Rows, cropped so at most one fully-solid ring surrounds the playable area."""
+        g = self.g
+        solid = lambda c: c in STRUCTURE - {"="}
+        top = next(y for y in range(self.h) if not all(solid(c) for c in g[y]))
+        bot = next(y for y in reversed(range(self.h)) if not all(solid(c) for c in g[y]))
+        left = next(x for x in range(self.w) if not all(solid(g[y][x]) for y in range(self.h)))
+        right = next(x for x in reversed(range(self.w)) if not all(solid(g[y][x]) for y in range(self.h)))
+        y0, y1, x0, x1 = max(top - 1, 0), min(bot + 1, self.h - 1), max(left - 1, 0), min(right + 1, self.w - 1)
+        self.w, self.h = x1 - x0 + 1, y1 - y0 + 1
+        return ["".join(r[x0:x1 + 1]) for r in g[y0:y1 + 1]]
+
+
+# ----------------------------------------------------------------------------- levels
+def garden_gate():
+    m = Map(26, 16, seed=11, border="H")
+    m.blob(7, 10, 3.2, "~")                       # pond
+    m.set(7, 10, "=")
+    m.rect(16, 3, 23, 11, "W", filled=False)      # walled garden
+    m.set(16, 7, "D")
+    m.scatter("t", 2, (18, 5, 22, 9))
+    for p in [(3, 3), (11, 3), (12, 13), (3, 13), (13, 7)]:
+        m.set(*p, "T")
+    m.scatter("b", 6, (2, 2, 14, 14))
+    m.set(2, 2, "A")
+    m.set(21, 9, "g")
+    m.set(12, 12, "g")
+    m.set(3, 12, "K")
+    m.scatter("G", 3, (8, 2, 15, 14), away_from=(2, 2), min_dist=7)
+    return m, dict(grass=10, moss=2, mush=4, dirt=1)
+
+
+def riverlands():
+    m = Map(36, 20, seed=22, border="T")
+    m.walk((17, 0), (20, 19), "~", width=2, wobble=0.45, only=".")
+    for y in (4, 10, 16):                          # bridges over the river
+        xs = [x for x in range(1, 35) if m.get(x, y) == "~"]
+        for x in xs:
+            m.set(x, y, "=")
+    for cx, cy, r in [(6, 5, 2.2), (28, 14, 2.5), (31, 4, 1.6)]:
+        m.blob(cx, cy, r, "T", only=".")
+    m.blob(9, 14, 2.4, "~", only=".")
+    m.scatter("b", 14)
+    m.set(2, 17, "A")
+    for p in [(33, 2), (27, 9), (6, 2), (32, 17)]:
+        m.set(*p, "g")
+    m.scatter("N", 2, (24, 3, 33, 16), clear=3)
+    m.scatter("G", 4, away_from=(2, 17), min_dist=10)
+    return m, dict(grass=18, moss=3, mush=6, dirt=3)
+
+
+def hedge_maze():
+    m = Map(33, 21, seed=33, border="H")
+    m.maze(0, 0, 32, 20, "H", braid=0.75)
+    m.rect(12, 7, 20, 13, ".")                     # courtyard
+    m.rect(14, 9, 18, 11, "~")                     # fountain
+    m.set(16, 9, "=")
+    m.set(16, 8, "g")
+    for p in [(12, 7), (20, 7), (12, 13), (20, 13)]:
+        m.set(*p, "T")
+    m.set(1, 1, "A")
+    for p in [(31, 1), (1, 19), (31, 19)]:
+        m.set(*p, "g")
+    m.scatter("G", 6, away_from=(1, 1), min_dist=12)
+    return m, dict(grass=14, dirt=4, mush=5)
+
+
+def sunken_crypt():
+    m = Map(34, 22, seed=44, fill="W")
+    rooms = [(2, 2, 9, 8), (13, 2, 20, 8), (24, 2, 31, 8), (2, 13, 9, 19), (13, 13, 20, 19), (24, 13, 31, 19)]
+    for r in rooms:
+        m.rect(*r, ".")
+    for (x0, y0, x1, y1), (a0, b0, a1, b1) in [(rooms[0], rooms[1]), (rooms[1], rooms[2]), (rooms[3], rooms[4]),
+                                               (rooms[0], rooms[3]), (rooms[1], rooms[4])]:
+        m.walk(((x0 + x1) // 2, (y0 + y1) // 2), ((a0 + a1) // 2, (b0 + b1) // 2), ".", width=1, wobble=0.0, only="W.")
+    m.walk((20, 16), (24, 16), ".", width=1, wobble=0.0)          # treasure room entrance...
+    m.rect(21, 15, 23, 17, "W")
+    m.set(21, 16, ".")
+    m.set(22, 16, "D")                                             # ...behind a door
+    m.set(23, 16, ".")
+    m.walk((27, 8), (27, 13), "W", width=1, wobble=0.0)            # seal treasure room from above
+    for x0, y0, x1, y1 in rooms[:5]:
+        for x in range(x0 + 1, x1, 3):
+            m.set(x, y0 + 1, "t") if m.rng.random() < 0.7 else None
+        m.set(x0, y0, "i")
+        m.set(x1, y0, "i")
+    m.set(3, 4, "A")
+    m.set(30, 3, "K")
+    for p in [(28, 18), (25, 14), (16, 18)]:
+        m.set(*p, "g")
+    m.scatter("N", 2, (13, 2, 31, 8), clear=3)
+    m.scatter("G", 5, away_from=(3, 4), min_dist=12)
+    return m, dict(dirt=10, bones=12, skull=8, moss=6)
+
+
+def bog():
+    m = Map(36, 22, seed=55, border="~")
+    for _ in range(14):
+        m.blob(m.rng.randint(3, 32), m.rng.randint(3, 18), m.rng.uniform(1.0, 2.6), "~", only=".")
+    for _ in range(18):
+        m.set(m.rng.randint(2, 33), m.rng.randint(2, 19), "T") if m.rng.random() < 0.9 else None
+    m.scatter("b", 12)
+    m.rect(1, 1, 4, 4, ".")
+    m.set(2, 2, "A")
+    for p in [(33, 2), (32, 18), (18, 10), (5, 18)]:
+        m.rect(p[0] - 1, p[1] - 1, p[0] + 1, p[1] + 1, ".")
+        m.set(*p, "g")
+    m.scatter("N", 1, (14, 6, 30, 16), clear=4)
+    m.scatter("G", 7, away_from=(2, 2), min_dist=10)
+    return m, dict(moss=20, grass=10, mush=10, bones=3)
+
+
+def queens_lair():
+    m = Map(38, 24, seed=66, fill="R", border="R")
+    hubs = [(3, 3), (12, 6), (6, 15), (17, 19), (20, 11), (27, 4), (29, 15), (14, 2)]
+    for a, b in [(0, 1), (1, 4), (0, 2), (2, 3), (3, 4), (4, 5), (1, 7), (7, 5), (4, 6)]:
+        m.walk(hubs[a], hubs[b], ".", width=2, wobble=0.4)
+    for x, y in hubs:
+        m.blob(x, y, m.rng.uniform(1.8, 2.8), ".")
+    m.rect(32, 8, 36, 19, ".")                     # the queen's chamber
+    m.walk((29, 15), (32, 15), ".", width=1, wobble=0.0)
+    m.set(31, 15, "D")
+    m.rect(31, 13, 31, 14, "R")
+    m.rect(31, 16, 31, 17, "R")
+    m.set(3, 3, "A")
+    m.set(6, 16, "K")
+    m.set(34, 13, "g")
+    m.set(34, 9, "g")
+    m.set(17, 20, "g")
+    m.set(27, 4, "g")
+    m.scatter("N", 3, (8, 4, 30, 21), clear=3)
+    m.set(35, 17, "N")
+    m.scatter("G", 6, away_from=(3, 3), min_dist=12)
+    m.scatter("G", 2, (32, 8, 36, 19))
+    return m, dict(dirt=12, bones=14, skull=8, moss=4, mush=4)
+
+
+LEVELS = [
+    ("Garden Gate", "Find the key to open the walled garden.", garden_gate),
+    ("Riverlands", "Cross the river by bridge — nests are hatching on the far bank.", riverlands),
+    ("Hedge Maze", "Four gems hidden in a looping hedge maze.", hedge_maze),
+    ("Sunken Crypt", "Tombs, torches and a locked treasure room.", sunken_crypt),
+    ("The Bog", "Wade through the mire. Watch the spiders in the reeds.", bog),
+    ("Queen's Lair", "Deep caves, many nests. The queen guards her treasure.", queens_lair),
 ]
 
 
-def validate(name: str, rows: list[str]) -> None:
-    w = len(rows[0])
-    assert all(len(r) == w for r in rows), f"{name}: ragged rows {[len(r) for r in rows]}"
-    cells = {(x, y): c for y, r in enumerate(rows) for x, c in enumerate(r)}
-    a = [p for p, c in cells.items() if c == "A"]
-    g = [p for p, c in cells.items() if c == "g"]
-    assert len(a) == 1 and len(g) == 1, f"{name}: need exactly one A and one g"
-    seen, q = {a[0]}, collections.deque(a)
+# ----------------------------------------------------------------------------- validation
+def reach(rows, start, opened=frozenset()):
+    seen, q = {start}, collections.deque([start])
     while q:
         x, y = q.popleft()
         for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-            n = (x + dx, y + dy)
-            if n in cells and cells[n] not in BLOCKING and n not in seen:
-                seen.add(n)
-                q.append(n)
-    assert g[0] in seen, f"{name}: gem unreachable"
+            nx, ny = x + dx, y + dy
+            c = rows[ny][nx] if 0 <= ny < len(rows) and 0 <= nx < len(rows[0]) else "W"
+            if (nx, ny) in seen:
+                continue
+            if c in BLOCKING and not (c == "D" and (nx, ny) in opened):
+                continue
+            seen.add((nx, ny))
+            q.append((nx, ny))
+    return seen
+
+
+def validate(name, rows):
+    w = len(rows[0])
+    assert all(len(r) == w for r in rows), f"{name}: ragged rows"
+    cells = {(x, y): c for y, r in enumerate(rows) for x, c in enumerate(r)}
+    a = [p for p, c in cells.items() if c == "A"]
+    assert len(a) == 1, f"{name}: need exactly one A"
+    gems = [p for p, c in cells.items() if c == "g"]
+    keys = [p for p, c in cells.items() if c == "K"]
+    doors = [p for p, c in cells.items() if c == "D"]
+    assert gems, f"{name}: no gems"
+    assert len(keys) >= len(doors), f"{name}: not enough keys for doors"
+    opened: set = set()
+    seen = reach(rows, a[0])
+    while True:  # open doors with keys we can reach, until nothing changes
+        usable = sum(k in seen for k in keys) - len(opened)
+        frontier = [d for d in doors if d not in opened and any((d[0] + dx, d[1] + dy) in seen
+                    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))]
+        if usable <= 0 or not frontier:
+            break
+        opened.add(frontier[0])
+        seen = reach(rows, a[0], frozenset(opened))
+    missing = [p for p in gems if p not in seen]
+    assert not missing, f"{name}: unreachable gems {missing}"
     ax, ay = a[0]
-    near = [p for p, c in cells.items() if c == "G" and abs(p[0] - ax) + abs(p[1] - ay) <= 3]
-    assert not near, f"{name}: spider within 3 of start {near}"
+    near = [p for p, c in cells.items() if c in "GN" and abs(p[0] - ax) + abs(p[1] - ay) <= 4]
+    assert not near, f"{name}: spider/nest within 4 of start {near}"
+    return len(gems), len(keys), sum(c == "G" for c in cells.values()), sum(c == "N" for c in cells.values())
 
 
-def decorate(rows: list[str], recipe: dict, seed: int) -> list[list[str]]:
-    """Return the ground layer: one of '', ',', 'm', 'd', 'o', 'u', 'k' per cell."""
+# ----------------------------------------------------------------------------- decoration
+def decorate(rows, recipe, seed):
     rng = random.Random(seed)
     h, w = len(rows), len(rows[0])
-    ground = [["" for _ in range(w)] for _ in range(h)]
-    walkable = [(x, y) for y in range(h) for x in range(w) if rows[y][x] not in "WH~="]
+    ground = [[""] * w for _ in range(h)]
+    walkable = [(x, y) for y in range(h) for x in range(w) if rows[y][x] not in STRUCTURE]
 
-    def blob(char: str, count: int, rmin: float, rmax: float) -> None:
+    def blob(char, count, rmin, rmax):
         for _ in range(count):
             cx, cy = rng.choice(walkable)
             r = rng.uniform(rmin, rmax)
@@ -187,48 +338,48 @@ def decorate(rows: list[str], recipe: dict, seed: int) -> list[list[str]]:
                 if d <= r and rng.random() < 1.15 - d / (r + 0.01) * 0.6:
                     ground[y][x] = char
 
-    blob("d", recipe.get("dirt", 0), 1.0, 2.5)
-    blob("m", recipe.get("moss", 0), 1.0, 2.8)
-    blob(",", recipe.get("grass", 0), 1.2, 3.0)
-    # grass likes to grow around bushes and trees
-    for y in range(h):
+    blob("d", recipe.get("dirt", 0), 1.0, 2.8)
+    blob("m", recipe.get("moss", 0), 1.0, 3.0)
+    blob(",", recipe.get("grass", 0), 1.2, 3.4)
+    for y in range(h):  # grass grows around bushes and trees
         for x in range(w):
             if rows[y][x] in "bT":
                 for dx, dy in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)):
                     nx, ny = x + dx, y + dy
-                    if (nx, ny) in walkable and rng.random() < (1 if (dx, dy) == (0, 0) else 0.6):
+                    if (nx, ny) in set(walkable) and rng.random() < (1 if (dx, dy) == (0, 0) else 0.5):
                         ground[ny][nx] = ","
-    # small scattered props on otherwise bare, unoccupied floor
-    for char, key in (("u", "mush"), ("k", "skull"), ("o", "bones")):
+    for char, key in (("u", "mush"), ("x", "skull"), ("o", "bones")):
         free = [(x, y) for x, y in walkable if rows[y][x] == "." and ground[y][x] in ("", "m", "d")]
         for x, y in rng.sample(free, min(recipe.get(key, 0), len(free))):
             ground[y][x] = char
     return ground
 
 
-def level_tokens(rows: list[str], ground: list[list[str]]) -> str:
+def level_tokens(rows, ground):
     out = []
     for y, r in enumerate(rows):
         toks = []
         for x, c in enumerate(r):
             gch = ground[y][x]
-            if c in "WH~=":
+            if c in STRUCTURE:
                 toks.append(c)
             elif c == ".":
                 toks.append(gch or ".")
-            else:  # entity or obstacle drawn over the ground
-                toks.append(f"{gch}/{c}" if gch and gch not in "uko" else c)
-        out.append("  ".join(t.ljust(3) for t in toks).rstrip())
+            else:  # entity or prop drawn over the ground
+                toks.append(f"{gch}/{c}" if gch and gch not in "uxo" else c)
+        out.append(" ".join(t.ljust(3) for t in toks).rstrip())
     return "\n".join(out)
 
 
+# ----------------------------------------------------------------------------- GDY text
 HEADER = '''Version: "0.1"
 Environment:
   Name: Spiders Garden
   Description: |
-    Guide the gnome to the gem through gardens, swamps and crypts without touching a spider.
-    Spiders wander at random. Water, walls, hedges, bushes, trees and tombstones block everyone;
-    grass, moss, dirt and bridges are walkable. Generated by studio/griddly-demo/tools/gen_spiders_garden.py.
+    Collect every gem without touching a spider. Spiders wander at random and nests hatch more of
+    them. Keys open doors. Water, walls, hedges, rocks, bushes, trees, tombstones, torches and nests
+    block the way; grass, moss, dirt and bridges are walkable.
+    Generated by studio/griddly-demo/tools/gen_spiders_garden.py — edit that, not this file.
   Observers:
     Sprite2D:
       TileSize: 24
@@ -240,8 +391,8 @@ Environment:
     Observer:
       TrackAvatar: true
       RotateWithAvatar: false
-      Height: 7
-      Width: 7
+      Height: 9
+      Width: 9
     AvatarObject: gnome
   Termination:
     Win:
@@ -251,8 +402,13 @@ Environment:
   Levels:
 '''
 
-WALKABLE = "[grass, moss, dirt, bones, mushroom, skull, bridge]"
-SOLID = "[wall, hedge, water, bush, tree, tombstone, gem]"
+GROUND = "[grass, moss, dirt, bones, mushroom, skull, bridge]"
+SOLID = "[wall, hedge, rock, water, door, bush, tree, tombstone, torch, nest, gem, key]"
+
+
+def exec_(action, delay=3):
+    return f"{{Action: {action}, Delay: {delay}, Randomize: true}}"
+
 
 ACTIONS = f'''
 Actions:
@@ -260,98 +416,70 @@ Actions:
   - Name: random_movement
     InputMapping:
       Inputs:
-        1:
-          Description: Rotate left
-          OrientationVector: [-1, 0]
-        2:
-          Description: Move forwards
-          OrientationVector: [0, -1]
-          VectorToDest: [0, -1]
-        3:
-          Description: Rotate right
-          OrientationVector: [1, 0]
+        1: {{Description: Rotate left, OrientationVector: [-1, 0]}}
+        2: {{Description: Move forwards, OrientationVector: [0, -1], VectorToDest: [0, -1]}}
+        3: {{Description: Rotate right, OrientationVector: [1, 0]}}
       Relative: true
       Internal: true
     Behaviours:
+      - Src: {{Object: spider, Commands: [{{rot: _dir}}, {{exec: {exec_("random_movement")}}}]}}
+        Dst: {{Object: spider}}
+      - Src: {{Object: spider, Commands: [{{mov: _dest}}, {{exec: {exec_("random_movement")}}}]}}
+        Dst: {{Object: _empty}}
+      - Src: {{Object: spider, Commands: [{{mov: _dest}}, {{exec: {exec_("random_movement")}}}]}}
+        Dst: {{Object: {GROUND}}}
+      - Src: {{Object: spider, Commands: [{{exec: {exec_("random_movement")}}}]}}
+        Dst: {{Object: {SOLID}}}
+      - Src: {{Object: spider}}
+        Dst: {{Object: gnome, Commands: [{{remove: true}}, {{reward: -1}}]}}
+
+  # Nests hatch up to 2 spiders each, into a random neighbouring cell.
+  - Name: hatch
+    InputMapping:
+      Internal: true
+    Behaviours:
       - Src:
-          Object: spider
-          Commands:
-            - rot: _dir
-            - exec: {{Action: random_movement, Delay: 3, Randomize: true}}
-        Dst:
-          Object: spider
+          Object: nest
+          Preconditions: [{{lt: [src.hatched, 2]}}]
+          Commands: [{{spawn: spider}}, {{incr: hatched}}, {{exec: {exec_("hatch", 60)}}}]
+        Dst: {{Object: _empty}}
       - Src:
-          Object: spider
-          Commands:
-            - mov: _dest
-            - exec: {{Action: random_movement, Delay: 3, Randomize: true}}
-        Dst:
-          Object: _empty
+          Object: nest
+          Preconditions: [{{lt: [src.hatched, 2]}}]
+          Commands: [{{spawn: spider}}, {{incr: hatched}}, {{exec: {exec_("hatch", 60)}}}]
+        Dst: {{Object: {GROUND}}}
       - Src:
-          Object: spider
-          Commands:
-            - mov: _dest
-            - exec: {{Action: random_movement, Delay: 3, Randomize: true}}
-        Dst:
-          Object: {WALKABLE}
-      - Src:
-          Object: spider
-          Commands:
-            - exec: {{Action: random_movement, Delay: 3, Randomize: true}}
-        Dst:
-          Object: {SOLID}
-      - Src:
-          Object: spider
-        Dst:
-          Object: gnome
-          Commands:
-            - remove: true
-            - reward: -1
+          Object: nest
+          Preconditions: [{{lt: [src.hatched, 2]}}]
+          Commands: [{{exec: {exec_("hatch", 10)}}}]
+        Dst: {{Object: [wall, hedge, rock, water, door, bush, tree, tombstone, torch, nest, gem, key, spider, gnome]}}
 
   # The gnome moves up / down / left / right (default absolute mapping: 1 left, 2 up, 3 right, 4 down).
   - Name: move
     Behaviours:
+      - Src: {{Object: gnome, Commands: [{{remove: true}}, {{reward: -1}}]}}
+        Dst: {{Object: spider}}
+      - Src: {{Object: gnome, Commands: [{{mov: _dest}}]}}
+        Dst: {{Object: _empty}}
+      - Src: {{Object: gnome, Commands: [{{mov: _dest}}]}}
+        Dst: {{Object: {GROUND}}}
+      - Src: {{Object: gnome, Commands: [{{reward: 1}}]}}
+        Dst: {{Object: gem, Commands: [{{remove: true}}]}}
+      - Src: {{Object: gnome, Commands: [{{incr: keys}}]}}
+        Dst: {{Object: key, Commands: [{{remove: true}}]}}
       - Src:
           Object: gnome
-          Commands:
-            - remove: true
-            - reward: -1
-        Dst:
-          Object: spider
-      - Src:
-          Object: gnome
-          Commands:
-            - mov: _dest
-        Dst:
-          Object: _empty
-      - Src:
-          Object: gnome
-          Commands:
-            - mov: _dest
-        Dst:
-          Object: {WALKABLE}
-      - Src:
-          Object: gnome
-          Commands:
-            - reward: 1
-        Dst:
-          Object: gem
-          Commands:
-            - remove: true
+          Preconditions: [{{gte: [src.keys, 1]}}]
+          Commands: [{{decr: keys}}]
+        Dst: {{Object: door, Commands: [{{remove: true}}]}}
 '''
 
 
-def wall16(prefix: str, sep: str = "-") -> str:
-    return "\n".join(f"            - {prefix}{sep}{i}.png" for i in range(16))
-
-
-def obj(name, char, z, sprite, color, shape="square", scale=1.0, initial=False):
-    init = ("    InitialActions:\n      - Action: random_movement\n        Delay: 3\n        Randomize: true\n"
-            if initial else "")
+def obj(name, char, z, sprite, color, shape="square", scale=1.0, extra=""):
     return f'''  - Name: {name}
     MapCharacter: '{char}'
     Z: {z}
-{init}    Observers:
+{extra}    Observers:
       Sprite2D:
 {sprite}
       Block2D:
@@ -366,38 +494,52 @@ def img(path):
 
 
 def tiled(prefix, sep="-"):
-    return f"        - TilingMode: WALL_16\n          Image:\n{wall16(prefix, sep)}"
+    imgs = "\n".join(f"            - {prefix}{sep}{i}.png" for i in range(16))
+    return f"        - TilingMode: WALL_16\n          Image:\n{imgs}"
 
+
+TG = "oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_"
+SPIDER_INIT = "    InitialActions:\n      - Action: random_movement\n        Delay: 3\n        Randomize: true\n"
+NEST_INIT = ("    Variables:\n      - Name: hatched\n        InitialValue: 0\n"
+             "    InitialActions:\n      - Action: hatch\n        Delay: 40\n        Randomize: true\n")
+GNOME_VARS = "    Variables:\n      - Name: keys\n        InitialValue: 0\n"
 
 OBJECTS = "\nObjects:\n" + "".join([
     obj("wall", "W", 0, tiled("oryx/oryx_fantasy/wall2"), "[0.45, 0.45, 0.45]"),
     obj("hedge", "H", 0, tiled("oryx/oryx_fantasy/wall9"), "[0.15, 0.35, 0.15]"),
-    obj("water", "~", 0, img("oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png"), "[0.1, 0.35, 0.7]"),
+    obj("rock", "R", 0, tiled("gvgai/oryx/dirtWall", "_"), "[0.45, 0.25, 0.12]"),
+    obj("water", "~", 0, img(TG + "water.png"), "[0.1, 0.35, 0.7]"),
     obj("bridge", "=", 0, img("gvgai/newset/logm.png"), "[0.55, 0.4, 0.25]"),
+    obj("door", "D", 0, img("oryx/oryx_fantasy/door-1.png"), "[0.6, 0.4, 0.1]"),
     obj("grass", ",", 0, tiled("gvgai/oryx/grass", "_"), "[0.25, 0.55, 0.25]", scale=0.9),
-    obj("moss", "m", 0, img("oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_moss_a.png"), "[0.25, 0.4, 0.2]", scale=0.9),
-    obj("dirt", "d", 0, img("oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_dirt_a.png"), "[0.3, 0.22, 0.15]", scale=0.9),
-    obj("bones", "o", 0, img("oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_bones_a.png"), "[0.8, 0.8, 0.75]", "circle", 0.3),
+    obj("moss", "m", 0, img(TG + "floor_moss_a.png"), "[0.25, 0.4, 0.2]", scale=0.9),
+    obj("dirt", "d", 0, img(TG + "floor_dirt_a.png"), "[0.3, 0.22, 0.15]", scale=0.9),
+    obj("bones", "o", 0, img(TG + "bones_a.png"), "[0.8, 0.8, 0.75]", "circle", 0.3),
     obj("mushroom", "u", 0, img("gvgai/oryx/mushroom2.png"), "[0.8, 0.2, 0.2]", "circle", 0.3),
-    obj("skull", "k", 0, img("gvgai/oryx/skull1.png"), "[0.9, 0.9, 0.9]", "circle", 0.3),
+    obj("skull", "x", 0, img("gvgai/oryx/skull1.png"), "[0.9, 0.9, 0.9]", "circle", 0.3),
     obj("bush", "b", 1, img("gvgai/oryx/bush1.png"), "[0.1, 0.45, 0.15]", "circle", 0.8),
     obj("tree", "T", 1, img("gvgai/oryx/tree2.png"), "[0.05, 0.4, 0.2]", "circle", 0.9),
     obj("tombstone", "t", 1, img("gvgai/oryx/tombstone1.png"), "[0.5, 0.5, 0.5]", "square", 0.7),
+    obj("torch", "i", 1, img("gvgai/oryx/torch1.png"), "[1.0, 0.6, 0.1]", "circle", 0.5),
+    obj("nest", "N", 1, img("gvgai/newset/cocoonb1.png"), "[0.6, 0.6, 0.5]", "circle", 0.7, NEST_INIT),
+    obj("key", "K", 1, img("oryx/oryx_fantasy/key-0.png"), "[1.0, 0.85, 0.1]", "triangle", 0.5),
     obj("gem", "g", 1, img("oryx/oryx_fantasy/ore-6.png"), "[0.0, 1.0, 0.0]", "triangle", 0.5),
-    obj("spider", "G", 2, img("oryx/oryx_fantasy/avatars/spider1.png"), "[1.0, 0.0, 0.0]", "triangle", 0.8, initial=True),
-    obj("gnome", "A", 2, img("oryx/oryx_fantasy/avatars/gnome1.png"), "[0.0, 0.0, 1.0]", "triangle", 0.8),
+    obj("spider", "G", 2, img("oryx/oryx_fantasy/avatars/spider1.png"), "[1.0, 0.0, 0.0]", "triangle", 0.8, SPIDER_INIT),
+    obj("gnome", "A", 2, img("oryx/oryx_fantasy/avatars/gnome1.png"), "[0.0, 0.0, 1.0]", "triangle", 0.8, GNOME_VARS),
 ])
 
 
-def main() -> None:
+def main():
     parts = [HEADER]
-    for i, (name, recipe, layout) in enumerate(LEVELS):
-        rows = layout.strip("\n").split("\n")
-        validate(name, rows)
-        ground = decorate(rows, recipe, seed=1000 + i)
-        body = level_tokens(rows, ground)
-        parts.append(f"    # {name}\n    - |\n" + "\n".join("      " + r for r in body.split("\n")) + "\n")
-        print(f"{i}: {name:13s} {len(rows[0])}x{len(rows)}  spiders={layout.count('G')}", file=sys.stderr)
+    for i, (name, blurb, build) in enumerate(LEVELS):
+        m, recipe = build()
+        rows = m.rows()  # (crops m.w/m.h)
+        gems, keys, spiders, nests = validate(name, rows)
+        body = level_tokens(rows, decorate(rows, recipe, seed=1000 + i))
+        parts.append(f"    # {name} | {blurb}\n    - |\n" + "\n".join("      " + r for r in body.split("\n")) + "\n")
+        print(f"{i + 1}. {name:13s} {m.w}x{m.h}  gems={gems} keys={keys} spiders={spiders} nests={nests}", file=sys.stderr)
+        if "-v" in sys.argv:
+            print("\n".join(rows), file=sys.stderr)
     gdy = "".join(parts) + ACTIONS + OBJECTS
     for p in OUT:
         p.parent.mkdir(parents=True, exist_ok=True)

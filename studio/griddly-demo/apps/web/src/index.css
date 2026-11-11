@@ -7,7 +7,8 @@
   }
 
   body {
-    @apply antialiased;
+    @apply antialiased bg-[#050605] text-stone-200;
+    color-scheme: dark;
   }
 }
 

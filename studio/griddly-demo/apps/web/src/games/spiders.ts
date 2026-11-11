@@ -7,8 +7,11 @@ import gdy from "./minigrid-spiders-garden.yaml?raw";
 
 export const SPIDERS_GDY: string = gdy;
 
-/** Level names, taken from the `# Name` comment above each level in the GDY. */
-export const SPIDERS_LEVELS: string[] = [...gdy.matchAll(/^ {4}# (.+)\n {4}- \|/gm)].map((m) => m[1]!.trim());
+/** Level names and blurbs, from the `# Name | blurb` comment above each level in the GDY. */
+export const SPIDERS_LEVELS: { name: string; blurb: string }[] = [...gdy.matchAll(/^ {4}# (.+)\n {4}- \|/gm)].map((m) => {
+  const [name, blurb = ""] = m[1]!.split("|").map((x) => x.trim());
+  return { name: name!, blurb };
+});
 
 export type SpriteDef = { images: string[]; tiling: "WALL_16" | "WALL_2" | null; z: number };
 

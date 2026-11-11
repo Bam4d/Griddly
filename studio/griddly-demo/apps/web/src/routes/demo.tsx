@@ -6,12 +6,12 @@ import { BACKGROUND_TILE, SPIDERS_GDY, SPIDERS_LEVELS, SPRITES } from "../games/
 import type { Griddly } from "@griddly/wasm";
 
 /**
- * Griddly "Spiders Garden" demo: guide the gnome to the gem without touching a spider. The GDY is
- * bundled with the app and loaded via `loadGDYString`. The game state is drawn on a 2D canvas with
- * the sprites the GDY names, read straight from the WASM virtual FS (incl. WALL_16 auto-tiling).
+ * Griddly "Spiders Garden" demo: collect every gem without touching a spider. The GDY is bundled with
+ * the app and loaded via `loadGDYString`; the state is drawn on a 2D canvas with the sprites the GDY
+ * names (read from the WASM virtual FS), including WALL_16 auto-tiling and Z ordering.
  */
 
-const TILE = 32;
+const SRC_TILE = 24; // native sprite size
 const RES = "/resources/images/";
 
 // Default (absolute) move mapping from the GDY: 1 = left, 2 = up, 3 = right, 4 = down.
@@ -30,19 +30,12 @@ const KEYS: Record<string, number> = {
   s: DOWN,
 };
 const ARROW_ANGLE: Record<number, number> = { [UP]: 0, [RIGHT]: 90, [DOWN]: 180, [LEFT]: 270 };
+const FALLBACK: Record<string, string> = { wall: "#6b7280", hedge: "#166534", rock: "#7c2d12", water: "#1d4ed8" };
 
-const FALLBACK: Record<string, string> = {
-  wall: "#6b7280",
-  hedge: "#166534",
-  water: "#1d4ed8",
-  spider: "#ef4444",
-  gnome: "#3b82f6",
-  gem: "#22c55e",
-};
-
-type Obj = { name: string; location: [number, number]; zidx: number };
+type Obj = { name: string; location: [number, number]; variables?: Record<string, number> };
 type State = { objects: Obj[] };
 type Status = "loading" | "playing" | "won" | "lost" | "error";
+type Hud = { gems: number; gemsTotal: number; keys: number; spiders: number };
 
 function loadImages(g: Griddly): Promise<Record<string, HTMLImageElement>> {
   const paths = new Set<string>(BACKGROUND_TILE ? [BACKGROUND_TILE] : []);
@@ -53,11 +46,10 @@ function loadImages(g: Griddly): Promise<Record<string, HTMLImageElement>> {
       (p) =>
         new Promise<[string, HTMLImageElement | null]>((resolve) => {
           try {
-            const bytes = fs.readFile(RES + p);
             const img = new Image();
             img.onload = () => resolve([p, img]);
             img.onerror = () => resolve([p, null]);
-            img.src = URL.createObjectURL(new Blob([bytes as BlobPart], { type: "image/png" }));
+            img.src = URL.createObjectURL(new Blob([fs.readFile(RES + p) as BlobPart], { type: "image/png" }));
           } catch {
             resolve([p, null]);
           }
@@ -68,40 +60,64 @@ function loadImages(g: Griddly): Promise<Record<string, HTMLImageElement>> {
 
 const DemoPage = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
   const griddlyRef = useRef<Griddly | null>(null);
   const imagesRef = useRef<Record<string, HTMLImageElement>>({});
   const lastMoveRef = useRef<number>(DOWN);
+  const gemsTotalRef = useRef(0);
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState("");
   const [level, setLevel] = useState(0);
   const [steps, setSteps] = useState(0);
+  const [hud, setHud] = useState<Hud>({ gems: 0, gemsTotal: 0, keys: 0, spiders: 0 });
   const [score, setScore] = useState({ wins: 0, losses: 0 });
+  const [follow, setFollow] = useState(false);
+  const followRef = useRef(follow);
+  followRef.current = follow;
 
   const draw = useCallback(() => {
     const g = griddlyRef.current;
     const canvas = canvasRef.current;
-    if (!g || !canvas) return;
+    const frame = frameRef.current;
+    if (!g || !canvas || !frame) return;
     const state = g.getState() as State;
     const W = g.width;
     const H = g.height;
-    canvas.width = W * TILE;
-    canvas.height = H * TILE;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.imageSmoothingEnabled = false;
     const imgs = imagesRef.current;
 
+    // Camera: whole map scaled to fit, or a 15x11 window following the gnome.
+    const gnome = state.objects.find((o) => o.name === "gnome");
+    const viewW = followRef.current ? Math.min(W, 15) : W;
+    const viewH = followRef.current ? Math.min(H, 11) : H;
+    let camX = 0;
+    let camY = 0;
+    if (followRef.current && gnome) {
+      camX = Math.min(Math.max(gnome.location[0] - Math.floor(viewW / 2), 0), W - viewW);
+      camY = Math.min(Math.max(gnome.location[1] - Math.floor(viewH / 2), 0), H - viewH);
+    }
+    const maxW = frame.clientWidth;
+    const maxH = Math.max(window.innerHeight * 0.62, 320);
+    const tile = Math.max(8, Math.floor(Math.min(maxW / viewW, maxH / viewH, 40)));
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = viewW * tile * dpr;
+    canvas.height = viewH * tile * dpr;
+    canvas.style.width = `${viewW * tile}px`;
+    canvas.style.height = `${viewH * tile}px`;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+
     const bg = BACKGROUND_TILE ? imgs[BACKGROUND_TILE] : undefined;
-    for (let y = 0; y < H; y++)
-      for (let x = 0; x < W; x++) {
-        if (bg) ctx.drawImage(bg, x * TILE, y * TILE, TILE, TILE);
+    for (let y = 0; y < viewH; y++)
+      for (let x = 0; x < viewW; x++) {
+        if (bg) ctx.drawImage(bg, x * tile, y * tile, tile, tile);
         else {
           ctx.fillStyle = "#2a2618";
-          ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+          ctx.fillRect(x * tile, y * tile, tile, tile);
         }
       }
 
-    // Occupancy per object type, for WALL_16 / WALL_2 tiling (same object name connects).
     const at = new Map<string, Set<string>>();
     for (const o of state.objects) {
       if (!at.has(o.name)) at.set(o.name, new Set());
@@ -112,8 +128,9 @@ const DemoPage = () => {
     const objs = [...state.objects].sort((a, b) => (SPRITES[a.name]?.z ?? 0) - (SPRITES[b.name]?.z ?? 0));
     for (const o of objs) {
       const [x, y] = o.location;
-      const px = x * TILE;
-      const py = y * TILE;
+      if (x < camX || y < camY || x >= camX + viewW || y >= camY + viewH) continue;
+      const px = (x - camX) * tile;
+      const py = (y - camY) * tile;
       const def = SPRITES[o.name];
       let path = def?.images[0];
       if (def?.tiling === "WALL_16") {
@@ -128,13 +145,30 @@ const DemoPage = () => {
         path = def.images[same(o.name, x, y + 1) ? 1 : 0];
       }
       const img = path ? imgs[path] : undefined;
-      if (img) ctx.drawImage(img, px, py, TILE, TILE);
+      if (img) ctx.drawImage(img, px, py, tile, tile);
       else {
         ctx.fillStyle = FALLBACK[o.name] ?? "#a855f7";
-        ctx.fillRect(px + 2, py + 2, TILE - 4, TILE - 4);
+        ctx.fillRect(px, py, tile, tile);
       }
-      if (o.name === "gnome") drawArrow(ctx, px, py, ARROW_ANGLE[lastMoveRef.current] ?? 180);
+      if (o.name === "gnome") drawArrow(ctx, px, py, tile, ARROW_ANGLE[lastMoveRef.current] ?? 180);
     }
+
+    // soft vignette
+    const vw = viewW * tile;
+    const vh = viewH * tile;
+    const grad = ctx.createRadialGradient(vw / 2, vh / 2, Math.min(vw, vh) * 0.35, vw / 2, vh / 2, Math.max(vw, vh) * 0.75);
+    grad.addColorStop(0, "rgba(0,0,0,0)");
+    grad.addColorStop(1, "rgba(0,0,0,0.45)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, vw, vh);
+
+    const count = (n: string) => state.objects.filter((o) => o.name === n).length;
+    setHud({
+      gems: gemsTotalRef.current - count("gem"),
+      gemsTotal: gemsTotalRef.current,
+      keys: gnome?.variables?.keys ?? 0,
+      spiders: count("spider"),
+    });
   }, []);
 
   const start = useCallback(
@@ -144,6 +178,7 @@ const DemoPage = () => {
       g.loadLevel(lvl);
       g.seed(Math.floor(Math.random() * 1e9));
       g.reset();
+      gemsTotalRef.current = (g.getState() as State).objects.filter((o) => o.name === "gem").length;
       lastMoveRef.current = DOWN;
       setSteps(0);
       setStatus("playing");
@@ -175,6 +210,13 @@ const DemoPage = () => {
     };
   }, [start]);
 
+  useEffect(() => {
+    const onResize = () => draw();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [draw]);
+  useEffect(() => draw(), [follow, draw]);
+
   const doStep = useCallback(
     (action: number) => {
       const g = griddlyRef.current;
@@ -196,18 +238,25 @@ const DemoPage = () => {
     [status, draw]
   );
 
-  const nextLevel = useCallback(() => {
-    const next = (level + 1) % SPIDERS_LEVELS.length;
-    setLevel(next);
-    start(next);
-  }, [level, start]);
+  const pick = useCallback(
+    (l: number) => {
+      setLevel(l);
+      start(l);
+    },
+    [start]
+  );
+  const nextLevel = useCallback(() => pick((level + 1) % SPIDERS_LEVELS.length), [level, pick]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLSelectElement) return;
       if (e.key === "r" || e.key === "R") {
         e.preventDefault();
         start(level);
+        return;
+      }
+      if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        setFollow((f) => !f);
         return;
       }
       if ((e.key === "n" || e.key === "N" || e.key === "Enter") && status === "won") {
@@ -225,103 +274,209 @@ const DemoPage = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [doStep, start, nextLevel, level, status]);
 
+  const meta = SPIDERS_LEVELS[level];
+
   return (
-    <main className="mx-auto flex min-h-full max-w-4xl flex-col gap-4 p-8">
-      <header className="flex flex-col gap-1">
-        <p className="text-sm text-neutral-500">Griddly WASM demo</p>
-        <h1 className="text-3xl font-semibold">Spiders Garden 🕷️</h1>
-        <p className="text-sm text-neutral-400">
-          Guide the gnome to the gem without touching a spider. Spiders wander at random; water, hedges, bushes, trees
-          and tombstones block the way. Running fully in your browser via <code>@griddly/wasm</code>.
-        </p>
-      </header>
+    <div className="min-h-full bg-[radial-gradient(ellipse_at_top,_#1b2a1f_0%,_#0b0f0c_55%,_#050605_100%)] text-stone-200">
+      <main className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-6 sm:px-8">
+        <header className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-emerald-400/70">
+              Griddly · WebAssembly
+            </p>
+            <h1 className="bg-gradient-to-r from-emerald-200 via-lime-200 to-amber-200 bg-clip-text text-4xl font-black tracking-tight text-transparent">
+              Spiders Garden
+            </h1>
+          </div>
+          <div className="flex gap-2 font-mono text-xs">
+            <Pill tone="emerald">🏆 {score.wins}</Pill>
+            <Pill tone="rose">💀 {score.losses}</Pill>
+          </div>
+        </header>
 
-      <div className="flex flex-wrap items-center gap-3 text-sm">
-        <label className="flex items-center gap-2">
-          Level
-          <select
-            value={level}
-            onChange={(e) => {
-              const l = Number(e.target.value);
-              setLevel(l);
-              start(l);
-              e.currentTarget.blur();
-            }}
-            className="rounded bg-neutral-800 px-2 py-1"
-          >
-            {SPIDERS_LEVELS.map((name, i) => (
-              <option key={i} value={i}>
-                {i + 1}. {name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <span className="ml-auto">steps: {steps}</span>
-        <span className="text-green-500">wins: {score.wins}</span>
-        <span className="text-red-500">deaths: {score.losses}</span>
-      </div>
-
-      <p className="text-sm">
-        {status === "loading" && <span className="text-amber-500">Loading WASM engine…</span>}
-        {status === "error" && <span className="text-red-500">Error: {error}</span>}
-        {status === "playing" && <span className="text-neutral-400">Arrow keys / WASD to move · R restart</span>}
-        {status === "won" && (
-          <span className="text-green-500">💎 Got the gem! Press N for the next level, R to replay.</span>
-        )}
-        {status === "lost" && <span className="text-red-500">🕷️ Eaten by a spider. Press R to try again.</span>}
-      </p>
-
-      <div className="flex justify-center overflow-auto">
-        <canvas
-          ref={canvasRef}
-          className="rounded-lg border border-neutral-700 bg-neutral-900"
-          style={{ imageRendering: "pixelated", maxWidth: "100%" }}
-        />
-      </div>
-
-      <div className="flex flex-col items-center gap-1">
-        <Btn onClick={() => doStep(UP)}>↑</Btn>
-        <div className="flex gap-1">
-          <Btn onClick={() => doStep(LEFT)}>←</Btn>
-          <Btn onClick={() => doStep(DOWN)}>↓</Btn>
-          <Btn onClick={() => doStep(RIGHT)}>→</Btn>
-        </div>
-        <div className="mt-2 flex gap-2">
-          <button onClick={() => start(level)} className="rounded bg-blue-700 px-3 py-1 text-sm hover:bg-blue-600">
-            Restart (R)
-          </button>
-          {status === "won" && (
-            <button onClick={nextLevel} className="rounded bg-green-700 px-3 py-1 text-sm hover:bg-green-600">
-              Next level (N)
+        {/* level picker */}
+        <nav className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+          {SPIDERS_LEVELS.map((l, i) => (
+            <button
+              key={i}
+              onClick={() => pick(i)}
+              className={`group shrink-0 rounded-xl border px-3 py-2 text-left transition ${
+                i === level
+                  ? "border-emerald-400/60 bg-emerald-400/10 shadow-[0_0_24px_-6px_rgba(52,211,153,0.6)]"
+                  : "border-white/5 bg-white/[0.03] hover:border-white/15 hover:bg-white/[0.06]"
+              }`}
+            >
+              <span className="block font-mono text-[10px] text-stone-500 group-hover:text-stone-400">
+                LEVEL {String(i + 1).padStart(2, "0")}
+              </span>
+              <span className={`block text-sm font-semibold ${i === level ? "text-emerald-200" : "text-stone-300"}`}>
+                {l.name}
+              </span>
             </button>
-          )}
-        </div>
-      </div>
-    </main>
+          ))}
+        </nav>
+
+        <section className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
+          {/* board */}
+          <div className="relative min-w-0 rounded-2xl border border-white/10 bg-black/40 p-3 shadow-2xl shadow-black/60 ring-1 ring-emerald-500/10 backdrop-blur">
+            <div ref={frameRef} className="flex min-h-[240px] w-full min-w-0 items-center justify-center overflow-hidden rounded-xl">
+              <canvas ref={canvasRef} className="max-w-full rounded-lg" style={{ imageRendering: "pixelated" }} />
+            </div>
+
+            {status === "loading" && <Overlay>Waking the spiders…</Overlay>}
+            {status === "error" && <Overlay tone="rose">Error: {error}</Overlay>}
+            {status === "won" && (
+              <Overlay>
+                <p className="text-5xl">💎</p>
+                <p className="mt-2 text-2xl font-bold text-emerald-200">All gems collected!</p>
+                <p className="mt-1 font-mono text-xs text-stone-400">{steps} steps</p>
+                <div className="mt-4 flex gap-2">
+                  <Action onClick={() => start(level)}>Replay</Action>
+                  <Action primary onClick={nextLevel}>
+                    Next level →
+                  </Action>
+                </div>
+              </Overlay>
+            )}
+            {status === "lost" && (
+              <Overlay tone="rose">
+                <p className="text-5xl">🕷️</p>
+                <p className="mt-2 text-2xl font-bold text-rose-200">Eaten by a spider</p>
+                <div className="mt-4">
+                  <Action primary onClick={() => start(level)}>
+                    Try again (R)
+                  </Action>
+                </div>
+              </Overlay>
+            )}
+          </div>
+
+          {/* side panel */}
+          <aside className="flex flex-col gap-4">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-lg font-bold text-stone-100">{meta?.name}</p>
+              <p className="mt-1 text-sm leading-snug text-stone-400">{meta?.blurb}</p>
+              <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-xs">
+                <Stat label="Gems" value={`${hud.gems}/${hud.gemsTotal}`} tone="text-fuchsia-300" />
+                <Stat label="Keys" value={hud.keys} tone="text-amber-300" />
+                <Stat label="Spiders" value={hud.spiders} tone="text-rose-300" />
+                <Stat label="Steps" value={steps} tone="text-sky-300" />
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <Pad onClick={() => doStep(UP)}>▲</Pad>
+              <div className="flex gap-2">
+                <Pad onClick={() => doStep(LEFT)}>◀</Pad>
+                <Pad onClick={() => doStep(DOWN)}>▼</Pad>
+                <Pad onClick={() => doStep(RIGHT)}>▶</Pad>
+              </div>
+              <div className="mt-2 flex w-full gap-2">
+                <Action onClick={() => start(level)} className="flex-1">
+                  ↻ Restart
+                </Action>
+                <Action onClick={() => setFollow((f) => !f)} className="flex-1" active={follow}>
+                  {follow ? "◎ Follow" : "▦ Full map"}
+                </Action>
+              </div>
+              <p className="mt-1 text-center font-mono text-[10px] leading-relaxed text-stone-500">
+                ARROWS / WASD move · R restart · F camera
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs leading-relaxed text-stone-400">
+              Grab every <span className="text-fuchsia-300">gem</span>. <span className="text-amber-300">Keys</span>{" "}
+              open doors. <span className="text-rose-300">Spiders</span> wander at random and cocoon nests hatch more.
+              Runs entirely in your browser via <code className="text-emerald-300">@griddly/wasm</code>.
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
   );
 };
 
-const Btn = ({ onClick, children }: { onClick: () => void; children: React.ReactNode }) => (
-  <button onClick={onClick} className="w-10 rounded bg-neutral-800 py-1 text-sm hover:bg-neutral-700">
+const Pill = ({ tone, children }: { tone: "emerald" | "rose"; children: React.ReactNode }) => (
+  <span
+    className={`rounded-full border px-3 py-1 ${
+      tone === "emerald"
+        ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
+        : "border-rose-400/30 bg-rose-400/10 text-rose-200"
+    }`}
+  >
+    {children}
+  </span>
+);
+
+const Stat = ({ label, value, tone }: { label: string; value: React.ReactNode; tone: string }) => (
+  <div className="rounded-lg border border-white/5 bg-black/30 px-3 py-2">
+    <p className="text-[10px] uppercase tracking-widest text-stone-500">{label}</p>
+    <p className={`text-lg font-bold ${tone}`}>{value}</p>
+  </div>
+);
+
+const Pad = ({ onClick, children }: { onClick: () => void; children: React.ReactNode }) => (
+  <button
+    onClick={onClick}
+    className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-stone-700/60 to-stone-900/80 text-stone-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_4px_12px_-4px_rgba(0,0,0,0.8)] transition hover:border-emerald-400/40 hover:text-emerald-200 active:translate-y-px active:shadow-none"
+  >
     {children}
   </button>
 );
 
+const Action = ({
+  onClick,
+  children,
+  primary,
+  active,
+  className = "",
+}: {
+  onClick: () => void;
+  children: React.ReactNode;
+  primary?: boolean;
+  active?: boolean;
+  className?: string;
+}) => (
+  <button
+    onClick={onClick}
+    className={`rounded-lg px-4 py-2 text-sm font-semibold transition active:translate-y-px ${
+      primary
+        ? "bg-gradient-to-b from-emerald-400 to-emerald-600 text-emerald-950 shadow-[0_0_20px_-4px_rgba(52,211,153,0.7)] hover:from-emerald-300 hover:to-emerald-500"
+        : active
+          ? "border border-emerald-400/40 bg-emerald-400/10 text-emerald-200"
+          : "border border-white/10 bg-white/[0.04] text-stone-300 hover:border-white/20 hover:bg-white/[0.08]"
+    } ${className}`}
+  >
+    {children}
+  </button>
+);
+
+const Overlay = ({ children, tone = "emerald" }: { children: React.ReactNode; tone?: "emerald" | "rose" }) => (
+  <div
+    className={`absolute inset-3 flex flex-col items-center justify-center rounded-xl text-center backdrop-blur-[2px] ${
+      tone === "rose" ? "bg-rose-950/60" : "bg-black/60"
+    }`}
+  >
+    {children}
+  </div>
+);
+
 /** Small arrow above the gnome showing the last move direction (the sprite itself never rotates). */
-function drawArrow(ctx: CanvasRenderingContext2D, px: number, py: number, angleDeg: number) {
+function drawArrow(ctx: CanvasRenderingContext2D, px: number, py: number, tile: number, angleDeg: number) {
+  const s = tile / SRC_TILE;
   ctx.save();
-  ctx.translate(px + TILE / 2, py + TILE / 2);
+  ctx.translate(px + tile / 2, py + tile / 2);
   ctx.rotate((angleDeg * Math.PI) / 180);
   ctx.fillStyle = "#facc15";
   ctx.strokeStyle = "#1c1917";
-  ctx.lineWidth = 1;
+  ctx.lineWidth = Math.max(1, s);
   ctx.beginPath();
-  ctx.moveTo(0, -TILE / 2 + 1);
-  ctx.lineTo(-4, -TILE / 2 + 7);
-  ctx.lineTo(4, -TILE / 2 + 7);
+  ctx.moveTo(0, -tile / 2 + 1);
+  ctx.lineTo(-3.5 * s, -tile / 2 + 6 * s);
+  ctx.lineTo(3.5 * s, -tile / 2 + 6 * s);
   ctx.closePath();
-  ctx.fill();
   ctx.stroke();
+  ctx.fill();
   ctx.restore();
 }
 
