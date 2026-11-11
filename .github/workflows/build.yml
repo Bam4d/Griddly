@@ -21,7 +21,7 @@ jobs:
 
       - name: Install build tools
         run: |
-          pip install conan==2.34.0 ninja cmake
+          pip install conan==2.34.0 ninja "cmake<4"
           sudo apt-get update
           sudo apt-get install -y libudev-dev libgl1-mesa-dev \
             libx11-dev libx11-xcb-dev libfontenc-dev libice-dev libsm-dev libxau-dev libxaw7-dev \
