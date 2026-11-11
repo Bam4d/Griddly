@@ -1,0 +1,11 @@
+{
+  "name": "griddly",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Griddly game engine monorepo. npm-installable packages live in subdirectories, e.g. js/griddly-wasm.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bam4d/Griddly.git"
+  }
+}
