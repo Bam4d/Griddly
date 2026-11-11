@@ -177,6 +177,23 @@ if(NOT WASM)
 
 endif()
 
+# Resolve the emscripten sysroot before targets are defined so the SDL3 port
+# headers (-sUSE_SDL=3) can be added to the core library's compile options.
+if(WASM AND NOT EMSCRIPTEN_SYSROOT)
+  if(DEFINED ENV{EMSCRIPTEN_SYSROOT})
+    set(EMSCRIPTEN_SYSROOT "$ENV{EMSCRIPTEN_SYSROOT}")
+  elseif(CMAKE_TOOLCHAIN_FILE)
+    get_filename_component(_emsdk_emscripten_dir "${CMAKE_TOOLCHAIN_FILE}" DIRECTORY)
+    get_filename_component(_emsdk_emscripten_dir "${_emsdk_emscripten_dir}" DIRECTORY)
+    get_filename_component(_emsdk_upstream "${_emsdk_emscripten_dir}" DIRECTORY)
+    set(EMSCRIPTEN_SYSROOT "${_emsdk_upstream}/cache/sysroot")
+  endif()
+endif()
+if(WASM)
+  message(STATUS "WASM: using emscripten sysroot ${EMSCRIPTEN_SYSROOT}")
+  add_compile_options("-I${EMSCRIPTEN_SYSROOT}/include")
+endif()
+
 include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
 
 if(WASM)

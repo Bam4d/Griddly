@@ -29,24 +29,8 @@ FetchContent_MakeAvailable(glm spdlog yaml-cpp stb)
 include_directories(${stb_SOURCE_DIR} ${stb_SOURCE_DIR}/deprecated)
 
 # SDL3 comes from the emscripten port (-sUSE_SDL=3); its headers live in the
-# emscripten sysroot. EMSCRIPTEN_SYSROOT is only set as a CMake variable by the
-# Emscripten toolchain module, so fall back to $ENV{EMSCRIPTEN_SYSROOT} or the
-# sysroot next to the toolchain (derived from CMAKE_TOOLCHAIN_FILE) if unset.
-if(NOT EMSCRIPTEN_SYSROOT)
-  if(DEFINED ENV{EMSCRIPTEN_SYSROOT})
-    set(EMSCRIPTEN_SYSROOT "$ENV{EMSCRIPTEN_SYSROOT}")
-  elseif(CMAKE_TOOLCHAIN_FILE)
-    get_filename_component(_emsdk_emscripten_dir "${CMAKE_TOOLCHAIN_FILE}" DIRECTORY)
-    get_filename_component(_emsdk_emscripten_dir "${_emsdk_emscripten_dir}" DIRECTORY)
-    get_filename_component(_emsdk_upstream "${_emsdk_emscripten_dir}" DIRECTORY)
-    set(EMSCRIPTEN_SYSROOT "${_emsdk_upstream}/cache/sysroot")
-  endif()
-endif()
-message(STATUS "WASM: using emscripten sysroot ${EMSCRIPTEN_SYSROOT}")
-# Attach the sysroot include to the library target itself: include_directories()
-# here runs after add_library(Griddly_static) in griddly.cmake, so a plain
-# directory-level include never reaches the core sources.
-add_compile_options("-I${EMSCRIPTEN_SYSROOT}/include")
+# emscripten sysroot. The sysroot include path is added in CMakeLists.txt before
+# the core library target is defined (see the WASM block there).
 
 file(GLOB_RECURSE JIDDLY_SOURCES "js/bindings/*.cpp")
 
