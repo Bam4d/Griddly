@@ -66,17 +66,7 @@ e::val GriddlyJSGameWrapper::observe() {
 }
 
 e::val GriddlyJSGameWrapper::observeImage() {
-  auto observer = gameProcess_->getObserver();
-  auto tensorObserver = std::dynamic_pointer_cast<griddly::TensorObservationInterface>(observer);
-  auto& data = tensorObserver->update();
-  auto shape = tensorObserver->getShape();    // {3, width, height}
-  size_t size = (size_t)shape[1] * shape[2] * 4;
-  // never expose more than the actual buffer (shape can be stale mid-reset)
-  auto sdlObserver = std::dynamic_pointer_cast<griddly::SDLObserver>(observer);
-  if (sdlObserver != nullptr && sdlObserver->bufferSize() < size) {
-    size = sdlObserver->bufferSize();
-  }
-  return e::val(e::typed_memory_view(size, &data));
+  return wrapObservationImage(gameProcess_->getObserver());
 }
 
 e::val GriddlyJSGameWrapper::stepParallel(e::val stepArray) {

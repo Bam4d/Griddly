@@ -94,6 +94,8 @@ export interface GriddlyJSPlayerWrapper {
   getObservationDescription(): ObservationDescription;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   observe(): any;
+  /** RGBA pixels of the player's render observer (Sprite2D / Block2D / Isometric). */
+  observeImage(): Promise<Uint8Array> | Uint8Array;
   delete(): void;
 }
 

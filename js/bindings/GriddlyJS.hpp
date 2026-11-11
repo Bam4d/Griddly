@@ -75,7 +75,8 @@ EMSCRIPTEN_BINDINGS(GriddlyJS) {
   e::class_<GriddlyJSPlayerWrapper>("GriddlyJSPlayerWrapper")
       .smart_ptr<std::shared_ptr<GriddlyJSPlayerWrapper>>("GriddlyJSPlayerWrapper")
       .function("getObservationDescription", &GriddlyJSPlayerWrapper::getObservationDescription)
-      .function("observe", &GriddlyJSPlayerWrapper::observe);
+      .function("observe", &GriddlyJSPlayerWrapper::observe)
+      .function("observeImage", &GriddlyJSPlayerWrapper::observeImage);
   
   // Types
   e::value_object<glm::ivec2>("glm::ivec2")

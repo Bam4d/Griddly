@@ -2,6 +2,8 @@
 #include <emscripten/val.h>
 
 #include "../../src/Griddly/Core/Observers/EntityObserver.hpp"
+#include "../../src/Griddly/Core/Observers/SDL/SDLObserver.hpp"
+#include "../../src/Griddly/Core/Observers/TensorObservationInterface.hpp"
 
 namespace e = emscripten;
 
@@ -110,6 +112,21 @@ inline e::val wrapObservation(std::shared_ptr<griddly::Observer> observer) {
     }
     return yVals;
   }
+}
+
+// RGBA pixels of a render observer (Sprite2D / Block2D / Isometric), as a view into the observer's
+// buffer. Shape is {3, width, height}; never expose more than the actual buffer (shape can be stale
+// mid-reset).
+inline e::val wrapObservationImage(std::shared_ptr<griddly::Observer> observer) {
+  auto tensorObserver = std::dynamic_pointer_cast<griddly::TensorObservationInterface>(observer);
+  auto& data = tensorObserver->update();
+  auto shape = tensorObserver->getShape();
+  size_t size = (size_t)shape[1] * shape[2] * 4;
+  auto sdlObserver = std::dynamic_pointer_cast<griddly::SDLObserver>(observer);
+  if (sdlObserver != nullptr && sdlObserver->bufferSize() < size) {
+    size = sdlObserver->bufferSize();
+  }
+  return e::val(e::typed_memory_view(size, &data));
 }
 
 inline e::val wrapObservationDescription(std::shared_ptr<griddly::Observer> observer) {

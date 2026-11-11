@@ -13,25 +13,18 @@ export const SPIDERS_LEVELS: { name: string; blurb: string }[] = [...gdy.matchAl
   return { name: name!, blurb };
 });
 
-export type SpriteDef = { images: string[]; tiling: "WALL_16" | "WALL_2" | null; z: number };
+type Gdy = { Environment: { Observers?: Record<string, { Type?: string; TrackAvatar?: boolean; Width?: number; Height?: number }> } };
 
-type GdyObject = {
-  Name: string;
-  Z?: number;
-  Observers?: { Sprite2D?: { Image?: string | string[]; TilingMode?: string }[] };
-};
-type Gdy = { Environment: { Observers?: { Sprite2D?: { BackgroundTile?: string } } }; Objects: GdyObject[] };
-
-const parsed = parse(gdy) as Gdy;
-
-/** Per-object Sprite2D definitions read from the GDY, so the canvas renderer needs no hardcoding. */
-export const SPRITES: Record<string, SpriteDef> = Object.fromEntries(
-  parsed.Objects.map((o) => {
-    const s = o.Observers?.Sprite2D?.[0] ?? {};
-    const images = s.Image === undefined ? [] : Array.isArray(s.Image) ? s.Image : [s.Image];
-    const tiling = s.TilingMode === "WALL_16" || s.TilingMode === "WALL_2" ? s.TilingMode : null;
-    return [o.Name, { images, tiling, z: o.Z ?? 0 }];
-  })
-);
-
-export const BACKGROUND_TILE: string | undefined = parsed.Environment.Observers?.Sprite2D?.BackgroundTile;
+/**
+ * Cameras = the render observers named in the GDY. The engine renders them; the demo only blits.
+ * The global `Sprite2D` observer shows the whole level; avatar-tracking SPRITE_2D observers follow the gnome.
+ */
+export const CAMERAS: { name: string; label: string; follows: boolean }[] = Object.entries(
+  (parse(gdy) as Gdy).Environment.Observers ?? {}
+)
+  .filter(([name, o]) => name === "Sprite2D" || o.Type === "SPRITE_2D")
+  .map(([name, o]) => ({
+    name,
+    follows: !!o.TrackAvatar,
+    label: o.TrackAvatar ? `Follow ${o.Width}×${o.Height}` : "Whole map",
+  }));

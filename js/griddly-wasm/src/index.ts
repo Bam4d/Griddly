@@ -144,14 +144,19 @@ export class Griddly {
     this.loadGDYString(gdyString);
   }
 
-  /** Create a game with the given observer ("Vector", "ASCII", "Sprite2D", ...). */
-  createGame(observerName = "Vector"): GriddlyJSGameWrapper {
+  /**
+   * Create a game. `observerName` is the global observer ("Vector", "ASCII", "Sprite2D", or any
+   * observer named in the GDY's `Environment.Observers`). `playerObserverName` is the observer each
+   * player sees (defaults to `observerName`); use a named, avatar-tracking SPRITE_2D observer in the
+   * GDY to get a camera that follows the player, and read it with `observePlayerImage()`.
+   */
+  createGame(observerName = "Vector", playerObserverName: string = observerName): GriddlyJSGameWrapper {
     if (!this.gdy) throw new Error("No GDY loaded — call loadGDYString()/loadGDYFile() first");
     try {
       this.game = this.gdy.createGame(observerName);
       this.players = [];
       for (let p = 0; p < this.playerCount; p++) {
-        this.players.push(this.game.registerPlayer(`Player ${p}`, observerName));
+        this.players.push(this.game.registerPlayer(`Player ${p}`, playerObserverName));
       }
       this.game.init();
       return this.game;
@@ -196,19 +201,20 @@ export class Griddly {
     return this.requireGame().observe();
   }
 
-  /** RGBA pixels of the current render, with width/height. */
+  /** RGBA pixels of the global observer's render, with width/height. */
   async observeImage(): Promise<{ pixels: Uint8Array; width: number; height: number }> {
     const game = this.requireGame();
-    const desc = game.getGlobalObservationDescription() as { Shape?: unknown };
     const pixels = await Promise.resolve(game.observeImage());
-    // `Shape` is an embind val: a plain JS array [channels, width, height]
-    // (older builds exposed an embind vector with size()/get()).
-    const shape = Array.isArray(desc?.Shape) ? (desc.Shape as number[]) : null;
-    if (shape && shape.length >= 3) {
-      return { pixels, width: shape[1]!, height: shape[2]! };
-    }
-    const side = Math.floor(Math.sqrt(pixels.length / 4));
-    return { pixels, width: side, height: side };
+    return withShape(pixels, game.getGlobalObservationDescription());
+  }
+
+  /** RGBA pixels of a player's observer render (e.g. an avatar-tracking camera), with width/height. */
+  async observePlayerImage(playerIdx = 0): Promise<{ pixels: Uint8Array; width: number; height: number }> {
+    this.requireGame();
+    const player = this.players[playerIdx];
+    if (!player) throw new Error(`No player ${playerIdx}`);
+    const pixels = await Promise.resolve(player.observeImage());
+    return withShape(pixels, player.getObservationDescription());
   }
 
   get width(): number {
@@ -379,6 +385,17 @@ function installNodeDomShim(): void {
       configurable: true,
     });
   }
+}
+
+/** Attach width/height from an observation description (`Shape` = [channels, width, height]). */
+function withShape(pixels: Uint8Array, desc: unknown): { pixels: Uint8Array; width: number; height: number } {
+  // `Shape` is an embind val: a plain JS array (older builds exposed an embind vector with size()/get()).
+  const shape = (desc as { Shape?: unknown } | null)?.Shape;
+  if (Array.isArray(shape) && shape.length >= 3) {
+    return { pixels, width: shape[1] as number, height: shape[2] as number };
+  }
+  const side = Math.floor(Math.sqrt(pixels.length / 4));
+  return { pixels, width: side, height: side };
 }
 
 /** Create and initialize a Griddly instance. */

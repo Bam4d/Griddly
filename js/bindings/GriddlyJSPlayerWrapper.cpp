@@ -17,6 +17,10 @@ e::val GriddlyJSPlayerWrapper::observe() {
   return wrapObservation(player_->getObserver());
 }
 
+e::val GriddlyJSPlayerWrapper::observeImage() {
+  return wrapObservationImage(player_->getObserver());
+}
+
 e::val GriddlyJSPlayerWrapper::stepSingle(std::string actionName, std::vector<int32_t> actionArray, bool updateTicks) {
   if (gameProcess_ != nullptr && !gameProcess_->isInitialized()) {
     throw std::invalid_argument("Cannot send player commands when game has not been initialized.");
