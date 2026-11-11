@@ -23,9 +23,10 @@ jobs:
         run: |
           pip install conan==2.34.0 ninja cmake
           sudo apt-get update && sudo apt-get install -y libudev-dev libgl1-mesa-dev
+          conan profile detect --force
 
       - name: Conan install
-        run: conan install deps/conanfile.txt -pr:h=default -pr:b=deps/build.profile -s build_type=Release --build=missing -of build
+        run: conan install deps/conanfile.txt -pr:h=default -pr:b=default -s build_type=Release --build=missing -of build
 
       - name: Configure
         run: |
@@ -87,7 +88,10 @@ jobs:
           submodules: true
 
       - name: Conan install
-        run: conan install deps/conanfile.txt -pr:h=default -pr:b=deps/build.profile -s build_type=Release --build=missing -of build
+        run: |
+          pip install conan==2.34.0
+          conan profile detect --force
+          conan install deps/conanfile.txt -pr:h=default -pr:b=default -s build_type=Release --build=missing -of build
 
       - name: Configure (CUDA on)
         run: |

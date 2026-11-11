@@ -28,7 +28,21 @@ set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(glm spdlog yaml-cpp stb)
 include_directories(${stb_SOURCE_DIR} ${stb_SOURCE_DIR}/deprecated)
 
-# SDL3 comes from the emscripten port (-sUSE_SDL=3); its headers live in the emscripten sysroot
+# SDL3 comes from the emscripten port (-sUSE_SDL=3); its headers live in the
+# emscripten sysroot. EMSCRIPTEN_SYSROOT is only set as a CMake variable by the
+# Emscripten toolchain module, so fall back to $ENV{EMSCRIPTEN_SYSROOT} or the
+# sysroot next to the toolchain (derived from CMAKE_TOOLCHAIN_FILE) if unset.
+if(NOT EMSCRIPTEN_SYSROOT)
+  if(DEFINED ENV{EMSCRIPTEN_SYSROOT})
+    set(EMSCRIPTEN_SYSROOT "$ENV{EMSCRIPTEN_SYSROOT}")
+  elseif(CMAKE_TOOLCHAIN_FILE)
+    get_filename_component(_emsdk_emscripten_dir "${CMAKE_TOOLCHAIN_FILE}" DIRECTORY)
+    get_filename_component(_emsdk_emscripten_dir "${_emsdk_emscripten_dir}" DIRECTORY)
+    get_filename_component(_emsdk_upstream "${_emsdk_emscripten_dir}" DIRECTORY)
+    set(EMSCRIPTEN_SYSROOT "${_emsdk_upstream}/cache/sysroot")
+  endif()
+endif()
+message(STATUS "WASM: using emscripten sysroot ${EMSCRIPTEN_SYSROOT}")
 include_directories(${EMSCRIPTEN_SYSROOT}/include)
 
 file(GLOB_RECURSE JIDDLY_SOURCES "js/bindings/*.cpp")
