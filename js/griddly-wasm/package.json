@@ -1,0 +1,59 @@
+{
+  "name": "@griddly/wasm",
+  "version": "2.0.0",
+  "description": "Griddly game engine compiled to WebAssembly (emscripten/embind) with a typed TypeScript API. Runs in the browser and in Node.js.",
+  "type": "module",
+  "license": "MIT",
+  "homepage": "https://github.com/bam4d/Griddly",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bam4d/Griddly.git",
+    "directory": "js/griddly-wasm"
+  },
+  "bugs": {
+    "url": "https://github.com/bam4d/Griddly/issues"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./griddlyjs.js": "./griddlyjs.js",
+    "./griddlyjs.wasm": "./griddlyjs.wasm",
+    "./griddlyjs.data": "./griddlyjs.data",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "griddlyjs.js",
+    "griddlyjs.wasm",
+    "griddlyjs.data",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^5.6.3"
+  },
+  "keywords": [
+    "griddly",
+    "wasm",
+    "webassembly",
+    "emscripten",
+    "game-engine",
+    "gridworld",
+    "reinforcement-learning",
+    "gym"
+  ]
+}
