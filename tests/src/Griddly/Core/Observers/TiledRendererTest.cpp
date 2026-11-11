@@ -421,14 +421,6 @@ TEST(TiledRendererTest, SDLIncrementalItemsTrackWallNeighbours) {
   const uint32_t numEnvs = 2;
   VectorizedEnv env(gdy, numEnvs, 1);
   env.loadLevel(0);
-  // The reference rebuilds every item every frame (no base layer, so no
-  // incremental items); the option is read on the first render
-  std::unique_ptr<TiledSDLRenderer> full;
-  {
-    ScopedEnv noBase("GRIDDLY_SDL_NO_BASE_LAYER", "1");
-    full = makeSDLCPU(gdy, env, "Sprite2D");
-    full->render(true, 1);
-  }
   auto cpu = makeSDLCPU(gdy, env, "Sprite2D");
   auto gpu = makeSDLGPU(gdy, env, "Sprite2D");
   // first frames build the caches
@@ -439,11 +431,21 @@ TEST(TiledRendererTest, SDLIncrementalItemsTrackWallNeighbours) {
   auto generator = gdy->getObjectGenerator();
   std::vector<uint8_t> expected;
   auto check = [&](const std::string& when) {
+    // Reference: a fresh full-rebuild renderer per check, built with the
+    // incremental/dirty-cell paths disabled. A long-lived no-base reference
+    // diverges on the CPU software path after out-of-band grid mutation, while
+    // a fresh full renderer is the ground truth (the GPU path proves the
+    // incremental renderer matches it exactly).
     ScopedEnv noBase("GRIDDLY_SDL_NO_BASE_LAYER", "1");
-    const uint8_t* f = full->render(true, 1);
-    ASSERT_FALSE(full->envObserver(0).lastFrameIncremental());
+    ScopedEnv noDirty("GRIDDLY_SDL_NO_DIRTY_CELLS", "1");
+    ScopedEnv noInc("GRIDDLY_SDL_NO_INCREMENTAL_ITEMS", "1");
+    auto reference = makeSDLCPU(gdy, env, "Sprite2D");
+    const uint8_t* f = reference->render(true, 1);
+    ASSERT_FALSE(reference->envObserver(0).lastFrameIncremental());
+    expected.assign(f, f + static_cast<size_t>(reference->width()) * reference->height() * 4);
     unsetenv("GRIDDLY_SDL_NO_BASE_LAYER");
-    expected.assign(f, f + static_cast<size_t>(full->width()) * full->height() * 4);
+    unsetenv("GRIDDLY_SDL_NO_DIRTY_CELLS");
+    unsetenv("GRIDDLY_SDL_NO_INCREMENTAL_ITEMS");
     auto d = diffFrames(*cpu, cpu->render(true, 1), expected.data());
     ASSERT_EQ(d.pixels, 0u) << "cpu " << when << ": " << describe(d);
     ASSERT_TRUE(cpu->envObserver(0).lastFrameIncremental()) << when << ": CPU frame was not built incrementally";
