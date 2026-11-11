@@ -51,7 +51,7 @@ jobs:
         run: cmake --build build -j "$(nproc)"
 
       - name: Run C++ tests (headless, SDL software renderer)
-        run: ./Release/bin/Griddly_Test
+        run: env SDL_VIDEODRIVER=dummy SDL_RENDER_DRIVER=software ./Release/bin/Griddly_Test
         working-directory: ${{ github.workspace }}
 
       - name: Tiled renderer parity (python bindings)
@@ -138,15 +138,18 @@ jobs:
           /tmp/emsdk/emsdk install 3.1.73
           /tmp/emsdk/emsdk activate 3.1.73
 
+      - name: Fetch the SDL3 emscripten port into the sysroot
+        run: |
+          source /tmp/emsdk/emsdk_env.sh > /dev/null
+          embuilder build SDL3 --cflags 2>/dev/null || emcc -sUSE_SDL=3 -x c -c /dev/null -o /dev/null
+
       - name: Configure
         run: |
           source /tmp/emsdk/emsdk_env.sh > /dev/null
           mkdir -p build_wasm
           emcmake cmake -S . -B build_wasm -GNinja \
             -DWASM=ON -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-            -DCMAKE_CXX_FLAGS="-sUSE_SDL=3" -DCMAKE_C_FLAGS="-sUSE_SDL=3" \
-            -DCMAKE_EXE_LINKER_FLAGS="-sUSE_SDL=3"
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build
         run: |
