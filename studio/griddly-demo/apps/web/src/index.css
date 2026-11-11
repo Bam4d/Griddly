@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@layer base {
+  html,
+  body {
+    @apply h-full;
+  }
+
+  body {
+    @apply antialiased;
+  }
+}
+
+/*
+ * Spinners and pulsing placeholders already say "loading" by their shape or accessible name, so they
+ * hold still for a reader who asked for reduced motion.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse,
+  .animate-spin {
+    animation: none;
+  }
+}

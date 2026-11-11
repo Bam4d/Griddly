@@ -1,0 +1,87 @@
+# syntax=docker/dockerfile:1.7-labs
+# The browser API origin is compiled into the Vite bundle. APP_NAME is the display name the bundle
+# falls back to when the server has none at runtime.
+#   DOCKER_BUILDKIT=1 docker build -f deploy/docker/Dockerfile.web --build-arg APP_NAME=my-app \
+#     -t my-app-web .
+# An app that installs from a private package index passes its pull token as the `registry_token`
+# BuildKit secret, never as an ARG, ENV or layer.
+
+FROM node:24-slim AS deps
+# Keep in step with package.json `packageManager` and the CI `bun-version`.
+COPY --from=oven/bun:1.4.0 /usr/local/bin/bun /usr/local/bin/bun
+WORKDIR /app
+# Vendored capability sources, in a layer of their own and FIRST because they change least.
+# In GIT registry mode the CLI wires the TS capabilities in as `file:` deps pointing into the
+# committed subtree, and bun implements `file:` by COPYING the target — so unlike a registry
+# dep the manifest alone is not enough, the whole tree must be present before `bun install`
+# or it fails with `ENOENT: failed to link package`. Keeping it separate from, and ahead of,
+# the app `COPY . .` is what preserves the install cache: fused with app source, every edit
+# under apps/web would re-run the install.
+#
+# Globs, not literals, and that is load-bearing: in package (npm) registry mode there is no
+# `.mistral/repositories/` at all (capabilities arrive as versioned deps from the index), and
+# a COPY whose *wildcard* matches nothing is skipped silently while a missing *literal* path
+# is a hard error. So one Dockerfile serves both acquisition modes with no build ARG.
+COPY --parents .mistral/repositories/*/capabilities .mistral/repositories/*/packages ./
+# Dependency layer: only the manifests + lockfile (+ .npmrc, when a capability ships one for its
+# private scopes), so `bun install` is cached until they change rather than on every source edit.
+# --parents preserves each workspace member's path, and `.npmr[c]` is a wildcard so an app without
+# an .npmrc still builds.
+# bunfig.toml carries the app's `linker = "hoisted"` (and its registry pin). Without it the image
+# installs with bun's default isolated linker while the host is hoisted: workspace members then
+# resolve their dependencies from their own `node_modules`, which the dev stack's `../..:/app` bind
+# mount hides, so the dev server fails to resolve what the host install put at the root.
+# `patche[s]` carries the `bun patch` files package.json's `patchedDependencies` names (a frozen
+# install fails without them), and is skipped when the app has none, like `.npmr[c]`.
+COPY --parents package.json bun.lock bunfig.toml .npmr[c] patche[s] tools/uv.sh apps/web/package.json packages/ts/*/package.json ./
+# Sourcing core's tools/uv.sh exports the credentials a private index needs, and nothing when the
+# app installs from public indexes only.
+RUN --mount=type=secret,id=registry_token \
+    --mount=type=cache,target=/root/.bun/install/cache \
+    bash -c '. tools/uv.sh && bun install --frozen-lockfile' && \
+    mkdir -p apps/web/node_modules
+# The hoisted linker creates apps/web/node_modules only when a version conflict forces a nested
+# copy, but the runtime stage copies that path unconditionally, and COPY of a missing source fails.
+COPY . .
+
+FROM deps AS build
+WORKDIR /app
+# Empty means the API is on the page's own origin, which is how Mistral Apps and the Helm chart
+# route `/api`; neither passes this arg. Compose passes its own value.
+ARG VITE_API_URL=""
+# The app's display name (see apps/web/src/app-name.ts). The root .env that holds it is not in the
+# build context, so the build takes it as an arg; an ARG is in the environment of this stage's RUN,
+# where vite.config.ts reads it. Left empty, the app shows its default name.
+ARG APP_NAME=""
+ENV NODE_ENV=production \
+    VITE_API_URL=${VITE_API_URL}
+RUN bun x nx run web:build
+
+FROM node:24-slim AS runtime
+WORKDIR /app
+ENV NODE_ENV=production \
+    HOST=0.0.0.0 \
+    PORT=3001
+RUN groupadd -g 1000 app 2>/dev/null || true && \
+    useradd -u 1000 -g 1000 -m -s /usr/sbin/nologin app 2>/dev/null || true
+COPY --from=build --chown=1000:1000 /app/apps/web/.output ./apps/web/.output
+COPY --from=build --chown=1000:1000 /app/node_modules ./node_modules
+COPY --from=build --chown=1000:1000 /app/apps/web/node_modules ./apps/web/node_modules
+COPY --from=build --chown=1000:1000 /app/packages ./packages
+EXPOSE 3001
+USER 1000:1000
+WORKDIR /app/apps/web
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=15s \
+    CMD node -e "fetch('http://127.0.0.1:3001/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+CMD ["node", ".output/server/index.mjs"]
+
+# Hot-reload dev target (used by compose.dev.yaml with the repo bind-mounted over
+# /app and node_modules kept as anonymous volumes). Runs the Vite dev server with
+# HMR, bound to 0.0.0.0 so the gateway can reach it.
+FROM deps AS dev
+ENV NODE_ENV=development \
+    HOST=0.0.0.0 \
+    PORT=3001
+WORKDIR /app/apps/web
+EXPOSE 3001
+CMD ["sh", "-c", "exec bun x vite dev --host 0.0.0.0 --port 3001"]

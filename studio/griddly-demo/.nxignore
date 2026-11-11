@@ -1,0 +1,3 @@
+# The CLI keeps registry source material under .mistral while generated projects live elsewhere.
+# Exclude the source material so NX discovers only projects present in the generated composition.
+.mistral

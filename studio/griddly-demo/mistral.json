@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 2,
+  "kind": "app",
+  "name": "griddly-demo",
+  "deployment": {
+    "organizationId": "3fbdc95a-16ce-4532-b77f-e8836f047a29",
+    "workspaceId": "6340e568-a546-4c41-9dee-1fbeb80493e1",
+    "appId": "01a1ca85-9f8d-7666-8ba4-1471b0f6a918"
+  },
+  "modules": [
+    {
+      "type": "app",
+      "name": "web",
+      "path": "apps/web",
+      "routes": [
+        {
+          "path": "/"
+        }
+      ],
+      "port": 3001,
+      "serve": "static",
+      "runtime": "node",
+      "build": {
+        "context": ".",
+        "dockerfile": "deploy/docker/Dockerfile.web",
+        "target": "runtime"
+      },
+      "dev": {
+        "startCommand": "bun run dev"
+      },
+      "deploy": {
+        "startCommand": "node .output/server/index.mjs"
+      }
+    }
+  ]
+}

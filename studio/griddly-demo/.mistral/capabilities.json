@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 4,
+  "requested": [
+    "mistralai-capabilities/deployment/apps",
+    "mistralai-capabilities/frontend/tanstack-start"
+  ],
+  "installed": [
+    {
+      "capability": "mistralai-capabilities/base/core",
+      "version": "0.1.71"
+    },
+    {
+      "capability": "mistralai-capabilities/deployment/apps",
+      "version": "0.1.71"
+    },
+    {
+      "capability": "mistralai-capabilities/frontend/tanstack-start",
+      "version": "0.1.71"
+    }
+  ]
+}

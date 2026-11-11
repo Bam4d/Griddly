@@ -1,0 +1,10 @@
+[test]
+# The generated API client is machine-written from the FastAPI OpenAPI spec
+# (`bunx nx run fastapi-tanstack-start:gen-types`): testing it would test the generator, and its large
+# unreachable surface would otherwise dominate the numbers.
+coveragePathIgnorePatterns = ["**/api/generated/**", "**/*.gen.ts", "**/src/test/**"]
+coverageSkipTestFiles = true
+# No `coverageThreshold` here on purpose: through bun 1.4.0 it is enforced per FILE, not on the total,
+# so any value above 0 fails on the first component with no direct test. Compute an aggregate
+# threshold from the lcov report emitted below instead.
+coverageReporter = ["text", "lcov"]

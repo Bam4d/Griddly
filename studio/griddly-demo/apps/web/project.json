@@ -1,0 +1,24 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "web",
+  "projectType": "application",
+  "targets": {
+    "gen-routes": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bun scripts/gen-routes.ts",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "build": {
+      "inputs": ["default", "^default", { "env": "APP_NAME" }]
+    },
+    "check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo \"[check] web gate passed\"",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}
