@@ -132,11 +132,11 @@ jobs:
         with:
           submodules: true
 
-      - name: Install emsdk 3.1.73 (matches deps/wasm/emscripten.profile)
+      - name: Install emsdk 4.0.4+ (first release with the SDL3 port, -sUSE_SDL=3)
         run: |
           git clone https://github.com/emscripten-core/emsdk.git /tmp/emsdk
-          /tmp/emsdk/emsdk install 3.1.73
-          /tmp/emsdk/emsdk activate 3.1.73
+          /tmp/emsdk/emsdk install 4.0.23
+          /tmp/emsdk/emsdk activate 4.0.23
 
       - name: Fetch the SDL3 emscripten port into the sysroot
         run: |
