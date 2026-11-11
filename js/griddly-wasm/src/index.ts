@@ -199,11 +199,13 @@ export class Griddly {
   /** RGBA pixels of the current render, with width/height. */
   async observeImage(): Promise<{ pixels: Uint8Array; width: number; height: number }> {
     const game = this.requireGame();
-    const desc = game.getGlobalObservationDescription();
+    const desc = game.getGlobalObservationDescription() as { Shape?: unknown };
     const pixels = await Promise.resolve(game.observeImage());
-    if (desc.Shape && desc.Shape.size() >= 3) {
-      const shape = vectorToArray(desc.Shape);
-      return { pixels, width: shape[1], height: shape[2] };
+    // `Shape` is an embind val: a plain JS array [channels, width, height]
+    // (older builds exposed an embind vector with size()/get()).
+    const shape = Array.isArray(desc?.Shape) ? (desc.Shape as number[]) : null;
+    if (shape && shape.length >= 3) {
+      return { pixels, width: shape[1]!, height: shape[2]! };
     }
     const side = Math.floor(Math.sqrt(pixels.length / 4));
     return { pixels, width: side, height: side };

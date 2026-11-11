@@ -51,7 +51,11 @@ jobs:
         run: cmake --build build -j "$(nproc)"
 
       - name: Run C++ tests (headless, SDL software renderer)
-        run: env SDL_VIDEODRIVER=dummy SDL_RENDER_DRIVER=software ./Release/bin/Griddly_Test
+        # Do NOT pin SDL_VIDEODRIVER: with it set, the GPU probe in
+        # makeSDLGPU runs SDL_Init+SDL_Quit, which destroys the software
+        # renderers of other live TiledSDLRenderers (SDL_Quit is global).
+        # Letting SDL pick the offscreen driver avoids that path on headless CI.
+        run: ./Release/bin/Griddly_Test
         working-directory: ${{ github.workspace }}
 
       - name: Tiled renderer parity (python bindings)
