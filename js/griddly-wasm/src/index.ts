@@ -103,7 +103,9 @@ export class Griddly {
       // The build targets ENVIRONMENT=web, so emscripten always fetch()es the
       // wasm and the .data file; Node's fetch rejects plain paths. Read the
       // artifacts synchronously and hand them over directly so no fetch runs.
-      const { readFileSync } = await import("node:fs");
+      // (`node:fs` is imported lazily inside this branch so bundlers never see
+      // it — the browser path above never executes it.)
+      const { readFileSync } = (await import("node:fs")) as typeof import("node:fs");
       const pkgUrl = (name: string) => new URL(`../${name}`, import.meta.url);
       const toArrayBuffer = (buf: Uint8Array): ArrayBuffer =>
         buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
@@ -118,7 +120,7 @@ export class Griddly {
       overrides.getPreloadedPackage = (name: string, _size: number) => {
         let path = name;
         if (!path.startsWith("/")) path = pkgUrl(name).pathname;
-        return toArrayBuffer(readFileSync(path));
+        return toArrayBuffer(readFileSync(path) as Uint8Array);
       };
     }
     const module = await wasmFactory(overrides as Parameters<typeof wasmFactory>[0]);
