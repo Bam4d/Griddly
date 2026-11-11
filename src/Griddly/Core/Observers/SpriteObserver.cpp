@@ -175,14 +175,18 @@ void SpriteObserver::updateObjectRenderItems(PartialObservableGrid& observableGr
       background.dst = {0, 0, static_cast<float>(pixelWidth_), static_cast<float>(pixelHeight_)};
       renderItems_.push_back(background);
     } else {
-      // avatar-tracking view: background only on in-grid cells; cells outside the grid stay the
-      // clear colour (black) unless a PaddingTile is configured
-      for (int32_t y = std::max(observableGrid.bottom, 0); y <= std::min(observableGrid.top, static_cast<int32_t>(gridBoundary_.y) - 1); y++) {
-        for (int32_t x = std::max(observableGrid.left, 0); x <= std::min(observableGrid.right, static_cast<int32_t>(gridBoundary_.x) - 1); x++) {
-          auto center = getTilePixelCenter({x, y});
-          background.dst = {center.x - tileSize.x / 2.0f, center.y - tileSize.y / 2.0f, static_cast<float>(tileSize.x), static_cast<float>(tileSize.y)};
-          renderItems_.push_back(background);
-        }
+      // avatar-tracking view: draw the background only over the part of the view covered by the grid,
+      // so cells outside the grid stay the clear colour (black) unless a PaddingTile is configured.
+      // When the whole view is inside the grid this is exactly the full-view rect.
+      const auto c0 = getTilePixelCenter({0, 0});
+      const auto c1 = getTilePixelCenter({static_cast<int32_t>(gridBoundary_.x) - 1, static_cast<int32_t>(gridBoundary_.y) - 1});
+      const float x0 = std::max(0.0f, std::min(c0.x, c1.x) - tileSize.x / 2.0f);
+      const float y0 = std::max(0.0f, std::min(c0.y, c1.y) - tileSize.y / 2.0f);
+      const float x1 = std::min(static_cast<float>(pixelWidth_), std::max(c0.x, c1.x) + tileSize.x / 2.0f);
+      const float y1 = std::min(static_cast<float>(pixelHeight_), std::max(c0.y, c1.y) + tileSize.y / 2.0f);
+      if (x1 > x0 && y1 > y0) {
+        background.dst = {x0, y0, x1 - x0, y1 - y0};
+        renderItems_.push_back(background);
       }
     }
   }
