@@ -107,3 +107,46 @@ jobs:
 
       - name: Tiled renderer parity (python bindings)
         run: env -u SDL_VIDEODRIVER PYTHONPATH=Release/bin python3 tests/python_tiled_parity.py
+
+  # WASM build: no conan needed, deps come from CMake FetchContent and SDL3
+  # from the emscripten port (-sUSE_SDL=3). Mirrors js/build.sh.
+  build-wasm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install emsdk 3.1.73 (matches deps/wasm/emscripten.profile)
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git /tmp/emsdk
+          /tmp/emsdk/emsdk install 3.1.73
+          /tmp/emsdk/emsdk activate 3.1.73
+
+      - name: Configure
+        run: |
+          source /tmp/emsdk/emsdk_env.sh > /dev/null
+          mkdir -p build_wasm
+          emcmake cmake -S . -B build_wasm -GNinja \
+            -DWASM=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+
+      - name: Build
+        run: |
+          source /tmp/emsdk/emsdk_env.sh > /dev/null
+          emcmake cmake --build build_wasm -j "$(nproc)"
+
+      - name: Verify artifacts
+        run: |
+          ls -la build_wasm/bin/griddlyjs.js build_wasm/bin/griddlyjs.wasm build_wasm/bin/griddlyjs.data
+          test -s build_wasm/bin/griddlyjs.wasm
+
+      - name: Upload WASM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: griddlyjs-wasm
+          path: |
+            build_wasm/bin/griddlyjs.js
+            build_wasm/bin/griddlyjs.wasm
+            build_wasm/bin/griddlyjs.data
