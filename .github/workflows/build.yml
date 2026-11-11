@@ -141,7 +141,7 @@ jobs:
       - name: Fetch the SDL3 emscripten port into the sysroot
         run: |
           source /tmp/emsdk/emsdk_env.sh > /dev/null
-          echo 'int main(){return 0;}' > /tmp/port_probe.c
+          printf '#include <SDL3/SDL.h>\nint main(){return 0;}\n' > /tmp/port_probe.c
           emcc -sUSE_SDL=3 /tmp/port_probe.c -o /tmp/port_probe.js
           ls /tmp/emsdk/upstream/emscripten/cache/sysroot/include/SDL3/SDL.h
 
