@@ -25,7 +25,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y libudev-dev libgl1-mesa-dev
 
       - name: Conan install
-        run: conan install deps/conanfile.txt -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build=missing -of build
+        run: conan install deps/conanfile.txt -pr:h=default -pr:b=deps/build.profile -s build_type=Release --build=missing -of build
 
       - name: Configure
         run: |
@@ -87,7 +87,7 @@ jobs:
           submodules: true
 
       - name: Conan install
-        run: conan install deps/conanfile.txt -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build=missing -of build
+        run: conan install deps/conanfile.txt -pr:h=default -pr:b=deps/build.profile -s build_type=Release --build=missing -of build
 
       - name: Configure (CUDA on)
         run: |
@@ -135,7 +135,7 @@ jobs:
       - name: Build
         run: |
           source /tmp/emsdk/emsdk_env.sh > /dev/null
-          emcmake cmake --build build_wasm -j "$(nproc)"
+          cmake --build build_wasm -j "$(nproc)"
 
       - name: Verify artifacts
         run: |
