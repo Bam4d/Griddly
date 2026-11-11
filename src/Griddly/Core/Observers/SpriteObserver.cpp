@@ -55,64 +55,55 @@ std::string SpriteObserver::getSpriteName(const std::string& objectName, const s
 
   auto& tilingMode = spriteDefinitions_.at(tileName).tilingMode;
 
-  if (tilingMode == TilingMode::WALL_2) {
-    auto objectDown = grid_->getObject({location.x, location.y + 1});
-    int idx = 0;
-    if (objectDown != nullptr && objectDown->getObjectName() == objectName) {
-      idx += 1;
+  // A neighbour connects if *any* object on that cell has the same name, not just the top-most one:
+  // e.g. grass under a gnome / bush / gem still connects to the grass around it.
+  auto connects = [&](int32_t x, int32_t y) {
+    if (x < 0 || y < 0 || x >= static_cast<int32_t>(gridBoundary_.x) || y >= static_cast<int32_t>(gridBoundary_.y)) {
+      return false;
     }
+    for (const auto& entry : grid_->getObjectsAt({x, y})) {
+      if (entry.second != nullptr && entry.second->getObjectName() == objectName) return true;
+    }
+    return false;
+  };
 
-    return tileName + std::to_string(idx);
+  if (tilingMode == TilingMode::WALL_2) {
+    return tileName + std::to_string(connects(location.x, location.y + 1) ? 1 : 0);
 
   } else if (tilingMode == TilingMode::WALL_16) {
-    std::shared_ptr<ObjectRules> objectLeft, objectRight, objectUp, objectDown;
+    glm::ivec2 left, right, up, down;
     switch (orientation) {
-      case Direction::NONE:
-      case Direction::UP:
-        objectLeft = grid_->getObject({location.x - 1, location.y});
-        objectRight = grid_->getObject({location.x + 1, location.y});
-        objectUp = grid_->getObject({location.x, location.y - 1});
-        objectDown = grid_->getObject({location.x, location.y + 1});
-        break;
       case Direction::DOWN:
-        objectLeft = grid_->getObject({location.x + 1, location.y});
-        objectRight = grid_->getObject({location.x - 1, location.y});
-        objectUp = grid_->getObject({location.x, location.y + 1});
-        objectDown = grid_->getObject({location.x, location.y - 1});
+        left = {location.x + 1, location.y};
+        right = {location.x - 1, location.y};
+        up = {location.x, location.y + 1};
+        down = {location.x, location.y - 1};
         break;
       case Direction::LEFT:
-        objectLeft = grid_->getObject({location.x, location.y + 1});
-        objectRight = grid_->getObject({location.x, location.y - 1});
-        objectUp = grid_->getObject({location.x - 1, location.y});
-        objectDown = grid_->getObject({location.x + 1, location.y});
+        left = {location.x, location.y + 1};
+        right = {location.x, location.y - 1};
+        up = {location.x - 1, location.y};
+        down = {location.x + 1, location.y};
         break;
       case Direction::RIGHT:
-        objectLeft = grid_->getObject({location.x, location.y - 1});
-        objectRight = grid_->getObject({location.x, location.y + 1});
-        objectUp = grid_->getObject({location.x + 1, location.y});
-        objectDown = grid_->getObject({location.x - 1, location.y});
+        left = {location.x, location.y - 1};
+        right = {location.x, location.y + 1};
+        up = {location.x + 1, location.y};
+        down = {location.x - 1, location.y};
         break;
-      default:
-        objectLeft = grid_->getObject({location.x - 1, location.y});
-        objectRight = grid_->getObject({location.x + 1, location.y});
-        objectUp = grid_->getObject({location.x, location.y - 1});
-        objectDown = grid_->getObject({location.x, location.y + 1});
+      default:  // NONE / UP
+        left = {location.x - 1, location.y};
+        right = {location.x + 1, location.y};
+        up = {location.x, location.y - 1};
+        down = {location.x, location.y + 1};
         break;
     }
 
     int idx = 0;
-    if (objectLeft != nullptr && objectLeft->getObjectName() == objectName) {
-      idx += 1;
-    }
-    if (objectRight != nullptr && objectRight->getObjectName() == objectName) {
-      idx += 2;
-    }
-    if (objectUp != nullptr && objectUp->getObjectName() == objectName) {
-      idx += 4;
-    }
-    if (objectDown != nullptr && objectDown->getObjectName() == objectName) {
-      idx += 8;
-    }
+    if (connects(left.x, left.y)) idx += 1;
+    if (connects(right.x, right.y)) idx += 2;
+    if (connects(up.x, up.y)) idx += 4;
+    if (connects(down.x, down.y)) idx += 8;
 
     return tileName + std::to_string(idx);
   }
@@ -177,10 +168,23 @@ void SpriteObserver::updateObjectRenderItems(PartialObservableGrid& observableGr
     SDLRenderItem background;
     background.texture = backgroundTexture;
     background.src = {0, 0, static_cast<float>(tileSize.x), static_cast<float>(tileSize.y)};
-    background.dst = {0, 0, static_cast<float>(pixelWidth_), static_cast<float>(pixelHeight_)};
     background.tile = true;
     background.z = -10;
-    renderItems_.push_back(background);
+    if (!doTrackAvatar_) {
+      // whole grid is in view: one tiled item
+      background.dst = {0, 0, static_cast<float>(pixelWidth_), static_cast<float>(pixelHeight_)};
+      renderItems_.push_back(background);
+    } else {
+      // avatar-tracking view: background only on in-grid cells; cells outside the grid stay the
+      // clear colour (black) unless a PaddingTile is configured
+      for (int32_t y = std::max(observableGrid.bottom, 0); y <= std::min(observableGrid.top, static_cast<int32_t>(gridBoundary_.y) - 1); y++) {
+        for (int32_t x = std::max(observableGrid.left, 0); x <= std::min(observableGrid.right, static_cast<int32_t>(gridBoundary_.x) - 1); x++) {
+          auto center = getTilePixelCenter({x, y});
+          background.dst = {center.x - tileSize.x / 2.0f, center.y - tileSize.y / 2.0f, static_cast<float>(tileSize.x), static_cast<float>(tileSize.y)};
+          renderItems_.push_back(background);
+        }
+      }
+    }
   }
 
   const auto& objects = grid_->getObjects();

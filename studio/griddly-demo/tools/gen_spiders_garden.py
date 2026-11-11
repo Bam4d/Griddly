@@ -395,7 +395,6 @@ Environment:
       Type: SPRITE_2D
       TileSize: 24
       BackgroundTile: oryx/oryx_fantasy/floor3-0.png
-      PaddingTile: oryx/oryx_fantasy/wall2-15.png
       RotateAvatarImage: false
       RotateWithAvatar: false
       TrackAvatar: true
@@ -405,7 +404,6 @@ Environment:
       Type: SPRITE_2D
       TileSize: 24
       BackgroundTile: oryx/oryx_fantasy/floor3-0.png
-      PaddingTile: oryx/oryx_fantasy/wall2-15.png
       RotateAvatarImage: false
       RotateWithAvatar: false
       TrackAvatar: true
