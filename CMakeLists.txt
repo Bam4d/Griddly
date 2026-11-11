@@ -191,7 +191,10 @@ if(WASM AND NOT EMSCRIPTEN_SYSROOT)
 endif()
 if(WASM)
   message(STATUS "WASM: using emscripten sysroot ${EMSCRIPTEN_SYSROOT}")
-  add_compile_options("-I${EMSCRIPTEN_SYSROOT}/include")
+  # -sUSE_SDL=3 must be present at compile time too: emscripten only fetches the
+  # SDL3 port (and puts its headers in the sysroot) when the setting is seen by
+  # emcc/em++, not just at link time.
+  add_compile_options("-sUSE_SDL=3" "-I${EMSCRIPTEN_SYSROOT}/include")
 endif()
 
 include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
