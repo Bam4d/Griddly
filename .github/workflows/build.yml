@@ -171,3 +171,35 @@ jobs:
             build_wasm/bin/griddlyjs.js
             build_wasm/bin/griddlyjs.wasm
             build_wasm/bin/griddlyjs.data
+
+  js-griddly-wasm-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Typecheck + build the package
+        working-directory: js/griddly-wasm
+        run: |
+          npm ci
+          npm run build
+          npm run typecheck
+
+      - name: Smoke test the WASM module in Node
+        working-directory: js/griddly-wasm
+        run: |
+          node --input-type=module -e "
+          import { createGriddly } from './dist/index.js';
+          const g = await createGriddly();
+          g.loadGDYFile('/resources/games/Single-Player/Mini-Grid/minigrid-doggo.yaml');
+          if (g.playerCount !== 1) throw new Error('expected 1 player');
+          g.createGame('Vector');
+          g.loadLevel(0); g.seed(1); g.reset();
+          const r = g.step([2]);
+          if (typeof r.reward?.[0] !== 'number') throw new Error('expected numeric reward');
+          g.unload();
+          console.log('griddly-wasm smoke test OK');
+          " 
