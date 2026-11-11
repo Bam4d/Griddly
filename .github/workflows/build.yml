@@ -2,9 +2,9 @@ name: build
 
 on:
   push:
-    branches: [master, vibe_main]
+    branches: [master, vibe_main, vibe/studio-demo-app, vibe/wasm-npm-pkg]
   pull_request:
-    branches: [master]
+    branches: [master, vibe_main]
 
 jobs:
   build-test:
