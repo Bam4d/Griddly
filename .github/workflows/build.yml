@@ -26,7 +26,7 @@ jobs:
           conan profile detect --force
 
       - name: Conan install
-        run: conan install deps/conanfile.txt -pr:h=default -pr:b=default -s build_type=Release --build=missing -of build
+        run: conan install deps/conanfile.txt -pr:h=default -pr:b=default -s build_type=Release --build=missing -of build -o sdl/*:with_x11=False -o sdl/*:with_wayland=False -o sdl/*:with_pulseaudio=False -o sdl/*:with_pipewire=False -o sdl/*:with_alsa=False -o sdl/*:with_jack=False
 
       - name: Configure
         run: |

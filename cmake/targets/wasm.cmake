@@ -43,7 +43,10 @@ if(NOT EMSCRIPTEN_SYSROOT)
   endif()
 endif()
 message(STATUS "WASM: using emscripten sysroot ${EMSCRIPTEN_SYSROOT}")
-include_directories(${EMSCRIPTEN_SYSROOT}/include)
+# Attach the sysroot include to the library target itself: include_directories()
+# here runs after add_library(Griddly_static) in griddly.cmake, so a plain
+# directory-level include never reaches the core sources.
+add_compile_options("-I${EMSCRIPTEN_SYSROOT}/include")
 
 file(GLOB_RECURSE JIDDLY_SOURCES "js/bindings/*.cpp")
 
