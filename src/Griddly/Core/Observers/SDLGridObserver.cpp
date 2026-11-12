@@ -50,7 +50,11 @@ glm::vec2 SDLGridObserver::getTilePixelCenter(glm::ivec2 location) const {
       float s = std::sin(angle);
       v = glm::vec2(c * v.x - s * v.y, s * v.x + c * v.y);
     }
-    tilePos = v + glm::vec2(gridWidth_ / 2.0f - 0.5f, gridHeight_ / 2.0f - 0.5f);
+    // OffsetX/Y are in cells in the (possibly rotated) view frame: getAvatarObservableGrid shifts the
+    // visible window by -offset, so the avatar sits offset cells from the centre (e.g. OffsetY > 0 puts
+    // the avatar lower in the view so it sees further ahead).
+    tilePos = v + glm::vec2(gridWidth_ / 2.0f - 0.5f + config_.gridXOffset, gridHeight_ / 2.0f - 0.5f + config_.gridYOffset);
+    return (tilePos + 0.5f) * glm::vec2(config_.tileSize);
   }
 
   return (tilePos + 0.5f) * glm::vec2(config_.tileSize) + glm::vec2(config_.gridXOffset, config_.gridYOffset);

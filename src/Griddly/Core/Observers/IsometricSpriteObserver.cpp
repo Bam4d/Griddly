@@ -50,15 +50,17 @@ glm::vec2 IsometricSpriteObserver::getTilePixelCenter(glm::ivec2 location) const
       float s = std::sin(angle);
       v = glm::vec2(c * v.x - s * v.y, s * v.x + c * v.y);
     }
-    tilePos = v + glm::vec2(gridWidth_ / 2.0f - 0.5f, gridHeight_ / 2.0f - 0.5f);
+    // OffsetX/Y are in cells in the (rotated) view frame, like SDLGridObserver::getTilePixelCenter
+    tilePos = v + glm::vec2(gridWidth_ / 2.0f - 0.5f + config_.gridXOffset, gridHeight_ / 2.0f - 0.5f + config_.gridYOffset);
   }
 
   // Isometric shear: x' = (x - y) / 2, y' = (x + y) / 2 * heightRatio
   glm::vec2 iso(tilePos.x * 0.5f - tilePos.y * 0.5f, (tilePos.x + tilePos.y) * 0.5f * isoHeightRatio_);
 
   auto tileSize = config_.tileSize;
-  return glm::vec2((iso.x + (gridHeight_ - 1) / 2.0f + 0.5f) * tileSize.x + config_.gridXOffset,
-                   (iso.y + 0.5f) * tileSize.y + config_.gridYOffset);
+  const glm::vec2 pixelOffset = (doTrackAvatar_ && avatarObject_ != nullptr) ? glm::vec2(0.0f) : glm::vec2(config_.gridXOffset, config_.gridYOffset);
+  return glm::vec2((iso.x + (gridHeight_ - 1) / 2.0f + 0.5f) * tileSize.x + pixelOffset.x,
+                   (iso.y + 0.5f) * tileSize.y + pixelOffset.y);
 }
 
 void IsometricSpriteObserver::updateObjectRenderItems(PartialObservableGrid& observableGrid) {
