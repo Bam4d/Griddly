@@ -1,0 +1,41 @@
+{
+  "id": "bait",
+  "name": "Bait Remastered",
+  "tagline": "Fill the pits, grab the key, open the door.",
+  "description": "Push boxes into the pits to build a way to the key, then unlock the door. Cellars, garden moats, thin ice, a sealed crypt and an old mine shaft. Don't fall in!",
+  "tags": [
+    "puzzle",
+    "classic-port"
+  ],
+  "difficulty": "medium",
+  "original": "GVGAI/bait.yaml",
+  "accent": "#d97706",
+  "icon": "\ud83d\udddd\ufe0f",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Key",
+      "kind": "var",
+      "object": "avatar",
+      "variable": "has_key",
+      "tone": "amber"
+    },
+    {
+      "label": "Pits left",
+      "kind": "remaining",
+      "object": "pit",
+      "tone": "rose"
+    },
+    {
+      "label": "Toadstools",
+      "kind": "collected",
+      "object": "toadstool",
+      "tone": "emerald"
+    }
+  ],
+  "win_text": "The door is open!",
+  "lose_text": "You fell into a pit."
+}

@@ -1,0 +1,42 @@
+{
+  "id": "drunkdwarf",
+  "name": "Drunk Dwarf Remastered",
+  "tagline": "Keys, doors and too much ale between you and your bed.",
+  "description": "Stagger through taverns, cellars, inns and dwarven halls. Each key unlocks one door and is used up; chain the doors to reach your coffin bed.",
+  "tags": [
+    "exploration",
+    "puzzle",
+    "classic-port"
+  ],
+  "difficulty": "medium",
+  "original": "Mini-Grid/minigrid-drunkdwarf.yaml",
+  "accent": "#f59e0b",
+  "icon": "\ud83c\udf7a",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Keys held",
+      "kind": "var",
+      "object": "drunk_dwarf",
+      "variable": "keys",
+      "tone": "amber"
+    },
+    {
+      "label": "Keys left",
+      "kind": "remaining",
+      "object": "key",
+      "tone": "amber"
+    },
+    {
+      "label": "Locked doors",
+      "kind": "remaining",
+      "object": "door",
+      "tone": "rose"
+    }
+  ],
+  "win_text": "Zzz... safely tucked into your coffin.",
+  "lose_text": "Passed out on the floor."
+}

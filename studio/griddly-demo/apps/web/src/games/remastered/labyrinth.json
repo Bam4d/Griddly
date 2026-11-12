@@ -1,0 +1,29 @@
+{
+  "id": "labyrinth",
+  "name": "Labyrinth Remastered",
+  "tagline": "Find the way out. Don't step on the spikes.",
+  "description": "Navigate huge braided mazes (hedges, catacombs, crystal caves, sunken ruins) to the exit. Spike traps lurk in the corridors; gold in the dead ends is a bonus.",
+  "tags": [
+    "maze",
+    "exploration",
+    "classic-port"
+  ],
+  "difficulty": "medium",
+  "original": "GVGAI/labyrinth.yaml",
+  "accent": "#2dd4bf",
+  "icon": "\ud83c\udf00",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Gold",
+      "kind": "collected",
+      "object": "coin",
+      "tone": "amber"
+    }
+  ],
+  "win_text": "You escaped the labyrinth!",
+  "lose_text": "Impaled on a spike trap."
+}

@@ -1,0 +1,35 @@
+{
+  "id": "cookmepasta",
+  "name": "Cook Me Pasta Remastered",
+  "tagline": "Push the ingredients together \u2014 in the right order.",
+  "description": "Cook pasta in trattorias, restaurants and a busy market. Boil the pasta, mix tomato and tuna into sauce, then bring them together for the perfect meal \u2014 but never mix pasta with the sauce ingredients. Keys open locked pantries and kitchens.",
+  "tags": [
+    "puzzle",
+    "classic-port"
+  ],
+  "difficulty": "medium",
+  "original": "GVGAI/cookmepasta.yaml",
+  "accent": "#ef4444",
+  "icon": "\ud83c\udf5d",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Keys held",
+      "kind": "var",
+      "object": "chef",
+      "variable": "has_key",
+      "tone": "amber"
+    },
+    {
+      "label": "Meals",
+      "kind": "count",
+      "object": "complete_meal",
+      "tone": "emerald"
+    }
+  ],
+  "win_text": "Buon appetito! The meal is served.",
+  "lose_text": "Ruined! Those ingredients don't go together."
+}

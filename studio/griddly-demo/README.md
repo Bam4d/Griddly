@@ -8,10 +8,13 @@ engine, running as WebAssembly via the `@griddly/wasm` package built in this rep
 ## What it does
 
 - `apps/web` — a Vite + TanStack Start + React + TypeScript frontend.
-- `/` — landing page linking into the demo.
-- `/demo` — the Mini-Grid **Spiders** game (`src/games/minigrid-spiders.yaml`, a copy of
-  `resources/games/Single-Player/Mini-Grid/minigrid-spiders.yaml`) with a level picker,
-  drawn with the Oryx sprites read from the WASM virtual FS.
+- `/` — games library: search (`/` focuses, Enter opens the first match), tag / difficulty filters,
+  sorting, and engine-rendered thumbnails. The catalog (`src/games/catalog.ts`) bundles every
+  remastered game in `src/games/remastered/<id>.{yaml,json}` (written by `tools/remaster/`) plus
+  Spiders Garden (`src/games/minigrid-spiders-garden.yaml`).
+- `/play/$gameId` — player for any catalog game: level cards, HUD from the game's metadata, d-pad /
+  arrows / WASD / swipe, extra actions, cameras = the GDY's render observers (C cycles), win/lose from
+  the GDY's termination. `/demo` redirects to `/play/spiders`.
 
 ## Develop locally
 

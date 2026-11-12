@@ -1,0 +1,28 @@
+{
+  "id": "clusters",
+  "name": "Clusters Remastered",
+  "tagline": "Push every box home to its colour.",
+  "description": "Push red, green and blue boxes against the blocks of the same colour to grow the clusters. Spikes break boxes and hurt you; scenery is in the way.",
+  "tags": [
+    "puzzle",
+    "classic-port"
+  ],
+  "difficulty": "medium",
+  "original": "GVGAI/clusters.yaml",
+  "accent": "#a78bfa",
+  "icon": "\ud83e\uddf1",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Boxes left",
+      "kind": "global",
+      "variable": "box_count",
+      "tone": "fuchsia"
+    }
+  ],
+  "win_text": "Every box is clustered!",
+  "lose_text": "A box broke (or you stepped on spikes)."
+}

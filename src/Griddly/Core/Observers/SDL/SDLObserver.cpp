@@ -313,6 +313,12 @@ void SDLObserver::ensureReady() {
     observerState_ = ObserverState::READY;
   } else if (observerState_ != ObserverState::READY) {
     throw std::runtime_error("Observer is not in READY state, cannot render");
+  } else if (renderer_ == nullptr && sharedRenderer_ == nullptr) {
+    // A reset while READY that changed the surface size (e.g. loading a level with different
+    // dimensions) destroys the renderer and sprite textures in resetRenderSurface(); recreate them,
+    // otherwise every later frame renders nothing (black).
+    initSDL();
+    lazyInit();
   }
 }
 

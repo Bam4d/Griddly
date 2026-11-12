@@ -1,0 +1,41 @@
+{
+  "id": "butterflies",
+  "name": "Butterflies Remastered",
+  "tagline": "Catch every butterfly before the spiders do.",
+  "description": "Chase butterflies through cottage gardens, meadows, hedge mazes, orchards and marshes. Cocoons hatch more of them, and spiders hunt them - and you.",
+  "tags": [
+    "action",
+    "arcade",
+    "classic-port"
+  ],
+  "difficulty": "medium",
+  "original": "GVGAI/butterflies.yaml",
+  "accent": "#38bdf8",
+  "icon": "\ud83e\udd8b",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Butterflies",
+      "kind": "count",
+      "object": "butterfly",
+      "tone": "sky"
+    },
+    {
+      "label": "Cocoons",
+      "kind": "count",
+      "object": "cocoon",
+      "tone": "emerald"
+    },
+    {
+      "label": "Spiders",
+      "kind": "count",
+      "object": "spider",
+      "tone": "rose"
+    }
+  ],
+  "win_text": "Every butterfly caught!",
+  "lose_text": "Caught by a spider."
+}

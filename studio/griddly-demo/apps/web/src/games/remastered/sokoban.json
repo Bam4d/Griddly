@@ -1,0 +1,34 @@
+{
+  "id": "sokoban",
+  "name": "Sokoban Remastered",
+  "tagline": "Sink every crate into a hole.",
+  "description": "Classic crate pushing across warehouses, gardens, a frozen lake, a crypt and a quarry. Push each crate into a hole to fill it - but crates can't be pulled, so think ahead.",
+  "tags": [
+    "puzzle",
+    "classic-port"
+  ],
+  "difficulty": "medium",
+  "original": "GVGAI/sokoban.yaml",
+  "accent": "#f59e0b",
+  "icon": "\ud83d\udce6",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Crates left",
+      "kind": "remaining",
+      "object": "box",
+      "tone": "amber"
+    },
+    {
+      "label": "Holes left",
+      "kind": "remaining",
+      "object": "hole",
+      "tone": "sky"
+    }
+  ],
+  "win_text": "All holes filled!",
+  "lose_text": "Stuck? Reset and try another order."
+}

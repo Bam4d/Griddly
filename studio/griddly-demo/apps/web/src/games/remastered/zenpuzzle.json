@@ -1,0 +1,34 @@
+{
+  "id": "zenpuzzle",
+  "name": "Zen Puzzle Remastered",
+  "tagline": "Rake every tile of the garden \u2014 exactly once.",
+  "description": "Walk the zen garden and step on every stone tile of its patterns exactly once. Lanterns and ponds break up the patterns; you may leave a pattern at its edge and come back in elsewhere, but every raked tile is gone for good.",
+  "tags": [
+    "puzzle",
+    "classic-port"
+  ],
+  "difficulty": "medium",
+  "original": "GVGAI/zenpuzzle.yaml",
+  "accent": "#f59e0b",
+  "icon": "\ud83e\udea8",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Tiles left",
+      "kind": "remaining",
+      "object": "ground",
+      "tone": "amber"
+    },
+    {
+      "label": "Raked",
+      "kind": "count",
+      "object": "walked",
+      "tone": "emerald"
+    }
+  ],
+  "win_text": "Perfect calm. Every tile raked exactly once.",
+  "lose_text": "The garden's patience ran out."
+}

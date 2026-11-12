@@ -1,0 +1,34 @@
+{
+  "id": "sokoban2",
+  "name": "Sokoban II Remastered",
+  "tagline": "Every crate on its mark.",
+  "description": "Push crates onto the marked targets across storerooms, orchards, ice floes, catacombs and hedge courts. Placed crates can be pushed off again, so order matters.",
+  "tags": [
+    "puzzle",
+    "classic-port"
+  ],
+  "difficulty": "medium",
+  "original": "GVGAI/sokoban2.yaml",
+  "accent": "#22d3ee",
+  "icon": "\ud83c\udfaf",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Crates to place",
+      "kind": "remaining",
+      "object": "box",
+      "tone": "amber"
+    },
+    {
+      "label": "Placed",
+      "kind": "count",
+      "object": "box_in_place",
+      "tone": "emerald"
+    }
+  ],
+  "win_text": "Every crate is on its mark!",
+  "lose_text": "Stuck? Reset and try another order."
+}

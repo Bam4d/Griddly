@@ -1,0 +1,29 @@
+{
+  "id": "doggo",
+  "name": "Doggo Remastered",
+  "tagline": "Fetch every stick in the park.",
+  "description": "A good doggo explores gardens, duck ponds, hedge mazes and woodland trails to fetch every stick. Bridges cross the water; hedges and trees block the way.",
+  "tags": [
+    "exploration",
+    "maze",
+    "classic-port"
+  ],
+  "difficulty": "easy",
+  "original": "Mini-Grid/minigrid-doggo.yaml",
+  "accent": "#84cc16",
+  "icon": "\ud83d\udc15",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Sticks left",
+      "kind": "remaining",
+      "object": "stick",
+      "tone": "emerald"
+    }
+  ],
+  "win_text": "Good doggo! Every stick fetched.",
+  "lose_text": "Out of time."
+}

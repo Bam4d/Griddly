@@ -1,0 +1,35 @@
+{
+  "id": "spider_nest",
+  "name": "Spider Nest Remastered",
+  "tagline": "Gems, lava and a lot of spiders.",
+  "description": "Guide a gnome through volcanic caves, lava rivers and fire temples to collect every gem. Nests keep hatching spiders, and one step into the lava is the end.",
+  "tags": [
+    "action",
+    "exploration",
+    "classic-port"
+  ],
+  "difficulty": "medium",
+  "original": "GVGAI/spider-nest.yaml",
+  "accent": "#f97316",
+  "icon": "\ud83d\udd77\ufe0f",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Gems left",
+      "kind": "remaining",
+      "object": "gem",
+      "tone": "emerald"
+    },
+    {
+      "label": "Spiders",
+      "kind": "count",
+      "object": "spider",
+      "tone": "rose"
+    }
+  ],
+  "win_text": "Every gem collected!",
+  "lose_text": "The caves claimed another gnome."
+}

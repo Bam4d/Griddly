@@ -1,0 +1,49 @@
+{
+  "id": "zelda",
+  "name": "Zelda Remastered",
+  "tagline": "Keys, locked doors and a sword against the spiders.",
+  "description": "Explore meadows, keeps, forest ruins, catacombs and a dark citadel. Collect keys to open locked doors and the exit, and slash the spiders and bats that roam the rooms.",
+  "tags": [
+    "action",
+    "exploration",
+    "classic-port"
+  ],
+  "difficulty": "medium",
+  "original": "GVGAI/zelda.yaml",
+  "accent": "#22c55e",
+  "icon": "\ud83d\udde1\ufe0f",
+  "controls": {
+    "move": "move",
+    "extra": [
+      {
+        "key": " ",
+        "label": "Attack",
+        "action": "attack",
+        "directional": true
+      }
+    ]
+  },
+  "hud": [
+    {
+      "label": "Keys",
+      "kind": "var",
+      "object": "avatar",
+      "variable": "keys",
+      "tone": "amber"
+    },
+    {
+      "label": "Spiders",
+      "kind": "count",
+      "object": "spider",
+      "tone": "rose"
+    },
+    {
+      "label": "Bats",
+      "kind": "count",
+      "object": "bat",
+      "tone": "fuchsia"
+    }
+  ],
+  "win_text": "The exit door swings open. Well done, hero!",
+  "lose_text": "Slain in the dungeon."
+}

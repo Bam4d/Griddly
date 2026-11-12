@@ -1,0 +1,29 @@
+{
+  "id": "eyeball",
+  "name": "Eyeball Remastered",
+  "tagline": "Search room after room for your eye drops.",
+  "description": "A giant eyeball searches multi-room houses, hedge greenhouses, crypts and flooded cellars for its eye drops. Doorways link 4 to 9 rooms; find every bottle to win.",
+  "tags": [
+    "exploration",
+    "maze",
+    "classic-port"
+  ],
+  "difficulty": "easy",
+  "original": "Mini-Grid/minigrid-eyeball.yaml",
+  "accent": "#facc15",
+  "icon": "\ud83d\udc41\ufe0f",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Eye drops left",
+      "kind": "remaining",
+      "object": "eye_drops",
+      "tone": "sky"
+    }
+  ],
+  "win_text": "Ahh, relief! Every bottle found.",
+  "lose_text": "Out of time."
+}
