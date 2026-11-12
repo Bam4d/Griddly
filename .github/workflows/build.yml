@@ -66,6 +66,8 @@ jobs:
       - name: Python smoke test
         run: |
           pip install numpy gymnasium pyyaml pillow
+          # GriddlyLoader reads python/griddly/resources, which setup.py normally copies in
+          ln -sfn "$PWD/resources" python/griddly/resources
           PYTHONPATH=Release/bin:python python - <<'PY'
           import numpy as np
           from griddly import GriddlyLoader
