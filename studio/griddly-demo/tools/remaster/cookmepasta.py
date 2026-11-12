@@ -13,7 +13,7 @@ Layout characters (besides the shared terrain chars from common):
   w counter/wall   T table   B barrel   A chef   k key   l lock   . floor
   b boiling water  p raw pasta  o tomato  t tuna
 Every level is validated by a best-first search over (chef region, ingredient positions, keys, locks)
-that never makes a wrong mix; the move list is printed and written to tools/remaster/solutions/
+that never makes a wrong mix; the move list is printed and written to apps/web/src/games/solutions/
 cookmepasta.json so tools/remaster/replay_solutions.mjs can replay it in the engine.
 
 Engine note: the chef is Z=1 like the ingredients. Griddly only blocks `mov` when the destination
@@ -359,7 +359,7 @@ def main():
         if "-v" in sys.argv:
             print("   ", "".join(str(m) for m in moves), file=sys.stderr)
     gdy = "".join(parts) + ACTIONS + objects()
-    P.write_solutions(GID, sols)  # tools/remaster/solutions/<id>.json, read by replay_solutions.mjs
+    P.write_solutions(GID, sols)  # apps/web/src/games/solutions/<id>.json, read by replay_solutions.mjs
     C.emit(GID, gdy, {
         "name": "Cook Me Pasta Remastered",
         "tagline": "Push the ingredients together — in the right order.",

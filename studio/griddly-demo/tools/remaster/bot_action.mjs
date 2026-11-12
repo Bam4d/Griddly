@@ -25,14 +25,19 @@ const GAMES = {
   },
   butterflies: { walk: GROUND, enemies: ["spider"], goals: () => ["butterfly"] },
   spider_nest: { walk: GROUND, enemies: ["spider"], goals: () => ["gem"] },
+  spiders: { walk: GROUND, enemies: ["spider"], goals: (a) => ["gem", "key", ...(a.variables.keys > 0 ? ["door"] : [])] },
 };
 
 const id = process.argv[2];
 const episodes = Number(process.argv[3] ?? 10);
 const maxSteps = Number(process.argv[4] ?? 1500);
-const onlyLevel = process.argv[5] !== undefined ? Number(process.argv[5]) : null;
+const posArgs = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+const onlyLevel = posArgs[3] !== undefined ? Number(posArgs[3]) : null;
 const cfg = GAMES[id];
-const gdy = fs.readFileSync(path.join(root, "resources/games/Single-Player/Remastered", `${id}.yaml`), "utf8");
+// `spiders` (Spiders Garden) predates the remasters and lives in Mini-Grid/
+const gdyFile = id === "spiders" ? "resources/games/Single-Player/Mini-Grid/minigrid-spiders-garden.yaml"
+  : `resources/games/Single-Player/Remastered/${id}.yaml`;
+const gdy = fs.readFileSync(path.join(root, gdyFile), "utf8");
 const avatarName = gdy.match(/AvatarObject:\s*(\S+)/)[1];
 const g = await createGriddly({ moduleOverrides: { print() {}, printErr() {} } });
 g.loadGDYString(gdy);
@@ -134,6 +139,10 @@ function decide() {
   return ["move", 0]; // wait for the enemies to move away
 }
 
+// --record: save the first winning episode per level (seed + actions) to apps/web/src/games/solutions/<id>.json, in the
+// replay format the demo's "Watch solution" uses: {format: 2, levels: [{seed, actions: [[a, id], ...]}]}.
+const record = process.argv.includes("--record");
+const recorded = [];
 const n = g.getLevelCount();
 let total = 0, totalWins = 0;
 for (let l = 0; l < n; l++) {
@@ -145,9 +154,11 @@ for (let l = 0; l < n; l++) {
     g.seed(ep + 1);
     g.reset();
     let res = "timeout";
+    const taken = [];
     for (let t = 0; t < maxSteps; t++) {
       const d = decide();
       if (!d) { res = "lose"; break; }
+      taken.push(act(d[0], d[1]));
       const r = g.step(act(d[0], d[1]));
       if (r && r.terminated) {
         res = r.info?.playerResults?.["1"] === "Win" ? "win" : "lose";
@@ -170,6 +181,7 @@ for (let l = 0; l < n; l++) {
       for (const o of st.objects.sort((a, b) => a.zidx - b.zidx)) if (o.location[0] < 0) console.log("OFFGRID", JSON.stringify(o)); else if (!GROUND.includes(o.name)) grid[o.location[1]][o.location[0]] = ch[o.name] ?? "#";
       console.log(grid.map((r) => r.join("")).join("\n"));
     }
+    if (res === "win" && record && !recorded[l]) recorded[l] = { seed: ep + 1, actions: taken.map((x) => (x.length === 1 ? [0, x[0]] : x)) };
     if (res === "win") wins++;
     else if (res === "lose") losses++;
     else timeouts++;
@@ -179,3 +191,12 @@ for (let l = 0; l < n; l++) {
   console.log(`  L${l}: ${g.width}x${g.height} bot win ${wins} lose ${losses} timeout ${timeouts} / ${episodes}  steps ${steps.join(",")}`);
 }
 console.log(`${id}: bot won ${totalWins}/${total}`);
+
+if (record) {
+  const missing = [...Array(n).keys()].filter((l) => !recorded[l]);
+  if (missing.length) { console.log(`record: no winning episode for levels ${missing.join(",")} - not written`); process.exit(1); }
+  const out = path.join(here, "../../apps/web/src/games/solutions", `${id}.json`);
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  fs.writeFileSync(out, JSON.stringify({ format: 2, levels: recorded }));
+  console.log(`record: wrote ${out}`);
+}

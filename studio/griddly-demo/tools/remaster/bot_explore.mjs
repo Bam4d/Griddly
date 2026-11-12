@@ -83,6 +83,10 @@ function plan() {
   return 0; // no goal reachable
 }
 
+// --record: save the first winning episode per level (seed + actions) to apps/web/src/games/solutions/<id>.json, in the
+// replay format the demo's "Watch solution" uses: {format: 2, levels: [{seed, actions: [[a, id], ...]}]}.
+const record = process.argv.includes("--record");
+const recorded = [];
 const n = g.getLevelCount();
 let allWon = true;
 for (let l = 0; l < n; l++) {
@@ -92,9 +96,11 @@ for (let l = 0; l < n; l++) {
     g.seed(ep + 1);
     g.reset();
     let res = "timeout";
+    const taken = [];
     for (let t = 0; t < maxSteps; t++) {
       const a = plan();
       if (!a) { res = a === 0 ? "stuck" : "dead"; break; }
+      taken.push(act("move", a));
       const r = g.step(act("move", a));
       if (r && r.terminated) {
         res = r.info?.playerResults?.["1"] === "Win" ? "win" : "lose";
@@ -102,10 +108,19 @@ for (let l = 0; l < n; l++) {
         break;
       }
     }
+    if (res === "win" && record && !recorded[l]) recorded[l] = { seed: ep + 1, actions: taken.map((x) => (x.length === 1 ? [0, x[0]] : x)) };
     if (res === "win") wins++;
     else { stuck++; console.log(`    L${l} ep${ep}: ${res}`); }
   }
   if (wins < episodes) allWon = false;
   console.log(`  L${l}: ${g.width}x${g.height} bot win ${wins}/${episodes} steps ${steps.join(",")}`);
+}
+if (record) {
+  const missing = [...Array(n).keys()].filter((l) => !recorded[l]);
+  if (missing.length) { console.log(`record: no winning episode for levels ${missing.join(",")} - not written`); process.exit(1); }
+  const out = path.join(here, "../../apps/web/src/games/solutions", `${id}.json`);
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  fs.writeFileSync(out, JSON.stringify({ format: 2, levels: recorded }));
+  console.log(`record: wrote ${out}`);
 }
 process.exit(allWon ? 0 : 1);

@@ -22,7 +22,7 @@ import json
 from pathlib import Path
 
 DIRS = {1: (-1, 0), 2: (0, -1), 3: (1, 0), 4: (0, 1)}
-SOLUTIONS_DIR = Path(__file__).resolve().parent / "solutions"  # read by replay_solutions.mjs
+SOLUTIONS_DIR = Path(__file__).resolve().parents[2] / "apps/web/src/games/solutions"  # replay_solutions.mjs + demo "Watch solution"
 
 
 def add(p, d):

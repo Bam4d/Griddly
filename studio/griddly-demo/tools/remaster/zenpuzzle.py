@@ -12,7 +12,7 @@ Layout characters (besides the shared terrain chars from common):
 Every level is validated: rectangular, one avatar, the free garden is connected (so walked tiles can
 never cut the avatar off), and a DFS path-cover solver finds a way to walk every tile exactly once
 (segments start/end at tiles next to the garden; only the last one may end inside). The solution is
-printed and written to tools/remaster/solutions/zenpuzzle.json (move ids for the engine replay).
+printed and written to apps/web/src/games/solutions/zenpuzzle.json (move ids for the engine replay).
 """
 from __future__ import annotations
 
@@ -465,7 +465,7 @@ def main():
             print("\n".join(rows), file=sys.stderr)
             print("  runs:", [[s[0], s[-1], len(s)] for s in segs], file=sys.stderr)
     gdy = "".join(parts) + ACTIONS + objects()
-    P.write_solutions(GID, sols)  # tools/remaster/solutions/<id>.json, read by replay_solutions.mjs
+    P.write_solutions(GID, sols)  # apps/web/src/games/solutions/<id>.json, read by replay_solutions.mjs
     C.emit(GID, gdy, {
         "name": "Zen Puzzle Remastered",
         "tagline": "Rake every tile of the garden — exactly once.",

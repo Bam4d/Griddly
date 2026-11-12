@@ -297,6 +297,11 @@ const GameCard = ({ game, highlight }: { game: Game; highlight: boolean }) => {
         </span>
         <span className="absolute right-3 bottom-2 font-mono text-[10px] text-stone-300">
           {game.levels.length} levels
+          {game.solutions.filter(Boolean).length === game.levels.length && game.levels.length > 0 && (
+            <span className="ml-1 text-emerald-300" title="Every level has a watchable solution">
+              · 🎬 solutions
+            </span>
+          )}
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">

@@ -12,7 +12,7 @@ a part of the map cut off by a band of pits; boxes are scattered in the open par
 solved forward with a search over (avatar, boxes, pits, has_key) states and the solvable one needing
 the most pushes is kept. Toadstools are modelled as solid for boxes (they are: no rule lets a box
 onto one), so the solver's solution stays valid whether or not they have been eaten. Solutions go to
-tools/remaster/solutions/bait.json for replay_solutions.mjs.
+apps/web/src/games/solutions/bait.json for replay_solutions.mjs.
 
 Layout characters (besides the shared terrain chars from common; digits are avoided because the level
 parser reads digits as player ids):

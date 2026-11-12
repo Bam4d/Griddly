@@ -8,7 +8,7 @@ counted at reset by the internal `box_counter` action every box runs, and the le
 reaches 0. Levels are themed room-and-corridor layouts (pushlib); blocks, boxes and spikes are placed
 at random and every candidate is solved forward with a search over (avatar, boxes, grown blocks);
 the solvable candidate needing the most pushes is kept. Solutions go to
-tools/remaster/solutions/clusters.json for replay_solutions.mjs.
+apps/web/src/games/solutions/clusters.json for replay_solutions.mjs.
 
 Layout characters (besides the shared terrain chars from common; digits are avoided because the level
 parser reads digits as player ids):

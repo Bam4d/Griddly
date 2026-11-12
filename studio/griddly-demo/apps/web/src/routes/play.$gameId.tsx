@@ -77,6 +77,10 @@ const Player = ({ game }: { game: Game }) => {
   const [score, setScore] = useState({ wins: 0, losses: 0 });
   const [solved, setSolved] = useState<Set<number>>(() => new Set());
   const [camera, setCamera] = useState(0);
+  // "Watch solution": replays a recorded winning run (seed + actions) step by step.
+  const [replay, setReplay] = useState<{ step: number; total: number; playing: boolean } | null>(null);
+  const [replaySpeed, setReplaySpeed] = useState(1);
+  const replayRef = useRef<{ actions: [number | string, number][]; i: number } | null>(null);
   const [thumbs, setThumbs] = useState<string[]>(() => levels.map((_, i) => cachedThumb(game.id, i) ?? ""));
   const cam = cameras[camera] ?? cameras[0]!;
   const camRef = useRef(cam);
@@ -137,12 +141,16 @@ const Player = ({ game }: { game: Game }) => {
   }, []);
 
   const start = useCallback(
-    (lvl: number) => {
+    (lvl: number, seed?: number) => {
       const g = griddlyRef.current;
       if (!g) return;
       const t0 = performance.now();
+      if (seed === undefined) {
+        replayRef.current = null;
+        setReplay(null);
+      }
       g.loadLevel(lvl);
-      g.seed(Math.floor(Math.random() * 1e9));
+      g.seed(seed ?? Math.floor(Math.random() * 1e9));
       g.reset();
       const counts: Record<string, number> = {};
       for (const o of (g.getState() as State).objects) counts[o.name] = (counts[o.name] ?? 0) + 1;
@@ -234,12 +242,13 @@ const Player = ({ game }: { game: Game }) => {
 
   /** Step with a named action; with several actions the engine wants [actionTypeIdx, actionId]. */
   const act = useCallback(
-    (name: string, id: number) => {
+    (name: string | number, id: number, fromReplay = false) => {
       const g = griddlyRef.current;
       if (!g || status !== "playing") return;
+      if (replayRef.current && !fromReplay) return; // the player can't move during a replay
       const names = actionsRef.current;
-      const idx = names.indexOf(name);
-      if (idx < 0) return;
+      const idx = typeof name === "number" ? name : names.indexOf(name);
+      if (idx < 0 || idx >= names.length) return;
       const r = g.step(names.length > 1 ? [idx, id] : [id]) as unknown as StepResult;
       setSteps((s) => s + 1);
       setReward((x) => x + (r?.reward?.[0] ?? 0));
@@ -248,7 +257,7 @@ const Player = ({ game }: { game: Game }) => {
         if (res === "Win") {
           setStatus("won");
           setScore((s) => ({ ...s, wins: s.wins + 1 }));
-          setSolved((s) => new Set(s).add(levelRef.current));
+          if (!replayRef.current) setSolved((s) => new Set(s).add(levelRef.current));
         } else {
           setStatus("lost");
           setScore((s) => ({ ...s, losses: s.losses + 1 }));
@@ -275,6 +284,35 @@ const Player = ({ game }: { game: Game }) => {
     [act, game]
   );
 
+  const solution = game.solutions[level];
+
+  /** Restart the level with the solution's seed and replay its actions with a timer. */
+  const watchSolution = useCallback(() => {
+    if (!solution) return;
+    start(level, solution.seed);
+    replayRef.current = { actions: solution.actions, i: 0 };
+    setReplay({ step: 0, total: solution.actions.length, playing: true });
+  }, [solution, start, level]);
+
+  const replayPlaying = replay?.playing ?? false;
+  useEffect(() => {
+    if (!replayPlaying || status !== "playing") return;
+    const ms = Math.max(15, 140 / replaySpeed);
+    const id = setInterval(() => {
+      const r = replayRef.current;
+      if (!r) return;
+      const a = r.actions[r.i];
+      if (!a) {
+        setReplay((x) => (x ? { ...x, playing: false } : x));
+        return;
+      }
+      r.i += 1;
+      setReplay((x) => (x ? { ...x, step: r.i } : x));
+      act(a[0], a[1], true);
+    }, ms);
+    return () => clearInterval(id);
+  }, [replayPlaying, replaySpeed, status, act]);
+
   const pick = useCallback(
     (l: number) => {
       setLevel(l);
@@ -288,6 +326,21 @@ const Player = ({ game }: { game: Game }) => {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "v" || e.key === "V") {
+        e.preventDefault();
+        watchSolution();
+        return;
+      }
+      if (replayRef.current) {
+        if (e.key === " ") {
+          e.preventDefault();
+          setReplay((x) => (x ? { ...x, playing: !x.playing } : x));
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          start(level);
+        }
+        if (e.key !== "r" && e.key !== "R" && e.key !== "c" && e.key !== "C" && !(status === "won" && (e.key === "n" || e.key === "N" || e.key === "Enter"))) return;
+      }
       if (e.key === "r" || e.key === "R") {
         e.preventDefault();
         start(level);
@@ -322,7 +375,7 @@ const Player = ({ game }: { game: Game }) => {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [move, extra, start, nextLevel, cycleCamera, level, status, game]);
+  }, [move, extra, start, nextLevel, cycleCamera, level, status, game, watchSolution]);
 
   // Swipe to move on touch screens.
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -450,6 +503,39 @@ const Player = ({ game }: { game: Game }) => {
               </span>
             </div>
 
+            {replay && (
+              <div
+                data-testid="replay-bar"
+                className="absolute right-4 bottom-4 left-4 flex flex-wrap items-center gap-2 rounded-xl border border-[var(--accent-50)] bg-black/75 px-3 py-2 font-mono text-[11px] text-stone-200 backdrop-blur"
+              >
+                <span className="text-[var(--accent)]">▶ Solution replay</span>
+                <span className="text-stone-400">
+                  {replay.step}/{replay.total}
+                </span>
+                <div className="h-1 min-w-16 flex-1 overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full bg-[var(--accent)] transition-[width]" style={{ width: `${(100 * replay.step) / Math.max(1, replay.total)}%` }} />
+                </div>
+                <button
+                  onClick={() => setReplay((x) => (x ? { ...x, playing: !x.playing } : x))}
+                  className="rounded-md border border-white/10 px-2 py-0.5 hover:border-white/25"
+                  data-testid="replay-toggle"
+                >
+                  {replay.playing ? "❚❚ Pause" : "▶ Play"}
+                </button>
+                {[1, 2, 4, 8].map((x) => (
+                  <button
+                    key={x}
+                    onClick={() => setReplaySpeed(x)}
+                    className={`rounded-md px-1.5 py-0.5 ${replaySpeed === x ? "bg-[var(--accent-15)] text-[var(--accent)]" : "text-stone-400 hover:text-stone-200"}`}
+                  >
+                    {x}×
+                  </button>
+                ))}
+                <button onClick={() => start(level)} className="rounded-md border border-white/10 px-2 py-0.5 hover:border-white/25" data-testid="replay-stop">
+                  ✕ Stop
+                </button>
+              </div>
+            )}
             {status === "loading" && <Overlay>Loading {game.name}…</Overlay>}
             {status === "error" && (
               <Overlay tone="rose" testId="error-overlay">
@@ -462,10 +548,10 @@ const Player = ({ game }: { game: Game }) => {
                 <p className="text-5xl">{game.icon}</p>
                 <p className="mt-2 text-2xl font-bold text-emerald-200">{game.win_text}</p>
                 <p className="mt-1 font-mono text-xs text-stone-400">
-                  {meta?.name} · {steps} steps
+                  {meta?.name} · {steps} steps{replay ? " · solution replay" : ""}
                 </p>
                 <div className="mt-4 flex gap-2">
-                  <Action onClick={() => start(level)}>Replay</Action>
+                  <Action onClick={() => start(level)}>{replay ? "Play it yourself" : "Replay"}</Action>
                   <Action primary onClick={nextLevel}>
                     {level + 1 < levels.length ? "Next level →" : "Back to level 1 ↺"}
                   </Action>
@@ -536,6 +622,12 @@ const Player = ({ game }: { game: Game }) => {
                   ))}
                 </div>
               )}
+              {solution && (
+                <Action onClick={watchSolution} className="mt-2 w-full" title="Replay a recorded winning run (V)">
+                  <span data-testid="watch-solution">🎬 Watch solution</span>
+                  <span className="ml-2 font-mono text-[10px] text-stone-500">{solution.actions.length} steps</span>
+                </Action>
+              )}
               <div className="mt-2 flex w-full gap-2">
                 <Action onClick={() => start(level)} className="flex-1">
                   ↻ Restart
@@ -546,7 +638,7 @@ const Player = ({ game }: { game: Game }) => {
               </div>
               <p className="mt-1 text-center font-mono text-[10px] leading-relaxed text-stone-500">
                 ARROWS / WASD move{game.controls.extra.map((x) => ` · ${keyLabel(x.key)} ${x.label.toLowerCase()}`).join("")}
-                <br />R restart · C camera · swipe on mobile
+                <br />R restart · C camera{solution ? " · V watch solution" : ""} · swipe on mobile
               </p>
             </div>
 

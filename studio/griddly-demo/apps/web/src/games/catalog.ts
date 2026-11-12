@@ -8,9 +8,14 @@ import type { Camera, GameMeta, LevelInfo } from "./gdy-meta";
 export type { Camera, GameMeta, HudItem, LevelInfo, Tone } from "./gdy-meta";
 export { searchScore } from "./gdy-meta";
 
+/** One level's recorded winning run: reset with `seed`, then step `actions` ([actionTypeIdx|name, actionId]). */
+export type Solution = { seed: number; actions: [number | string, number][] };
+
 export type Game = GameMeta & {
   gdy: string;
   levels: LevelInfo[];
+  /** Per-level winning runs (from the generators' solvers / recorded bots), when available. */
+  solutions: (Solution | undefined)[];
   /** Order in the catalog ("featured"). */
   rank: number;
 };
@@ -29,6 +34,19 @@ const metas = safeGlob(() =>
 const gdys = safeGlob(() =>
   import.meta.glob<string>("./remastered/*.yaml", { query: "?raw", import: "default", eager: true })
 );
+
+// Solutions: tools/remaster solvers (sokoban, clusters, ...) write plain per-level `move` id lists
+// (seed 1); the bots (bot_explore.mjs / bot_action.mjs --record) write {format: 2, levels: [{seed,
+// actions}]}. The engine is deterministic for a given seed, so both replay exactly.
+const solutionFiles = safeGlob(() =>
+  import.meta.glob<unknown>("./solutions/*.json", { eager: true, import: "default" })
+);
+const solutionsFor = (id: string): (Solution | undefined)[] => {
+  const raw = solutionFiles[`./solutions/${id}.json`];
+  if (Array.isArray(raw)) return raw.map((moves: number[]) => ({ seed: 1, actions: moves.map((m) => ["move", m] as [string, number]) }));
+  if (raw && typeof raw === "object" && Array.isArray((raw as { levels?: unknown }).levels)) return (raw as { levels: Solution[] }).levels;
+  return [];
+};
 
 const SPIDERS_META = {
   id: "spiders",
@@ -53,11 +71,10 @@ const SPIDERS_META = {
 
 const stem = (path: string) => path.replace(/^.*\//, "").replace(/\.[^.]+$/, "");
 
-const build = (raw: Record<string, unknown>, gdy: string, fallbackId: string): Omit<Game, "rank"> => ({
-  ...normaliseMeta(raw, fallbackId, gdyName(gdy)),
-  gdy,
-  levels: parseLevels(gdy),
-});
+const build = (raw: Record<string, unknown>, gdy: string, fallbackId: string): Omit<Game, "rank"> => {
+  const meta = normaliseMeta(raw, fallbackId, gdyName(gdy));
+  return { ...meta, gdy, levels: parseLevels(gdy), solutions: solutionsFor(meta.id) };
+};
 
 const remastered = Object.entries(gdys)
   .map(([path, gdy]) => {
