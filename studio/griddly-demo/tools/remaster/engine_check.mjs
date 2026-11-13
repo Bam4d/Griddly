@@ -22,7 +22,9 @@ const { createGriddly } = await import(path.join(root, "studio/griddly-demo/pack
 const id = process.argv[2];
 const episodes = Number(process.argv[3] ?? 10);
 const maxSteps = Number(process.argv[4] ?? 400);
-const gdyPath = path.join(root, "resources/games/Single-Player/Remastered", `${id}.yaml`);
+// `spiders` (Spiders Garden) predates the remasters and lives in Mini-Grid/
+const gdyPath = id === "spiders" ? path.join(root, "resources/games/Single-Player/Mini-Grid/minigrid-spiders-garden.yaml")
+  : path.join(root, "resources/games/Single-Player/Remastered", `${id}.yaml`);
 const gdy = fs.readFileSync(gdyPath, "utf8");
 const avatarName = gdy.match(/AvatarObject:\s*(\S+)/)[1];
 

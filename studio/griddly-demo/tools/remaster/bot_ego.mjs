@@ -134,6 +134,7 @@ const inb = (w, x, y) => x >= 0 && y >= 0 && x < w.W && y < w.H;
 const TL_WALK = new Set([...GROUND, "crystal", "bat", "avatar"]);
 let tlRefuel = false;
 const SPR = Number(process.env.SPR ?? 2);
+const HR = Number(process.env.HR ?? 2);
 function torchlight(w) {
   const { W, av, by, glob, cells } = w;
   const ax = av.location[0], ay = av.location[1], af = fIdx(av.orientation);
@@ -142,9 +143,12 @@ function torchlight(w) {
   const lights = [...(by.brazier_lit ?? []).map((o) => [o.location, 3]), ...(by.sconce_lit ?? []).map((o) => [o.location, 2])];
   const spiders = (by.spider ?? []).filter((sp) => !(sp.variables.stun > 0) && !lights.some(([[bx, by_], r]) => Math.abs(bx - sp.location[0]) <= r && Math.abs(by_ - sp.location[1]) <= r));
   const spCells = new Set((by.spider ?? []).map((o) => o.location[0] + o.location[1] * W));
-  // a state is safe when every live spider within 2 (manhattan) is inside the 90-degree view cone
+  // shadow hunters (nightmare levels) chase with A* once fuel <= 40: keep HR tiles away from awake ones
+  // (they hit you from any side; facing them only helps to thrust them back)
+  const huntersAwake = process.env.NAIVE ? [] : (by.hunter ?? []).filter((h) => fuel <= 40 + 2 && !(h.variables.stun > 1));
   const stateOk = (s) => {
     const f = s & 3, k = s >> 2, x = k % W, y = (k - x) / W;
+    for (const h of huntersAwake) if (Math.abs(h.location[0] - x) + Math.abs(h.location[1] - y) <= HR) return false;
     for (const sp of spiders) {
       const dx = sp.location[0] - x, dy = sp.location[1] - y;
       if (Math.abs(dx) + Math.abs(dy) > SPR || (dx === 0 && dy === 0)) continue;
@@ -159,7 +163,7 @@ function torchlight(w) {
   const free = (k, fwd, f) => {
     const objs = cells.get(k) ?? [];
     if (objs.every((o) => TL_WALK.has(o))) return true;
-    if (!fwd || f === undefined || !objs.includes("spider")) return false;
+    if (!fwd || f === undefined || !(objs.includes("spider") || objs.includes("hunter"))) return false;
     const x = k % W, y = (k - x) / W, bx = x + DV[f][0], by_ = y + DV[f][1];
     return inb(w, bx, by_) && open(bx + by_ * W);
   };
@@ -202,9 +206,9 @@ function torchlight(w) {
     for (const [a, n] of succ(w, ax, ay, af, free)) if (stateOk(n) && R[n] >= 0 && R[n] < bestR) { bestR = R[n]; bestA = a; }
     if (bestA) return [MOVE, bestA];
   }
-  // no safe plan: face the closest live spider, or back away from it
+  // no safe plan: face the closest live spider / awake hunter, or back away from it
   let near = null;
-  for (const sp of spiders) {
+  for (const sp of [...spiders, ...huntersAwake]) {
     const d = Math.abs(sp.location[0] - ax) + Math.abs(sp.location[1] - ay);
     if (!near || d < near.d) near = { d, sp };
   }
@@ -392,10 +396,21 @@ for (let l = 0; l < n; l++) {
   console.log(`  L${l}: ${g.width}x${g.height} bot win ${wins}/${episodes} ${JSON.stringify(fails)} steps ${steps.join(",")}`);
 }
 if (record) {
-  const missing = [...Array(n).keys()].filter((l) => !recorded[l]);
-  if (missing.length) { console.log(`record: no winning episode for levels ${missing.join(",")} - not written`); process.exit(1); }
   const out = path.join(here, "../../apps/web/src/games/solutions", `${id}.json`);
-  fs.writeFileSync(out, JSON.stringify({ format: 2, levels: recorded }));
-  console.log(`record: wrote ${out}`);
+  if (onlyLevel !== null) {
+    // only this level's entry is replaced in the existing file
+    if (!recorded[onlyLevel]) { console.log(`record: no winning episode for level ${onlyLevel} - not written`); process.exit(1); }
+    const old = fs.existsSync(out) ? JSON.parse(fs.readFileSync(out, "utf8")) : { format: 2, levels: [] };
+    old.levels[onlyLevel] = recorded[onlyLevel];
+    for (let i = 0; i < n; i++) old.levels[i] ??= null;
+    old.levels.length = n;
+    fs.writeFileSync(out, JSON.stringify(old));
+    console.log(`record: wrote level ${onlyLevel} to ${out}`);
+  } else {
+    const missing = [...Array(n).keys()].filter((l) => !recorded[l]);
+    if (missing.length) { console.log(`record: no winning episode for levels ${missing.join(",")} - not written`); process.exit(1); }
+    fs.writeFileSync(out, JSON.stringify({ format: 2, levels: recorded }));
+    console.log(`record: wrote ${out}`);
+  }
 }
 process.exit(allWon ? 0 : 1);

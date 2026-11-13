@@ -1,0 +1,68 @@
+{
+  "id": "chatonfat",
+  "name": "Le Chaton Fat",
+  "tagline": "The fat cat runs the datacenter. Keep the GPUs from catching fire.",
+  "description": "GPUs heat up from cool to warm to hot to ON FIRE, and fire spreads to neighbouring GPUs and server racks. Le chaton fat splashes coolant to cool them down and waddles back to the chiller for more - but she is fat and walks only every other tick. Keep the training run alive until 100 %.",
+  "tags": [
+    "meme",
+    "action",
+    "time-management",
+    "fire"
+  ],
+  "difficulty": "medium",
+  "original": "",
+  "accent": "#fb923c",
+  "icon": "\ud83d\udc31",
+  "controls": {
+    "move": "move",
+    "extra": [
+      {
+        "key": " ",
+        "label": "Splash",
+        "action": "splash",
+        "directional": true
+      },
+      {
+        "key": "z",
+        "label": "Nap",
+        "action": "nap",
+        "directional": false
+      }
+    ]
+  },
+  "hud": [
+    {
+      "label": "Training %",
+      "kind": "global",
+      "variable": "progress",
+      "tone": "emerald"
+    },
+    {
+      "label": "Coolant",
+      "kind": "var",
+      "object": "cat",
+      "variable": "coolant",
+      "tone": "sky"
+    },
+    {
+      "label": "GPUs dead",
+      "kind": "global",
+      "variable": "dead",
+      "tone": "rose"
+    },
+    {
+      "label": "Spares",
+      "kind": "global",
+      "variable": "allow",
+      "tone": "amber"
+    },
+    {
+      "label": "Burning",
+      "kind": "count",
+      "object": "gpu_fire",
+      "tone": "orange"
+    }
+  ],
+  "win_text": "Training run complete. Le chaton fat has earned a nap.",
+  "lose_text": "Too many GPUs melted. The cat is not impressed."
+}

@@ -1,0 +1,40 @@
+{
+  "id": "bufoparty",
+  "name": "Bufo Party",
+  "tagline": "Every bufo copies your moves. Get the whole party onto the pads.",
+  "description": "A dance-floor clone puzzle: party bufos copy every step you take, all at once, and walls stop them. Line everybody up on the party pads, wake the sleepy bufos and push the speakers out of the way.",
+  "tags": [
+    "meme",
+    "puzzle"
+  ],
+  "difficulty": "medium",
+  "original": "new (Mistral office meme)",
+  "accent": "#a3e635",
+  "icon": "\ud83c\udf89",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "On pads",
+      "kind": "global",
+      "variable": "placed",
+      "tone": "lime"
+    },
+    {
+      "label": "Bufos",
+      "kind": "global",
+      "variable": "crowd",
+      "tone": "violet"
+    },
+    {
+      "label": "Sleepy",
+      "kind": "remaining",
+      "object": "sleepy",
+      "tone": "sky"
+    }
+  ],
+  "win_text": "Everybody on the pads - the party is on!",
+  "lose_text": "The music stopped before everybody found a pad."
+}

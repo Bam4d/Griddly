@@ -192,6 +192,7 @@ def caldera():
     heal(m, a)
     populate(m, a, 3, 1, 0, (16, 8, 22, 14))
     populate(m, a, 6, 2, 4)
+    hunters(m, a, 1, min_dist=18)
     return m, a, dict(dirt=10, sand=6, bones=6, skull=4)
 
 
@@ -210,6 +211,78 @@ def broodmother():
         if any(m.get(p[0] + dx, p[1] + dy) == "W" for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
             safe_paint(m, a, [p], TORCH)
     populate(m, a, 9, 4, 3)
+    hunters(m, a, 1, min_dist=20)
+    return m, a, dict(dirt=12, bones=14, skull=8, sand=3)
+
+
+def hunters(m, a, n, ch="H", min_dist=12, region=None):
+    """Place n hunters (or brood nests) far from the start, spread apart."""
+    r = C.reach(K.grid_rows(m), a, ok)
+    spots = [p for p in m.free(region) if p in r and abs(p[0] - a[0]) + abs(p[1] - a[1]) >= min_dist]
+    m.rng.shuffle(spots)
+    out = []
+    for p in spots:
+        if len(out) >= n:
+            break
+        if any(abs(p[0] - q[0]) + abs(p[1] - q[1]) < 6 for q in out):
+            continue
+        if ch == "B" and not safe_paint(m, a, [p], "B"):
+            continue
+        m.set(*p, ch)
+        out.append(p)
+    assert len(out) == n, f"only placed {len(out)}/{n} {ch}"
+    return out
+
+
+def lava_loops():
+    """Rings of tunnels around lava pools - run circles round the hunters."""
+    m = C.Map(31, 19, seed=47, fill="W", border="W")
+    for x0, y0, x1, y1 in [(2, 2, 13, 8), (16, 2, 28, 8), (2, 10, 13, 16), (16, 10, 28, 16), (9, 6, 21, 12)]:
+        m.rect(x0, y0, x1, y1, ".")
+        m.rect(x0 + 2, y0 + 2, x1 - 2, y1 - 2, "L" if (x0 + y0) % 3 else "W")
+    m.rect(11, 8, 19, 10, "L")
+    a = (2, 2)
+    m.set(*a, "A")
+    heal(m, a)
+    populate(m, a, 8, 0, 2)
+    hunters(m, a, 5, min_dist=14)
+    return m, a, dict(dirt=8, bones=6, skull=4)
+
+
+def gauntlet():
+    """One-wide braided tunnels, four hunters and a brood nest."""
+    m = C.Map(35, 21, seed=48, border="W")
+    m.maze(0, 0, 34, 20, "W", braid=1.0)
+    for y in range(2, 19):  # knock out ~45% of the wall segments: a pillar maze full of loops
+        for x in range(2, 33):
+            if (x + y) % 2 == 1 and m.get(x, y) == "W" and m.rng.random() < 0.45:
+                m.set(x, y, ".")
+    a = (1, 1)
+    m.set(*a, "A")
+    for _ in range(10):
+        p = m.rng.choice(m.free())
+        if abs(p[0] - a[0]) + abs(p[1] - a[1]) > 5:
+            safe_paint(m, a, [p], "L")
+    populate(m, a, 10, 0, 1)
+    hunters(m, a, 4, min_dist=16)
+    hunters(m, a, 1, "B", min_dist=16)
+    return m, a, dict(dirt=10, bones=8, skull=5)
+
+
+def broodmothers_wrath():
+    """The broodmother's den: brood nests keep hatching hunters until the last gem is gone."""
+    m = C.Map(41, 25, seed=49, fill="W", border="W")
+    hubs = [(3, 3), (12, 4), (5, 13), (4, 21), (14, 20), (20, 12), (28, 5), (37, 3), (30, 15), (37, 21), (22, 22)]
+    cave(m, hubs, [(0, 1), (0, 2), (2, 3), (3, 4), (2, 5), (1, 5), (1, 6), (6, 7), (5, 8), (7, 8), (8, 9), (4, 10),
+                   (10, 9), (5, 10), (6, 8)])
+    a = (3, 3)
+    m.set(*a, "A")
+    for x, y in hubs[4:]:
+        lava_pool(m, a, x + m.rng.randint(-1, 1), y + m.rng.randint(-1, 1), m.rng.uniform(0.8, 1.4))
+    heal(m, a)
+    populate(m, a, 10, 2, 2)
+    hunters(m, a, 2, min_dist=16)
+    hunters(m, a, 3, "B", min_dist=14)
     return m, a, dict(dirt=12, bones=14, skull=8, sand=3)
 
 
@@ -218,8 +291,13 @@ LEVELS = [
     ("Magma River", "Cross the lava river by its log bridges.", magma_river),
     ("Obsidian Maze", "Twisting tunnels with lava in the corridors.", obsidian_maze),
     ("Fire Temple", "Six chambers, each with its own lava pit.", fire_temple),
-    ("Caldera", "Gems on an island in a lava lake.", caldera),
-    ("Broodmother", "Deep caves crawling with nests.", broodmother),
+    ("Caldera", "Gems on an island in a lava lake. A red-eyed hunter prowls the shore.", caldera),
+    ("Broodmother", "Deep caves crawling with nests - and a hunter that tracks you.", broodmother),
+    ("Lava Loops", "☠ Nightmare: five hunters track you through rings of tunnels. Keep moving, use the loops.",
+     lava_loops),
+    ("The Gauntlet", "☠ Nightmare: one-wide tunnels, four hunters and a brood nest hatching more.", gauntlet),
+    ("Broodmother's Wrath", "☠ Nightmare: brood nests hatch hunters, and they get faster with every gem you take.",
+     broodmothers_wrath),
 ]
 
 
@@ -228,20 +306,21 @@ def validate(name, rows):
     C.check_rect(name, rows)
     a = C.find(rows, "A")
     assert len(a) == 1, f"{name}: need exactly one gnome"
-    seen = C.reach(rows, a[0], lambda c, p: c in WALK or c in "gS")
+    seen = C.reach(rows, a[0], lambda c, p: c in WALK or c in "gSH")
     gems = C.find(rows, "g")
     assert len(gems) >= 3, f"{name}: too few gems"
     missing = [p for p in gems if p not in seen]
     assert not missing, f"{name}: unreachable gems {missing}"
     ax, ay = a[0]
-    near = [p for c in "SN" for p in C.find(rows, c) if abs(p[0] - ax) + abs(p[1] - ay) <= 6]
+    near = [p for c in "SNHB" for p in C.find(rows, c) if abs(p[0] - ax) + abs(p[1] - ay) <= 6]
     assert not near, f"{name}: spider/nest within 6 of start {near}"
     return dict(gems=len(gems), nests=len(C.find(rows, "N")), spiders=len(C.find(rows, "S")),
-                lava=len(C.find(rows, "L")))
+                lava=len(C.find(rows, "L")), hunters=len(C.find(rows, "H")),
+                broods=len(C.find(rows, "B")))
 
 
 # ----------------------------------------------------------------------------- GDY
-OBJECTS = C.GROUND_NAMES + C.SCENERY_NAMES + ["wall", "lava", "gem", "nest", "spider", "gnome"]
+OBJECTS = C.GROUND_NAMES + C.SCENERY_NAMES + ["wall", "lava", "gem", "nest", "brood", "spider", "hunter", "gnome"]
 
 
 def actions():
@@ -256,17 +335,24 @@ Actions:
 {K.wander("random_movement", "spider", 3, OBJECTS, {"lava": burn, "gnome": kill}, relative=True)}
   # Nests hatch up to 3 spiders each into a free neighbouring cell.
 {K.hatch("spawn_spider", "nest", "spider", 60, 15, OBJECTS, limit=3)}
+  # Brood nests hatch up to 2 hunters each.
+{K.hatch("spawn_hunter", "brood", "hunter", 90, 15, OBJECTS, limit=2)}
+{K.sync_action(me)}
+  # Hunters (red-eyed) track the gnome with A* once within 9 tiles and lose it beyond 14; one step
+  # every 3 ticks (2 once the gnome has taken 4+ gems). They never walk into lava.
+{K.hunter("hunter", me, OBJECTS, {"gnome": kill.replace("spider", "hunter")}, sense=9, lose=14, pace=3,
+          fast=("taken", 4, 2))}
   # The gnome walks up / down / left / right; bumping a gem collects it.
   - Name: move
 {C.MOVE_INPUTS}    Behaviours:
-      - Src: {{Object: {me}, Commands: [{face}, {{mov: _dest}}]}}
+      - Src: {{Object: {me}, Commands: [{face}, {{mov: _dest}}, {K.SYNC}]}}
         Dst: {{Object: {C.EMPTY_OR_GROUND}}}
-      - Src: {{Object: {me}, Commands: [{face}, {{reward: 1}}]}}
+      - Src: {{Object: {me}, Commands: [{face}, {{reward: 1}}, {{incr: taken}}]}}
         Dst: {{Object: gem, Commands: [{{remove: true}}]}}
       - Src: {{Object: {me}, Commands: [{{remove: true}}, {{reward: -1}}]}}
-        Dst: {{Object: [spider, lava]}}
+        Dst: {{Object: [spider, hunter, lava]}}
       - Src: {{Object: {me}, Commands: [{face}]}}
-        Dst: {{Object: [{", ".join(C.SCENERY_NAMES)}, wall, nest]}}
+        Dst: {{Object: [{", ".join(C.SCENERY_NAMES)}, wall, nest, brood]}}
 '''
 
 
@@ -280,24 +366,31 @@ def objects():
         C.obj("gem", "g", 1, C.img("oryx/oryx_fantasy/ore-6.png"), "[0.0, 1.0, 0.0]", "triangle", 0.5),
         C.obj("nest", "N", 1, C.img("oryx/oryx_fantasy/bush-1.png"), "[0.0, 0.0, 1.0]", "triangle", 0.8,
               init("spawn_spider", 30, nest_vars)),
+        C.obj("brood", "B", 1, C.img("gvgai/newset/cocoonb1.png"), "[0.6, 0.0, 0.0]", "triangle", 0.8,
+              init("spawn_hunter", 45, nest_vars)),
+        C.obj("hunter", "H", 2, C.imgs(["gvgai/oryx/spider2.png", "gvgai/oryx/spider1.png"]), "[1.0, 0.5, 0.0]",
+              "triangle", 0.8, K.hunter_object_extra(), tiles=2),
         C.obj("spider", "S", 2, C.img("oryx/oryx_fantasy/avatars/spider1.png"), "[1.0, 0.0, 0.0]", "triangle", 0.8,
               init("random_movement", 3)),
-        C.obj("gnome", "A", 2, C.imgs(avatar), "[0.0, 0.0, 1.0]", "triangle", 0.8, C.FACE_INITIAL_ACTION, tiles=4),
+        C.obj("gnome", "A", 2, C.imgs(avatar), "[0.0, 0.0, 1.0]", "triangle", 0.8,
+              C.FACE_INITIAL_ACTION + K.SYNC_INIT, tiles=4),
     ])
 
 
 def main():
     parts = [C.header("Spider Nest Remastered", """
-        Collect every gem in the volcanic caves. Spiders wander at random and nests hatch more of them;
+        Collect every gem in the volcanic caves. Spiders wander at random and nests hatch more of them.
+        Red-eyed hunters chase you with A* pathfinding once you come within 9 tiles (one step every 3 ticks,
+        every 2 once you hold 4 gems; they lose you beyond 14) and brood nests hatch hunters;
         touching a spider or stepping into lava is fatal (spiders burn in lava too). Cave walls, rocks
         and torches block the way; log bridges cross the lava.
         """.replace("        ", ""), "gnome", ["eq: [gem:count, 0]"], ["eq: [gnome:count, 0]"],
-        background="oryx/oryx_fantasy/floor2-2.png")]
+        background="oryx/oryx_fantasy/floor2-2.png", variables=K.hunter_globals({"taken": 0}))]
     for i, (name, blurb, build) in enumerate(LEVELS):
         m, _, recipe = build()
         rows = m.rows(solid=SOLIDS)
         info = validate(name, rows)
-        ground = C.decorate(rows, recipe, seed=9300 + i, stack_under="AgSN")
+        ground = C.decorate(rows, recipe, seed=9300 + i, stack_under="AgSNHB")
         parts.append(C.level_block(name, blurb, rows, ground))
         print(f"{i}. {name:14s} {len(rows[0])}x{len(rows)} {info}", file=sys.stderr)
         if "-v" in sys.argv:
@@ -307,7 +400,8 @@ def main():
         "name": "Spider Nest Remastered",
         "tagline": "Gems, lava and a lot of spiders.",
         "description": "Guide a gnome through volcanic caves, lava rivers and fire temples to collect every gem. "
-                       "Nests keep hatching spiders, and one step into the lava is the end.",
+                       "Nests keep hatching spiders, red-eyed hunters track you down with pathfinding (faster with every gem "
+                       "you take in the nightmare caves), and one step into the lava is the end.",
         "tags": ["action", "exploration", "classic-port"],
         "difficulty": "medium",
         "original": "GVGAI/spider-nest.yaml",
@@ -315,7 +409,8 @@ def main():
         "icon": "🕷️",
         "controls": {"move": "move", "extra": []},
         "hud": [{"label": "Gems left", "kind": "remaining", "object": "gem", "tone": "emerald"},
-                {"label": "Spiders", "kind": "count", "object": "spider", "tone": "rose"}],
+                {"label": "Spiders", "kind": "count", "object": "spider", "tone": "rose"},
+                {"label": "Hunters", "kind": "count", "object": "hunter", "tone": "orange"}],
         "win_text": "Every gem collected!",
         "lose_text": "The caves claimed another gnome.",
     })

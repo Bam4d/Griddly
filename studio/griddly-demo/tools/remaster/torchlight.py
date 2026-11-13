@@ -29,7 +29,13 @@ creature then tries the other axis. Only the light uses proximity Triggers (RANG
 
 Layout characters (besides the shared terrain chars from common):
   w cave wall   A explorer (A[U/R/D/L] = initial facing)   c crystal   t torch sconce (on walls)
-  b brazier   v bat   x spider   . floor
+  b brazier   v bat   x spider   h shadow hunter   . floor
+
+Shadow hunters (`h`, nightmare levels) lurk motionless while your torch burns bright. Once the fuel
+drops to DARK or below they hunt you with A* pathfinding (exec + Search), one step every 2 ticks.
+Thrusting the torch at one (forward into it) drives it back a tile and stuns it for 8 ticks; backing
+into one, or letting it reach you, ends the run. Their logic only reads the global fuel and their own
+variables (no Triggers), so it is deterministic.
 """
 from __future__ import annotations
 
@@ -47,6 +53,7 @@ G = C.GROUND_CHARS
 WATER, ROCK, STONE = S["water"], S["rock"], S["stone"]
 BRIDGE = G["bridge"]
 FUEL = 80
+DARK = 40   # shadow hunters hunt while fuel <= DARK
 WALK = set(".") | set(G.values())
 DIRS4 = ((1, 0), (-1, 0), (0, 1), (0, -1))
 TERRAIN = {"grass", "moss", "dirt", "sand", "bones", "mushroom", "skull", "bridge", "water", "rock", "stone"}
@@ -57,7 +64,7 @@ def grid(m):
 
 
 def ok(c, p):
-    return c in WALK or c in "Acvx"
+    return c in WALK or c in "Acvxh"
 
 
 def dist_map(rows, starts):
@@ -220,6 +227,41 @@ def heart_of_the_mountain():
     return m, a, "U", dict(dirt=8, bones=10, skull=6, mush=4, moss=4)
 
 
+def shadow_warrens():
+    """Looping tunnels, few torches: three shadow hunters close in whenever the flame runs low."""
+    m = C.Map(33, 19, seed=306, fill="w", border="w")
+    hubs = [(3, 3), (12, 3), (22, 3), (29, 4), (6, 10), (16, 9), (26, 11), (3, 16), (14, 16), (29, 16)]
+    cave(m, hubs, [(0, 1), (1, 2), (2, 3), (0, 4), (1, 5), (2, 5), (3, 6), (4, 5), (5, 6), (4, 7), (5, 8), (6, 9),
+                   (7, 8), (8, 9)], width=1, rad=(1.4, 2.0))
+    a = (3, 3)
+    m.set(*a, "A")
+    sconces(m, a, 6, spacing=9)
+    place(m, a, "c", 7, 7)
+    place(m, a, "v", 3, 8)
+    place(m, a, "x", 2, 12)
+    place(m, a, "h", 3, 14, clear=2)
+    return m, a, "R", dict(dirt=6, bones=10, skull=6, mush=3)
+
+
+def the_long_dark():
+    """A deep, wide cave with a single brazier: four shadow hunters and two spiders."""
+    m = C.Map(37, 21, seed=307, fill="w", border="w")
+    hubs = [(18, 10), (5, 4), (5, 16), (13, 3), (24, 3), (32, 4), (32, 16), (24, 17), (12, 17)]
+    cave(m, hubs, [(0, 1), (0, 2), (0, 5), (0, 6), (1, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 8), (8, 2), (1, 2)],
+         width=2)
+    for _ in range(6):
+        m.blob(m.rng.randint(4, 32), m.rng.randint(3, 18), 0.9, ROCK, only=".")
+    a = (18, 10)
+    m.set(*a, "A")
+    safe_set(m, a, (20, 10), "b")
+    sconces(m, a, 6, spacing=10)
+    place(m, a, "c", 8, 8)
+    place(m, a, "v", 3, 8)
+    place(m, a, "x", 2, 12)
+    place(m, a, "h", 4, 14)
+    return m, a, "L", dict(dirt=8, bones=12, skull=8, mush=4, moss=4)
+
+
 LEVELS = [
     ("First Light", "Light the torches on the walls before your own flame dies.", first_light),
     ("Bat Roost", "Twisty tunnels full of skittish bats.", bat_roost),
@@ -227,6 +269,9 @@ LEVELS = [
     ("Drowned Grotto", "Underground lakes and long stretches between torches.", drowned_grotto),
     ("Heart of the Mountain", "Every crystal in the heart of the mountain, and everything that guards them.",
      heart_of_the_mountain),
+    ("Shadow Warrens", "☠ Nightmare: let your torch burn low and the shadow hunters come for you. Few torches, "
+     "many tunnels.", shadow_warrens),
+    ("The Long Dark", "☠ Nightmare: one brazier, six sconces and four shadow hunters in a deep cave.", the_long_dark),
 ]
 
 
@@ -246,7 +291,7 @@ def validate(name, rows, a):
                 spots.setdefault(p, []).append(q)
     r = C.reach(rows, a, ok)
     assert all(c in r for c in cs), f"{name}: unreachable crystal"
-    for x in C.find(rows, "x"):
+    for x in C.find(rows, "x") + C.find(rows, "h"):
         assert abs(x[0] - a[0]) + abs(x[1] - a[1]) >= 10, f"{name}: spider too close to the start"
     # fuel budget (path length x1.4 for turns): the refuel network must connect the start to every
     # crystal: each crystal is a round trip from some refuel point.
@@ -270,7 +315,7 @@ def validate(name, rows, a):
 
 # ----------------------------------------------------------------------------- GDY
 SOLID = ["wall", "sconce", "sconce_lit", "brazier", "brazier_lit", "water", "rock", "stone"]
-CRITTERS = ["bat", "spider"]
+CRITTERS = ["bat", "spider", "hunter"]
 
 
 def creep_action(name, mover, kill=False):
@@ -348,6 +393,15 @@ Actions:
         Dst: {{Object: spider, Commands: [{{cascade: _dest}}]}}
       - Src: {{Object: avatar, Preconditions: [{{eq: [meta.fwd, 0]}}], Commands: [{{remove: true}}]}}
         Dst: {{Object: spider}}
+      - Src: {{Object: avatar, Preconditions: [{{eq: [meta.fwd, 1]}}], Commands: [{{nop: []}}]}}
+        Dst: {{Object: hunter, Commands: [{{cascade: _dest}}]}}
+      - Src: {{Object: avatar, Preconditions: [{{eq: [meta.fwd, 0]}}], Commands: [{{remove: true}}]}}
+        Dst: {{Object: hunter}}
+      # (cascaded) a shadow hunter driven back by the torch, stunned for 8 ticks
+      - Src: {{Object: hunter, Commands: [{{mov: _dest}}, {{set: [stun, 8]}}]}}
+        Dst: {{Object: {terrain_dst}}}
+      - Src: {{Object: hunter, Commands: [{{set: [stun, 8]}}]}}
+        Dst: {{Object: [{", ".join(SOLID + CRITTERS + ["crystal"])}]}}
       # (cascaded) a spider driven back by the torch, stunned for 2 of its turns
       - Src: {{Object: spider, Commands: [{{mov: _dest}}, {{set: [stun, 2]}}, {{set_tile: 1}}]}}
         Dst: {{Object: {terrain_dst}}}
@@ -435,7 +489,43 @@ Actions:
                 OnFalse:
                   - exec: {{Action: flap, Randomize: true}}
         Dst: {{Object: bat}}
-{creep_action("flap", "bat")}'''
+{creep_action("flap", "bat")}
+  # Shadow hunter: thinks every tick; when the torch is low (fuel <= {DARK}) and it is not stunned it
+  # takes one A* step towards you every 2 ticks (Search: the avatar; everything solid is impassable).
+  - Name: prowl
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {{Description: Think, VectorToDest: [0, 0]}}
+    Behaviours:
+      - Src:
+          Object: hunter
+          Commands:
+            - exec: {{Action: prowl, ActionId: 1, Delay: 1}}
+            - if: {{Conditions: {{gt: [stun, 0]}}, OnTrue: [{{decr: stun}}]}}
+            - set: [alert, 0]
+            - if: {{Conditions: {{and: [{{lte: [fuel, {DARK}]}}, {{eq: [stun, 0]}}]}}, OnTrue: [{{set: [alert, 1]}}]}}
+            - if: {{Conditions: {{eq: [alert, 1]}}, OnTrue: [{{set_tile: 1}}, {{incr: tick}}], OnFalse: [{{set_tile: 0}}, {{set: [tick, 0]}}]}}
+            - if:
+                Conditions: {{gte: [tick, 2]}}
+                OnTrue:
+                  - set: [tick, 0]
+                  - exec: {{Action: hunt, Search: {{TargetObjectName: avatar, ImpassableObjects: [{", ".join(SOLID + ["bat", "spider", "hunter", "crystal"])}]}}}}
+        Dst: {{Object: hunter}}
+  - Name: hunt
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {{Description: West, VectorToDest: [-1, 0]}}
+        2: {{Description: North, VectorToDest: [0, -1]}}
+        3: {{Description: East, VectorToDest: [1, 0]}}
+        4: {{Description: South, VectorToDest: [0, 1]}}
+    Behaviours:
+      - Src: {{Object: hunter, Commands: [{{mov: _dest}}]}}
+        Dst: {{Object: {terrain_dst}}}
+      - Src: {{Object: hunter}}
+        Dst: {{Object: avatar, Commands: [{{remove: true}}]}}
+'''
 
 
 def objects():
@@ -459,6 +549,8 @@ def objects():
               vars_(calc) + think("flutter", 1)),
         C.obj("spider", "x", 2, C.imgs([sp, "gvgai/oryx/spider3.png"]), "[0.9, 0.1, 0.1]", "triangle", 0.8,
               vars_(calc + ["f", "l", "nl", "lit", "frozen", "stun"]) + think("stalk", 2), tiles=2),
+        C.obj("hunter", "h", 2, C.imgs(["gvgai/oryx/spider2.png", "gvgai/oryx/spider1.png"]), "[1.0, 0.5, 0.0]",
+              "triangle", 0.8, vars_(["alert", "tick", "stun"]) + think("prowl", 1), tiles=2),
         C.obj("avatar", "A", 2, C.img(avatar), "[1.0, 0.8, 0.2]", "triangle", 0.8, av_extra),
     ])
 
@@ -467,7 +559,8 @@ def main():
     hdr = E.header("Torchlight", """
         Dark caverns seen over your shoulder (egocentric, rotating view). Your torch burns down every tick;
         walk into torch sconces and braziers to refuel. Collect every crystal. Bats flee your flame;
-        cave spiders only move while you are not looking at them.
+        cave spiders only move while you are not looking at them. In the deepest caves shadow hunters track
+        you down whenever your torch burns low (fuel 40 or less).
         """.replace("        ", ""), "avatar", ["eq: [crystal:count, 0]"],
         ["eq: [avatar:count, 0]", "lte: [fuel, 0]"], background="oryx/oryx_fantasy/floor1-0.png",
         variables=f"    - Name: fuel\n      InitialValue: {FUEL}\n")
@@ -477,10 +570,11 @@ def main():
         rows = m.rows(solid="wt" + ROCK + STONE)
         a2 = C.find(rows, "A")[0]
         nc, nr, nreach, worst = validate(name, rows, a2)
-        ground = C.decorate(rows, recipe, seed=7300 + i, stack_under="Acvx")
+        ground = C.decorate(rows, recipe, seed=7300 + i, stack_under="Acvxh")
         parts.append(E.level_block(name, blurb, rows, ground, {a2: facing}))
         print(f"{i}. {name:22s} {len(rows[0])}x{len(rows)} crystals={nc} refuel={nr} (reachable {nreach}) "
-              f"worst-trip={worst:.0f}/{FUEL} spiders={len(C.find(rows, 'x'))} bats={len(C.find(rows, 'v'))}",
+              f"worst-trip={worst:.0f}/{FUEL} spiders={len(C.find(rows, 'x'))} bats={len(C.find(rows, 'v'))} "
+              f"hunters={len(C.find(rows, 'h'))}",
               file=sys.stderr)
         if "-v" in sys.argv:
             print("\n".join(rows), file=sys.stderr)
@@ -503,7 +597,8 @@ def main():
         "tagline": "Your torch is burning down. Don't look away from the spiders.",
         "description": "Explore pitch-dark caverns from a first-person, rotating view. Relight wall sconces "
                        "and braziers to keep your torch alive while you collect every crystal. Bats flee "
-                       "your flame, and cave spiders only creep closer while you aren't looking at them.",
+                       "your flame, cave spiders only creep closer while you aren't looking at them, and in the deepest caves "
+                       "shadow hunters track you down whenever your torch burns low.",
         "tags": ["exploration", "egocentric", "survival", "partial-observability"],
         "difficulty": "hard",
         "original": "",
@@ -516,6 +611,7 @@ def main():
             {"label": "Crystals", "kind": "collected", "object": "crystal", "tone": "sky"},
             {"label": "Torches lit", "kind": "count", "object": "sconce_lit", "tone": "amber"},
             {"label": "Spiders", "kind": "count", "object": "spider", "tone": "rose"},
+            {"label": "Hunters", "kind": "count", "object": "hunter", "tone": "violet"},
         ],
         "win_text": "Every crystal gathered. You climb back into the daylight!",
         "lose_text": "Darkness takes you.",

@@ -270,3 +270,109 @@ def far_cells(m, start, n, reachable, min_dist, region=None):
     spots = [p for p in m.free(region) if p in reachable and abs(p[0] - start[0]) + abs(p[1] - start[1]) >= min_dist]
     m.rng.shuffle(spots)
     return spots[:n]
+
+
+# ----------------------------------------------------------------------------- hunters (A* chasers)
+# A hunter is a spider that chases the avatar with `exec ... Search:` (A*). The avatar publishes its
+# position in the globals ax / ay (SYNC after every successful move + an initial sync), and each hunter
+# runs a self-scheduled `stalk` think action every `pace` ticks:
+#   * d = |x - ax| + |y - ay|; it becomes alert when d <= sense and loses track when d > lose (or, with
+#     `hide`, when the avatar stands in hiding (global `hidden` = 1) and is more than 2 tiles away);
+#   * alert: one A* step towards the avatar (`hunt` with Search; ImpassableObjects = every solid object
+#     incl. other spiders/hunters, so hunters queue up and flank); otherwise a random step;
+#   * pace (ticks between steps) = `pace`, dropping to fast[2] once the global fast[0] >= fast[1].
+# Everything is deterministic for a given seed (no Triggers), so recorded runs replay exactly.
+# Engine notes: A* returns action 0 when the avatar is unreachable / gone; the exec then falls back to
+# the stalk action's own [0, 0] vector, i.e. the hunter waits. stalk reschedules itself before it
+# moves, so a hunter that burns up (lava / sword flash) simply drops its pending think.
+SYNC = "{exec: {Action: sync, ActionId: 1}}"
+SYNC_INIT = "      - Action: sync\n        ActionId: 1\n"
+HUNTER_VARS = ["rx", "ry", "arx", "ary", "d", "pace", "alert", "due"]
+
+
+def sync_action(avatar: str) -> str:
+    return f'''  # Publishes the avatar's position in globals ax / ay (read by the hunters' stalk logic).
+  - Name: sync
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {{Description: Sync, VectorToDest: [0, 0]}}
+    Behaviours:
+      - Src: {{Object: {avatar}, Commands: [{{set: [ax, _x]}}, {{set: [ay, _y]}}]}}
+        Dst: {{Object: {avatar}}}
+'''
+
+
+def hunter_globals(extra: dict[str, int] | None = None) -> str:
+    vals = {"ax": 0, "ay": 0, **(extra or {})}
+    return "".join(f"    - Name: {k}\n      InitialValue: {v}\n" for k, v in vals.items())
+
+
+def hunter_object_extra(first_delay: int = 1) -> str:
+    """Variables + InitialActions for a hunter object (pass as obj(extra=...), tiles=2)."""
+    v = "    Variables:\n" + "".join(f"      - Name: {n}\n        InitialValue: 0\n" for n in HUNTER_VARS)
+    return v + f"    InitialActions:\n      - Action: stalk\n        ActionId: 1\n        Delay: {first_delay}\n"
+
+
+def hunter(mover: str, avatar: str, all_objects: list[str], special: dict[str, str], sense: int = 9,
+           lose: int = 14, pace: int = 3, fast: tuple[str, int, int] | None = None, hide: bool = False,
+           passable: tuple[str, ...] = ()) -> str:
+    """GDY for the `stalk` (think) and `hunt` (step) actions of a hunter object `mover`.
+
+    `special` maps destination object -> raw behaviour YAML for the hunt step (kill the avatar, burn in
+    lava, eat butterflies...); without a rule the step is simply blocked. `passable`: extra objects A*
+    may path through (e.g. butterflies it eats); everything else non-ground (except the avatar, the
+    target) is impassable for the search.
+    """
+    imp = [o for o in all_objects if o not in GROUND and o != avatar and o not in passable]
+    search = f"Search: {{TargetObjectName: {avatar}, ImpassableObjects: [{', '.join(imp)}]}}"
+    speed = (f"            - if: {{Conditions: {{gte: [{fast[0]}, {fast[1]}]}}, OnTrue: [{{set: [pace, {fast[2]}]}}]}}\n"
+             if fast else "")
+    hide_cmd = ("            - if: {Conditions: {and: [{eq: [hidden, 1]}, {gt: [d, 2]}]}, OnTrue: [{set: [alert, 0]}]}\n"
+                if hide else "")
+    rules = "".join(special.values())
+    return f'''  # Hunter think: every `pace` ticks decide - chase the {avatar} (A*) when alert, else roam.
+  - Name: stalk
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {{Description: Think, VectorToDest: [0, 0]}}
+    Behaviours:
+      - Src:
+          Object: {mover}
+          Commands:
+            - set: [rx, _x]
+            - sub: [rx, ax]
+            - set: [arx, rx]
+            - if: {{Conditions: {{lt: [rx, 0]}}, OnTrue: [{{set: [arx, 0]}}, {{sub: [arx, rx]}}]}}
+            - set: [ry, _y]
+            - sub: [ry, ay]
+            - set: [ary, ry]
+            - if: {{Conditions: {{lt: [ry, 0]}}, OnTrue: [{{set: [ary, 0]}}, {{sub: [ary, ry]}}]}}
+            - set: [d, arx]
+            - add: [d, ary]
+            - if: {{Conditions: {{lte: [d, {sense}]}}, OnTrue: [{{set: [alert, 1]}}]}}
+            - if: {{Conditions: {{gt: [d, {lose}]}}, OnTrue: [{{set: [alert, 0]}}]}}
+{hide_cmd}            - set: [pace, {pace}]
+{speed}            - set: [due, _steps]
+            - add: [due, pace]
+            - exec: {{Action: stalk, ActionId: 1, Delay: pace}}
+            - if:
+                Conditions: {{eq: [alert, 1]}}
+                OnTrue: [{{set_tile: 1}}, {{exec: {{Action: hunt, {search}}}}}]
+                OnFalse: [{{set_tile: 0}}, {{exec: {{Action: hunt, Randomize: true}}}}]
+        Dst: {{Object: {mover}}}
+
+  # One hunter step (absolute 1 W, 2 N, 3 E, 4 S); chosen by A* or at random by stalk.
+  - Name: hunt
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {{Description: West, VectorToDest: [-1, 0]}}
+        2: {{Description: North, VectorToDest: [0, -1]}}
+        3: {{Description: East, VectorToDest: [1, 0]}}
+        4: {{Description: South, VectorToDest: [0, 1]}}
+    Behaviours:
+      - Src: {{Object: {mover}, Commands: [{{mov: _dest}}]}}
+        Dst: {{Object: {C.EMPTY_OR_GROUND}}}
+{rules}'''

@@ -19,7 +19,8 @@ facing), and the main cameras rotate with it so "up" is always forward. meta.con
 Engine notes (verified in the WASM build, Nov 2026):
   * OffsetY on avatar-tracking SPRITE_2D observers was fixed in vibe_main 3d19bc45; EgoView and the
     Player.Observer use OffsetY = EGO_OFFSET_Y (see further ahead), EgoClose stays centred.
-  * `exec` with `Search:` (A*) crashes the WASM build; NPCs here steer greedily from the globals.
+  * `exec` with `Search:` (A*) works since vibe_main eb687fa2 (torchlight's shadow hunters use it); the
+    other NPCs here still steer greedily from the globals.
   * `exec: {ActionId: <variable>}` works, so NPC logic can pick a direction at run time.
 """
 from __future__ import annotations

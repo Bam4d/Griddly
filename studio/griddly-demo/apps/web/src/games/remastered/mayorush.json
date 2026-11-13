@@ -1,0 +1,44 @@
+{
+  "id": "mayorush",
+  "name": "Mayo Rush",
+  "tagline": "Every jar makes bufo bigger. Eat in the right order.",
+  "description": "A puzzle about a toad who can't stop eating mayo. Each jar makes bufo a tier fatter: chonky toads slide on mayo splats like ice, absolute units can shove server racks, but nobody that big fits through the narrow doors. Plan your snacks and reach the golden mayo jar.",
+  "tags": [
+    "meme",
+    "puzzle",
+    "sliding",
+    "push"
+  ],
+  "difficulty": "medium",
+  "original": "",
+  "accent": "#fde047",
+  "icon": "\ud83e\udd6b",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Tier",
+      "kind": "var",
+      "object": "bufo",
+      "variable": "tier",
+      "tone": "amber"
+    },
+    {
+      "label": "Jars eaten",
+      "kind": "var",
+      "object": "bufo",
+      "variable": "eaten",
+      "tone": "lime"
+    },
+    {
+      "label": "Jars left",
+      "kind": "count",
+      "object": "jar",
+      "tone": "sky"
+    }
+  ],
+  "win_text": "The golden mayo jar is bufo's. Absolute unit achieved.",
+  "lose_text": "Stuck! Restart and rethink the snack order."
+}

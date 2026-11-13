@@ -33,13 +33,13 @@ WATER, TREE, BUSH, ROCK, HEDGE, STONE, TOMB, TORCH = (S[k] for k in ("water", "t
 BRIDGE, DIRT, SAND = G["bridge"], G["dirt"], G["sand"]
 WALLS = "W" + HEDGE + STONE + ROCK
 WALK = set(".") | set(G.values())
-ENEMY = "SbN"
+ENEMY = "SbNHB"
 
 
-def enemies(m, start, spiders=0, bats=0, nests=0, region=None, min_dist=9):
+def enemies(m, start, spiders=0, bats=0, nests=0, region=None, min_dist=9, hunters=0, nest_ch="N"):
     rows = K.grid_rows(m)
-    r = C.reach(rows, start, lambda c, p: c in WALK or c in "kSbDE")
-    for ch, n in (("S", spiders), ("b", bats)):
+    r = C.reach(rows, start, lambda c, p: c in WALK or c in "kSbDEH")
+    for ch, n in (("S", spiders), ("b", bats), ("H", hunters)):
         for p in K.far_cells(m, start, n, r, min_dist, region):
             m.set(*p, ch)
     if nests:
@@ -51,9 +51,9 @@ def enemies(m, start, spiders=0, bats=0, nests=0, region=None, min_dist=9):
         for p in spots:
             if placed >= nests:
                 break
-            before = C.reach(K.grid_rows(m), start, lambda c, q: c in WALK or c in "kSbDE")
-            m.set(*p, "N")
-            after = C.reach(K.grid_rows(m), start, lambda c, q: c in WALK or c in "kSbDE")
+            before = C.reach(K.grid_rows(m), start, lambda c, q: c in WALK or c in "kSbDEH")
+            m.set(*p, nest_ch)
+            after = C.reach(K.grid_rows(m), start, lambda c, q: c in WALK or c in "kSbDEH")
             if len(after) != len(before) - 1:
                 m.set(*p, ".")
                 continue
@@ -72,7 +72,7 @@ def props(m, start, ch, n, region=None, wall_side=False):
             continue
         if (x, y) == start:
             continue
-        ok = lambda c, p: c in WALK or c in "AkSbDE"
+        ok = lambda c, p: c in WALK or c in "AkSbDEH"
         before = C.reach(K.grid_rows(m), start, ok)
         m.set(x, y, ch)
         if len(C.reach(K.grid_rows(m), start, ok)) != len(before) - 1:
@@ -193,8 +193,44 @@ def dark_citadel():
     props(m, a, TORCH, 16, wall_side=True)
     props(m, a, TOMB, 4, box[2][2])
     props(m, a, ROCK, 6)
-    enemies(m, a, spiders=7, bats=3, nests=2)
+    enemies(m, a, spiders=7, bats=3, nests=2, hunters=1, min_dist=14)
     return m, a, dict(dirt=10, bones=12, skull=8, moss=3)
+
+
+def hunters_keep():
+    """Rooms in a ring around a sealed vault: three locks, five hunters that speed up after two doors."""
+    m = C.Map(37, 23, seed=7, border="W")
+    box = K.rooms(m, [0, 9, 18, 27, 36], [0, 7, 15, 22], extra=0.9, door=1)
+    a = K.centre(box[0][0])
+    m.set(*a, "A")
+    goal = K.centre(box[2][3])
+    m.set(*goal, "E")
+    K.lock_path(m, a, goal, 3, WALK, WALLS, min_key_dist=5)
+    props(m, a, TORCH, 12, wall_side=True)
+    props(m, a, STONE, 6)
+    enemies(m, a, spiders=3, hunters=6, min_dist=10)
+    return m, a, dict(dirt=8, bones=10, skull=6, moss=3)
+
+
+def spider_warren():
+    """Narrow root-tunnels in the forest; hunters, brood nests and a nest of ordinary spiders."""
+    m = C.Map(39, 23, seed=8, border=TREE, fill=TREE)
+    m.maze(0, 0, 38, 22, TREE, braid=1.0)
+    for y in range(2, 21):
+        for x in range(2, 37):
+            if (x + y) % 2 == 1 and m.get(x, y) == TREE and m.rng.random() < 0.35:
+                m.set(x, y, ".")
+    for cx, cy in [(9, 6), (28, 6), (19, 16)]:          # clearings
+        m.rect(cx - 2, cy - 1, cx + 2, cy + 1, ".")
+    a = (1, 1)
+    m.set(*a, "A")
+    goal = (37, 21)
+    m.set(*goal, "E")
+    K.lock_path(m, a, goal, 2, WALK, WALLS + TREE, min_key_dist=6)
+    props(m, a, BUSH, 10)
+    enemies(m, a, spiders=3, hunters=6, min_dist=12)
+    enemies(m, a, nests=2, nest_ch="B", min_dist=14)
+    return m, a, dict(grass=18, moss=6, mush=6, dirt=3)
 
 
 LEVELS = [
@@ -203,7 +239,12 @@ LEVELS = [
     ("Forest Ruins", "Cross the river to the ruined temple. A nest hatches in the woods.", forest_ruins),
     ("Catacombs", "Nine crypts and two locked doors. Bats flit between the graves.", catacombs),
     ("Lake Temple", "Flooded chambers behind rock walls.", lake_temple),
-    ("Dark Citadel", "Twelve rooms, three locks, nests in the dark. Good luck, hero.", dark_citadel),
+    ("Dark Citadel", "Twelve rooms, three locks, nests in the dark and a hunter on your trail. Good luck, hero.",
+     dark_citadel),
+    ("Hunter's Keep", "☠ Nightmare: six hunters stalk twelve rooms and three locked doors - and they get faster "
+     "after the second door.", hunters_keep),
+    ("Spider Warren", "☠ Nightmare: twisting root tunnels, hunters and brood nests that hatch more of them.",
+     spider_warren),
 ]
 
 
@@ -214,19 +255,20 @@ def validate(name, rows):
     assert len(a) == 1, f"{name}: need exactly one hero"
     assert len(C.find(rows, "E")) == 1, f"{name}: need one exit"
     try:
-        states, doors = K.check_keys(rows, WALK | set("Sb"), goal="E")
+        states, doors = K.check_keys(rows, WALK | set("SbH"), goal="E")
     except AssertionError as e:
         raise AssertionError(f"{name}: {e}") from None
     ax, ay = a[0]
     near = [p for c in ENEMY for p in C.find(rows, c) if abs(p[0] - ax) + abs(p[1] - ay) <= 5]
     assert not near, f"{name}: enemy within 5 of start {near}"
     return dict(keys=len(C.find(rows, "k")), doors=doors, spiders=len(C.find(rows, "S")),
-                bats=len(C.find(rows, "b")), nests=len(C.find(rows, "N")), door_states=states)
+                bats=len(C.find(rows, "b")), nests=len(C.find(rows, "N")), hunters=len(C.find(rows, "H")),
+                broods=len(C.find(rows, "B")), door_states=states)
 
 
 # ----------------------------------------------------------------------------- GDY
-OBJECTS = (C.GROUND_NAMES + C.SCENERY_NAMES + ["wall", "key", "door", "exit", "nest", "spider", "bat", "avatar",
-                                              "attack_fire"])
+OBJECTS = (C.GROUND_NAMES + C.SCENERY_NAMES + ["wall", "key", "door", "exit", "nest", "brood", "spider", "hunter", "bat",
+                                              "avatar", "attack_fire"])
 
 
 def die(mover, victim="avatar"):
@@ -252,6 +294,12 @@ Actions:
 {K.wander("bat_move", "bat", 2, OBJECTS, special("bat"))}
   # Nests hatch up to 3 spiders, one every ~60 ticks, into a free neighbouring cell.
 {K.hatch("hatch", "nest", "spider", 60, 15, OBJECTS, limit=3)}
+  # Brood nests hatch up to 2 hunters each.
+{K.hatch("hatch_hunter", "brood", "hunter", 80, 15, OBJECTS, limit=2)}
+{K.sync_action(hero)}
+  # Hunters (red-eyed spiders) track the hero with A* within 9 tiles (lost beyond 14), one step every 3
+  # ticks - every 2 once the hero has opened 2 doors. They take 2 sword strikes.
+{K.hunter("hunter", hero, OBJECTS, {"avatar": die("hunter")}, sense=9, lose=14, pace=3, fast=("opened", 2, 2))}
   # The sword flash fades after a few ticks.
   - Name: fade
     InputMapping:
@@ -265,14 +313,14 @@ Actions:
   # The hero walks up / down / left / right (absolute; it never rotates).
   - Name: move
 {C.MOVE_INPUTS}    Behaviours:
-      - Src: {{Object: {hero}, Commands: [{face}, {{mov: _dest}}]}}
+      - Src: {{Object: {hero}, Commands: [{face}, {{mov: _dest}}, {K.SYNC}]}}
         Dst: {{Object: {C.EMPTY_OR_GROUND}}}
-      - Src: {{Object: {hero}, Commands: [{face}, {{mov: _dest}}, {{incr: keys}}, {{reward: 1}}]}}
+      - Src: {{Object: {hero}, Commands: [{face}, {{mov: _dest}}, {{incr: keys}}, {{reward: 1}}, {K.SYNC}]}}
         Dst: {{Object: key, Commands: [{{remove: true}}]}}
       - Src:
           Object: {hero}
           Preconditions: [{{gte: [src.keys, 1]}}]
-          Commands: [{face}, {{decr: keys}}]
+          Commands: [{face}, {{decr: keys}}, {{incr: opened}}]
         Dst: {{Object: door, Commands: [{{remove: true}}]}}
       - Src:
           Object: {hero}
@@ -280,26 +328,32 @@ Actions:
           Commands: [{face}, {{decr: keys}}, {{reward: 5}}]
         Dst: {{Object: exit, Commands: [{{remove: true}}]}}
       - Src: {{Object: {hero}, Commands: [{{remove: true}}, {{reward: -1}}]}}
-        Dst: {{Object: [spider, bat]}}
+        Dst: {{Object: [spider, hunter, bat]}}
       - Src: {{Object: {hero}, Commands: [{face}]}}
-        Dst: {{Object: [{", ".join(C.SCENERY_NAMES)}, wall, nest, attack_fire]}}
+        Dst: {{Object: [{", ".join(C.SCENERY_NAMES)}, wall, nest, brood, attack_fire]}}
 
   # Swing the sword at the cell in the given direction (the UI sends the last move direction).
   - Name: attack
 {C.MOVE_INPUTS}    Behaviours:
       - Src: {{Object: {hero}, Commands: [{face}, {{spawn: attack_fire}}, {{reward: 1}}]}}
         Dst: {{Object: [spider, bat], Commands: [{{remove: true}}]}}
+      - Src: {{Object: {hero}, Commands: [{face}]}}
+        Dst:
+          Object: hunter
+          Commands:
+            - incr: hits
+            - if: {{Conditions: {{gte: [hits, 2]}}, OnTrue: [{{remove: true}}]}}
       - Src: {{Object: {hero}, Commands: [{face}, {{spawn: attack_fire}}]}}
         Dst: {{Object: {C.EMPTY_OR_GROUND}}}
       - Src: {{Object: {hero}, Commands: [{face}]}}
-        Dst: {{Object: [{", ".join(C.SCENERY_NAMES)}, wall, nest, key, door, exit, attack_fire]}}
+        Dst: {{Object: [{", ".join(C.SCENERY_NAMES)}, wall, nest, brood, key, door, exit, attack_fire]}}
 '''
 
 
 def objects():
     avatar = C.facing_sprites("gvgai/oryx/swordman1_0.png", "zelda-avatar")
     init = lambda a, d: f"    InitialActions:\n      - Action: {a}\n        Delay: {d}\n        Randomize: true\n"
-    hero_extra = "    Variables:\n      - Name: keys\n        InitialValue: 0\n" + C.FACE_INITIAL_ACTION
+    hero_extra = "    Variables:\n      - Name: keys\n        InitialValue: 0\n" + C.FACE_INITIAL_ACTION + K.SYNC_INIT
     nest_extra = "    Variables:\n      - Name: hatched\n        InitialValue: 0\n" + init("hatch", 40)
     fire_extra = "    InitialActions:\n      - Action: fade\n        ActionId: 1\n        Delay: 3\n"
     return "\nObjects:\n" + C.terrain_objects() + "".join([
@@ -308,6 +362,10 @@ def objects():
         C.obj("door", "D", 1, C.img("oryx/oryx_fantasy/door-1.png"), "[0.6, 0.4, 0.1]", "square", 0.9),
         C.obj("exit", "E", 1, C.img("gvgai/oryx/doorclosed1.png"), "[0.0, 0.7, 0.0]", "square", 0.8),
         C.obj("nest", "N", 1, C.img("gvgai/newset/cocoonb1.png"), "[0.6, 0.6, 0.5]", "circle", 0.7, nest_extra),
+        C.obj("brood", "B", 1, C.img("gvgai/newset/cocoonb1.png"), "[0.6, 0.0, 0.0]", "circle", 0.7,
+              nest_extra.replace("Action: hatch\n", "Action: hatch_hunter\n")),
+        C.obj("hunter", "H", 2, C.imgs(["gvgai/oryx/spider2.png", "gvgai/oryx/spider1.png"]), "[1.0, 0.5, 0.0]",
+              "triangle", 0.6, K.hunter_object_extra().replace("    Variables:\n", "    Variables:\n      - Name: hits\n        InitialValue: 0\n", 1), tiles=2),
         C.obj("spider", "S", 2, C.img("oryx/oryx_fantasy/avatars/spider1.png"), "[0.9, 0.1, 0.1]", "triangle", 0.6,
               init("spider_move", 5)),
         C.obj("bat", "b", 2, C.img("gvgai/oryx/bat1.png"), "[0.6, 0.1, 0.7]", "triangle", 0.6, init("bat_move", 2)),
@@ -319,15 +377,16 @@ def objects():
 def main():
     parts = [C.header("Zelda Remastered", """
         Grab keys, unlock doors and reach the exit door with a key in hand. Spiders and bats wander at
-        random and kill on contact; swing your sword (attack) at the cell in front of you to slay them.
-        Nests hatch more spiders. Walls, water, trees, bushes, tombstones and torches block the way.
+        random and kill on contact; swing your sword (attack) at the cell in front of you to slay them (hunters take 2 strikes).
+        Nests hatch more spiders; red-eyed hunters track you down with pathfinding and brood nests hatch
+        more of them. Walls, water, trees, bushes, tombstones and torches block the way.
         """.replace("        ", ""), "avatar", ["eq: [exit:count, 0]"], ["eq: [avatar:count, 0]"],
-        background="gvgai/newset/floor2.png")]
+        background="gvgai/newset/floor2.png", variables=K.hunter_globals({"opened": 0}))]
     for i, (name, blurb, build) in enumerate(LEVELS):
         m, _, recipe = build()
         rows = m.rows(solid=WALLS + TREE)
         info = validate(name, rows)
-        ground = C.decorate(rows, recipe, seed=9100 + i, stack_under="AkSbDEN")
+        ground = C.decorate(rows, recipe, seed=9100 + i, stack_under="AkSbDENHB")
         parts.append(C.level_block(name, blurb, rows, ground))
         print(f"{i}. {name:14s} {len(rows[0])}x{len(rows)} {info}", file=sys.stderr)
         if "-v" in sys.argv:
@@ -347,6 +406,7 @@ def main():
                                                 "directional": True}]},
         "hud": [{"label": "Keys", "kind": "var", "object": "avatar", "variable": "keys", "tone": "amber"},
                 {"label": "Spiders", "kind": "count", "object": "spider", "tone": "rose"},
+                {"label": "Hunters", "kind": "count", "object": "hunter", "tone": "orange"},
                 {"label": "Bats", "kind": "count", "object": "bat", "tone": "fuchsia"}],
         "win_text": "The exit door swings open. Well done, hero!",
         "lose_text": "Slain in the dungeon.",

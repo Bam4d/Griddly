@@ -6,7 +6,7 @@ import { normaliseMeta, parseGdy, parseLevels, searchScore } from "./gdy-meta";
 describe("gdy-meta", () => {
   test("levels come from the `# Name | blurb` comments, with their map size", () => {
     const levels = parseLevels(spidersGdy);
-    expect(levels.length).toBe(6);
+    expect(levels.length).toBe(8);
     expect(levels[0]).toEqual({
       name: "Garden Gate",
       blurb: "Find the key to open the walled garden.",

@@ -25,13 +25,16 @@ const gdy = fs.readFileSync(path.join(root, "resources/games/Single-Player/Remas
 const g = await createGriddly({ moduleOverrides: { print() {}, printErr() {} } });
 export function syncImages(g) {
   const FS = g.module.FS;
-  const dir = path.join(root, "resources/images/remastered");
-  if (!FS.analyzePath("/resources/images/remastered").exists) FS.mkdir("/resources/images/remastered");
   let n = 0;
-  for (const f of fs.readdirSync(dir)) {
-    if (!f.endsWith(".png")) continue;
-    FS.writeFile(`/resources/images/remastered/${f}`, fs.readFileSync(path.join(dir, f)));
-    n++;
+  for (const sub of ["remastered", "memes"]) {  // memes/: Phase 4 memekit art
+    const dir = path.join(root, "resources/images", sub);
+    if (!fs.existsSync(dir)) continue;
+    if (!FS.analyzePath(`/resources/images/${sub}`).exists) FS.mkdir(`/resources/images/${sub}`);
+    for (const f of fs.readdirSync(dir)) {
+      if (!f.endsWith(".png")) continue;
+      FS.writeFile(`/resources/images/${sub}/${f}`, fs.readFileSync(path.join(dir, f)));
+      n++;
+    }
   }
   return n;
 }
@@ -77,7 +80,7 @@ const lit = ({ pixels, width, height }) => {
 };
 
 let failed = false;
-const views = [["Isometric", "IsoFollow"], ["Sprite2D", "FollowCam"]];
+const views = [["Isometric", "IsoFollow"], ["Sprite2D", "FollowCam"]].filter(([o]) => o !== "Isometric" || /\n    Isometric:/.test(gdy));
 const results = {};
 for (const [globalObs, playerObs] of views) {
   // a fresh game per level: the global observer renders black after loadLevel() switches size
@@ -90,7 +93,11 @@ for (const [globalObs, playerObs] of views) {
     g.loadLevel(l);
     g.seed(1);
     g.reset();
-    for (const [name, im] of [[globalObs, await g.observeImage()], [playerObs, await g.observePlayerImage(0)]]) {
+    // copy each frame at once: the pixels are a view into WASM memory, which the next render may grow (detaching it)
+    const snap = (im) => ({ width: im.width, height: im.height, pixels: new Uint8Array(im.pixels) });
+    const globalIm = snap(await g.observeImage());
+    const playerIm = snap(await g.observePlayerImage(0));
+    for (const [name, im] of [[globalObs, globalIm], [playerObs, playerIm]]) {
       const f = lit(im);
       const ok = f > 0.3;
       if (!ok) failed = true;

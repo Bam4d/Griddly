@@ -1,0 +1,50 @@
+{
+  "id": "gpuheist",
+  "name": "Bufo's GPU Heist",
+  "tagline": "Sneak past the sysadmin cats and steal every GPU in the datacenter.",
+  "description": "Bufo is on a heist in a Mistral datacenter. Bump blinking racks to grab GPUs (two at a time) and carry them back to the burrow. Sysadmin cats patrol the taped routes, and security cats chase you with A* once they spot you. Hide in cable bundles until they give up.",
+  "tags": [
+    "meme",
+    "stealth",
+    "timing",
+    "pathfinding"
+  ],
+  "difficulty": "medium",
+  "original": "",
+  "accent": "#84cc16",
+  "icon": "\ud83d\udc38",
+  "controls": {
+    "move": "move",
+    "extra": [
+      {
+        "key": " ",
+        "label": "Wait",
+        "action": "wait"
+      }
+    ]
+  },
+  "hud": [
+    {
+      "label": "GPUs to steal",
+      "kind": "global",
+      "variable": "need",
+      "tone": "emerald"
+    },
+    {
+      "label": "Carrying",
+      "kind": "var",
+      "object": "bufo",
+      "variable": "carry",
+      "tone": "lime"
+    },
+    {
+      "label": "Hidden",
+      "kind": "var",
+      "object": "bufo",
+      "variable": "hidden",
+      "tone": "sky"
+    }
+  ],
+  "win_text": "Every GPU is in the burrow. Bufo's cluster is now the biggest in the swamp.",
+  "lose_text": "Caught by a sysadmin cat! Bufo is escorted out of the datacenter."
+}

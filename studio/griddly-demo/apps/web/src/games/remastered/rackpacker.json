@@ -1,0 +1,48 @@
+{
+  "id": "rackpacker",
+  "name": "Rack Packer",
+  "tagline": "Sokoban with GPUs: cool them, belt them, rack them.",
+  "description": "Bufo installs GPU cards by pushing them into empty rack slots. Hot cards must slide through a coolant puddle first or the rack goes up in flames, and Mistral-logo conveyor belts whisk cards across the datacenter one tile per tick.",
+  "tags": [
+    "meme",
+    "puzzle",
+    "sokoban"
+  ],
+  "difficulty": "medium",
+  "original": "",
+  "accent": "#f97316",
+  "icon": "\ud83d\udce6",
+  "controls": {
+    "move": "move",
+    "extra": [
+      {
+        "key": "z",
+        "label": "Nap",
+        "action": "nap",
+        "directional": false
+      }
+    ]
+  },
+  "hud": [
+    {
+      "label": "Empty slots",
+      "kind": "global",
+      "variable": "open",
+      "tone": "amber"
+    },
+    {
+      "label": "Hot cards",
+      "kind": "count",
+      "object": "hotgpu",
+      "tone": "rose"
+    },
+    {
+      "label": "Cool cards",
+      "kind": "count",
+      "object": "gpu",
+      "tone": "sky"
+    }
+  ],
+  "win_text": "Every rack is full. Ship it!",
+  "lose_text": "You racked a hot GPU. Fire in aisle three!"
+}

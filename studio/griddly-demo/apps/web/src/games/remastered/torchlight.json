@@ -2,7 +2,7 @@
   "id": "torchlight",
   "name": "Torchlight",
   "tagline": "Your torch is burning down. Don't look away from the spiders.",
-  "description": "Explore pitch-dark caverns from a first-person, rotating view. Relight wall sconces and braziers to keep your torch alive while you collect every crystal. Bats flee your flame, and cave spiders only creep closer while you aren't looking at them.",
+  "description": "Explore pitch-dark caverns from a first-person, rotating view. Relight wall sconces and braziers to keep your torch alive while you collect every crystal. Bats flee your flame, cave spiders only creep closer while you aren't looking at them, and in the deepest caves shadow hunters track you down whenever your torch burns low.",
   "tags": [
     "exploration",
     "egocentric",
@@ -48,6 +48,12 @@
       "kind": "count",
       "object": "spider",
       "tone": "rose"
+    },
+    {
+      "label": "Hunters",
+      "kind": "count",
+      "object": "hunter",
+      "tone": "violet"
     }
   ],
   "win_text": "Every crystal gathered. You climb back into the daylight!",

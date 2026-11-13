@@ -1,0 +1,74 @@
+{
+  "id": "oom",
+  "name": "OOM Killer",
+  "tagline": "VRAM is mayo. The jobs are hungry. Bufo schedules.",
+  "description": "Training jobs grow through the VRAM like blobs of mayo. Bufo, the scheduler, kills job cells and drops checkpoints to wall them in until each job finishes - one blob on the red OOM line and the whole cluster crashes.",
+  "tags": [
+    "meme",
+    "action",
+    "containment",
+    "strategy"
+  ],
+  "difficulty": "medium",
+  "original": "",
+  "accent": "#ef4444",
+  "icon": "\ud83d\udca5",
+  "controls": {
+    "move": "move",
+    "extra": [
+      {
+        "key": " ",
+        "label": "Kill",
+        "action": "kill",
+        "directional": true
+      },
+      {
+        "key": "e",
+        "label": "Checkpoint",
+        "action": "checkpoint",
+        "directional": true
+      },
+      {
+        "key": "z",
+        "label": "Nap",
+        "action": "nap",
+        "directional": false
+      }
+    ]
+  },
+  "hud": [
+    {
+      "label": "Jobs running",
+      "kind": "global",
+      "variable": "cores",
+      "tone": "violet"
+    },
+    {
+      "label": "Checkpoints",
+      "kind": "var",
+      "object": "bufo",
+      "variable": "ckpts",
+      "tone": "sky"
+    },
+    {
+      "label": "Floppies left",
+      "kind": "count",
+      "object": "floppy",
+      "tone": "emerald"
+    },
+    {
+      "label": "Orange cells",
+      "kind": "count",
+      "object": "job1",
+      "tone": "orange"
+    },
+    {
+      "label": "Violet cells",
+      "kind": "count",
+      "object": "job2",
+      "tone": "fuchsia"
+    }
+  ],
+  "win_text": "Every job finished. No OOM today!",
+  "lose_text": "CUDA out of memory."
+}

@@ -53,7 +53,7 @@ const SPIDERS_META = {
   name: "Spiders Garden",
   tagline: "Grab every gem. Don't get eaten.",
   description:
-    "Collect every gem without touching a spider. Spiders wander at random and cocoon nests hatch more of them. Keys open doors; bridges cross the rivers.",
+    "Collect every gem without touching a spider. Spiders wander at random and cocoon nests hatch more of them, while red-eyed hunters track you down with pathfinding - hide in tall grass to lose them. Keys open doors; bridges cross the rivers.",
   tags: ["action", "exploration", "keys", "original"],
   difficulty: "medium",
   original: "Mini-Grid/minigrid-spiders.yaml",
@@ -64,6 +64,7 @@ const SPIDERS_META = {
     { label: "Gems", kind: "collected", object: "gem", tone: "fuchsia" },
     { label: "Keys", kind: "var", object: "gnome", variable: "keys", tone: "amber" },
     { label: "Spiders", kind: "count", object: "spider", tone: "rose" },
+    { label: "Hunters", kind: "count", object: "hunter", tone: "orange" },
   ],
   win_text: "All gems collected!",
   lose_text: "Eaten by a spider",

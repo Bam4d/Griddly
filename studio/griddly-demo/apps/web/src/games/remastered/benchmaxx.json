@@ -1,0 +1,69 @@
+{
+  "id": "benchmaxx",
+  "name": "Bufo vs the Benchmaxxers",
+  "tagline": "Splat leaderboard-chasing bots with mayo and smash their trophies.",
+  "description": "Benchmaxx bots pour out of leaderboard trophies and swarm bufo. Throw mayo to splat them (the puddles trap their friends), grab GPUs for rapid fire and smash every trophy - three hits each - before they overfit you to death.",
+  "tags": [
+    "meme",
+    "action",
+    "arena",
+    "shooter"
+  ],
+  "difficulty": "hard",
+  "original": "",
+  "accent": "#f59e0b",
+  "icon": "\ud83c\udfc6",
+  "controls": {
+    "move": "move",
+    "extra": [
+      {
+        "key": " ",
+        "label": "Throw mayo",
+        "action": "throw",
+        "directional": true
+      }
+    ]
+  },
+  "hud": [
+    {
+      "label": "HP",
+      "kind": "var",
+      "object": "bufo",
+      "variable": "hp",
+      "tone": "rose"
+    },
+    {
+      "label": "Bronze",
+      "kind": "count",
+      "object": "trophy",
+      "tone": "orange"
+    },
+    {
+      "label": "Gold",
+      "kind": "count",
+      "object": "trophy_gold",
+      "tone": "amber"
+    },
+    {
+      "label": "SOTA",
+      "kind": "count",
+      "object": "trophy_sota",
+      "tone": "sky"
+    },
+    {
+      "label": "Bots",
+      "kind": "global",
+      "variable": "alive",
+      "tone": "violet"
+    },
+    {
+      "label": "Rapid fire",
+      "kind": "var",
+      "object": "bufo",
+      "variable": "rapid",
+      "tone": "lime"
+    }
+  ],
+  "win_text": "Every leaderboard trophy is mayo'd. Bufo is the true SOTA!",
+  "lose_text": "Overfitted. The benchmaxxers got bufo."
+}

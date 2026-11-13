@@ -1,0 +1,69 @@
+{
+  "id": "gpurich",
+  "name": "GPU Rich",
+  "tagline": "Turn mayo into GPUs and GPUs into tokens before the runway runs out.",
+  "description": "An isometric datacenter tycoon. Bufo trades mayo for GPUs, places them on server pads without cooking them (three neighbours = meltdown), hauls the minted tokens to the Mistral HQ and keeps the investors happy - while le chaton fat snacks on stray tokens.",
+  "tags": [
+    "meme",
+    "economy",
+    "strategy",
+    "isometric"
+  ],
+  "difficulty": "medium",
+  "original": "",
+  "accent": "#fb923c",
+  "icon": "\ud83d\udcb0",
+  "controls": {
+    "move": "move",
+    "extra": [
+      {
+        "key": "b",
+        "label": "Build GPU",
+        "action": "build",
+        "directional": true
+      }
+    ]
+  },
+  "hud": [
+    {
+      "label": "Tokens",
+      "kind": "global",
+      "variable": "tokens",
+      "tone": "amber"
+    },
+    {
+      "label": "Target",
+      "kind": "global",
+      "variable": "target",
+      "tone": "orange"
+    },
+    {
+      "label": "Runway",
+      "kind": "global",
+      "variable": "runway",
+      "tone": "rose"
+    },
+    {
+      "label": "Mayo",
+      "kind": "var",
+      "object": "bufo",
+      "variable": "mayo",
+      "tone": "lime"
+    },
+    {
+      "label": "Carrying",
+      "kind": "var",
+      "object": "bufo",
+      "variable": "carry",
+      "tone": "sky"
+    },
+    {
+      "label": "GPUs",
+      "kind": "global",
+      "variable": "gpus",
+      "tone": "emerald"
+    }
+  ],
+  "win_text": "Target smashed. Bufo is officially GPU rich!",
+  "lose_text": "The runway ran out. Back to being GPU poor."
+}

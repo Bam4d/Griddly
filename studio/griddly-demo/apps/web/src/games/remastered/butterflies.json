@@ -2,7 +2,7 @@
   "id": "butterflies",
   "name": "Butterflies Remastered",
   "tagline": "Catch every butterfly before the spiders do.",
-  "description": "Chase butterflies through cottage gardens, meadows, hedge mazes, orchards and marshes. Cocoons hatch more of them, and spiders hunt them - and you.",
+  "description": "Chase butterflies through cottage gardens, meadows, hedge mazes, orchards and marshes. Cocoons hatch more of them, spiders hunt them - and red-eyed hunters hunt you. Hide in the tall grass.",
   "tags": [
     "action",
     "arcade",
@@ -34,6 +34,12 @@
       "kind": "count",
       "object": "spider",
       "tone": "rose"
+    },
+    {
+      "label": "Hunters",
+      "kind": "count",
+      "object": "hunter",
+      "tone": "orange"
     }
   ],
   "win_text": "Every butterfly caught!",

@@ -33,7 +33,7 @@ WALK = set(".") | set(G.values())
 SOLIDS = HEDGE + TREE + STONE + ROCK + WATER
 
 
-def populate(m, a, butterflies, cocoons, spiders, region=None):
+def populate(m, a, butterflies, cocoons, spiders, region=None, hunters=0):
     rows = K.grid_rows(m)
     r = C.reach(rows, a, lambda c, p: c in WALK or c in "fcS")
     for p in K.far_cells(m, a, butterflies, r, 4, region):
@@ -41,17 +41,28 @@ def populate(m, a, butterflies, cocoons, spiders, region=None):
     spots = [p for p in m.free(region) if p in r and abs(p[0] - a[0]) + abs(p[1] - a[1]) >= 5
              and sum(m.get(p[0] + dx, p[1] + dy) == "." for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))) >= 3]
     m.rng.shuffle(spots)
-    for p in spots[:cocoons]:
+    ok = lambda c, p: c in WALK or c in "AfSH"
+    placed = 0
+    for p in spots:  # cocoons are solid: never let one cut the map
+        if placed >= cocoons:
+            break
+        before = len(C.reach(K.grid_rows(m), a, ok))
         m.set(*p, "c")
+        if len(C.reach(K.grid_rows(m), a, ok)) != before - 1:
+            m.set(*p, ".")
+            continue
+        placed += 1
     for p in K.far_cells(m, a, spiders, r, 10, region):
         m.set(*p, "S")
+    for p in K.far_cells(m, a, hunters, C.reach(K.grid_rows(m), a, lambda c, p: c in WALK or c in "fcSH"), 14, region):
+        m.set(*p, "H")
 
 
 def safe_props(m, a, ch, n, region=None):
     spots = m.free(region)
     m.rng.shuffle(spots)
     placed = 0
-    ok = lambda c, p: c in WALK or c in "AfcS"
+    ok = lambda c, p: c in WALK or c in "AfcSH"
     for p in spots:
         if placed >= n:
             break
@@ -179,8 +190,36 @@ def conservatory():
             safe_props(m, a, BUSH, 3, b)
     for b in (box[0][0], box[0][2], box[2][0], box[2][2], box[0][1], box[2][1]):
         populate(m, a, 2, 2, 0, b)
-    populate(m, a, 0, 0, 6)
+    populate(m, a, 0, 0, 6, hunters=1)
     return m, a, dict(grass=20, sand=4, dirt=3, mush=6)
+
+
+def thorn_labyrinth():
+    """A braided hedge labyrinth with five hunters - and not much tall grass to hide in."""
+    m = C.Map(35, 21, seed=37, border=HEDGE)
+    m.maze(0, 0, 34, 20, HEDGE, braid=1.0)
+    for y in range(2, 19):
+        for x in range(2, 33):
+            if (x + y) % 2 == 1 and m.get(x, y) == HEDGE and m.rng.random() < 0.4:
+                m.set(x, y, ".")
+    a = (17, 9) if m.get(17, 9) == "." else (1, 1)
+    m.set(*a, "A")
+    populate(m, a, 9, 5, 2, hunters=5)
+    return m, a, dict(grass=3, dirt=8, mush=5)
+
+
+def spider_meadow():
+    """An open meadow ringed by trees; six hunters and a few tall-grass hiding spots."""
+    m = C.Map(39, 23, seed=38, border=TREE)
+    for cx, cy, r in [(9, 6, 1.6), (29, 16, 1.8), (30, 5, 1.3), (10, 17, 1.4), (19, 11, 1.2)]:
+        m.blob(cx, cy, r, TREE, only=".")
+    m.blob(19, 4, 1.8, WATER, only=".")
+    m.blob(20, 18, 1.8, WATER, only=".")
+    a = (2, 11)
+    m.set(*a, "A")
+    safe_props(m, a, BUSH, 230)                    # a dense bramble thicket: narrow, twisting lanes
+    populate(m, a, 12, 6, 3, hunters=8)
+    return m, a, dict(grass=3, moss=4, mush=8, sand=4)
 
 
 LEVELS = [
@@ -189,7 +228,11 @@ LEVELS = [
     ("Hedge Maze", "Butterflies flit through a looping hedge maze.", hedge_maze),
     ("Orchard", "Rows of fruit trees, a stream and a walled yard.", orchard),
     ("The Marsh", "Islands of reeds joined by log bridges.", marsh),
-    ("Conservatory", "Nine hedge rooms, each with its own cocoons.", conservatory),
+    ("Conservatory", "Nine hedge rooms, each with its own cocoons - and a hunter on the prowl.", conservatory),
+    ("Thorn Labyrinth", "☠ Nightmare: five hunters stalk a looping hedge labyrinth. Little grass to hide in.",
+     thorn_labyrinth),
+    ("Bramble Thicket", "☠ Nightmare: eight hunters in a thicket of brambles. Keep moving and use the tall grass.",
+     spider_meadow),
 ]
 
 
@@ -198,7 +241,7 @@ def validate(name, rows):
     C.check_rect(name, rows)
     a = C.find(rows, "A")
     assert len(a) == 1, f"{name}: need exactly one catcher"
-    seen = C.reach(rows, a[0], lambda c, p: c in WALK or c in "fS")
+    seen = C.reach(rows, a[0], lambda c, p: c in WALK or c in "fSH")
     flies, cocoons = C.find(rows, "f"), C.find(rows, "c")
     assert flies, f"{name}: no butterflies"
     missing = [p for p in flies if p not in seen]
@@ -206,13 +249,13 @@ def validate(name, rows):
     stuck = [p for p in cocoons if not any((p[0] + dx, p[1] + dy) in seen for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))]
     assert not stuck, f"{name}: cocoons that hatch out of reach {stuck}"
     ax, ay = a[0]
-    near = [p for p in C.find(rows, "S") if abs(p[0] - ax) + abs(p[1] - ay) <= 7]
+    near = [p for c in "SH" for p in C.find(rows, c) if abs(p[0] - ax) + abs(p[1] - ay) <= 7]
     assert not near, f"{name}: spider within 7 of start {near}"
-    return dict(butterflies=len(flies), cocoons=len(cocoons), spiders=len(C.find(rows, "S")))
+    return dict(butterflies=len(flies), cocoons=len(cocoons), spiders=len(C.find(rows, "S")), hunters=len(C.find(rows, "H")))
 
 
 # ----------------------------------------------------------------------------- GDY
-OBJECTS = C.GROUND_NAMES + C.SCENERY_NAMES + ["cocoon", "butterfly", "spider", "catcher"]
+OBJECTS = C.GROUND_NAMES + C.SCENERY_NAMES + ["cocoon", "butterfly", "spider", "hunter", "catcher"]
 
 
 def actions():
@@ -222,7 +265,7 @@ def actions():
            "        Dst: {Object: butterfly, Commands: [{remove: true}]}\n")
     kill = "      - Src: {Object: spider}\n        Dst: {Object: catcher, Commands: [{remove: true}, {reward: -1}]}\n"
     caught = ("      - Src: {Object: butterfly, Commands: [{remove: true}]}\n"
-              "        Dst: {Object: catcher, Commands: [{reward: 1}]}\n")
+              "        Dst: {Object: catcher, Commands: [{reward: 1}, {incr: caught}]}\n")
     return f'''
 Actions:
 {C.face_action(me)}
@@ -232,15 +275,31 @@ Actions:
 {K.wander("spider_move", "spider", 3, OBJECTS, {"butterfly": eat, "catcher": kill}, relative=True)}
   # Each cocoon hatches one butterfly into a free neighbouring cell at a random time.
 {K.hatch("hatch", "cocoon", "butterfly", 0, 10, OBJECTS, consume=True, idle=16)}
+{K.sync_action(me)}
+  # Hunters (red-eyed spiders) ignore the butterflies and track the catcher with A* once within 10 tiles
+  # (lost beyond 15, or when the catcher stands in tall grass more than 2 tiles away); one step every 3
+  # ticks, every 2 once 6 butterflies are caught.
+{K.hunter("hunter", me, OBJECTS, {"catcher": kill.replace("spider", "hunter")}, sense=10, lose=15, pace=3,
+          hide=True, fast=("caught", 6, 2))}
+  - Name: hide
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {{Description: Hide, VectorToDest: [0, 0]}}
+    Behaviours:
+      - Src: {{Object: {me}, Commands: [{{set: [hidden, 1]}}]}}
+        Dst: {{Object: {me}}}
   # The catcher runs up / down / left / right; running into a butterfly catches it.
   - Name: move
 {C.MOVE_INPUTS}    Behaviours:
-      - Src: {{Object: {me}, Commands: [{face}, {{mov: _dest}}]}}
-        Dst: {{Object: {C.EMPTY_OR_GROUND}}}
-      - Src: {{Object: {me}, Commands: [{face}, {{mov: _dest}}, {{reward: 1}}]}}
+      - Src: {{Object: {me}, Commands: [{face}, {{mov: _dest}}, {K.SYNC}, {{set: [hidden, 0]}}]}}
+        Dst: {{Object: [_empty, moss, dirt, sand, bones, mushroom, skull, bridge]}}
+      - Src: {{Object: {me}, Commands: [{face}, {{mov: _dest}}, {K.SYNC}, {{exec: {{Action: hide, ActionId: 1}}}}]}}
+        Dst: {{Object: grass}}
+      - Src: {{Object: {me}, Commands: [{face}, {{mov: _dest}}, {{reward: 1}}, {{incr: caught}}, {K.SYNC}, {{set: [hidden, 0]}}]}}
         Dst: {{Object: butterfly, Commands: [{{remove: true}}]}}
       - Src: {{Object: {me}, Commands: [{{remove: true}}, {{reward: -1}}]}}
-        Dst: {{Object: spider}}
+        Dst: {{Object: [spider, hunter]}}
       - Src: {{Object: {me}, Commands: [{face}]}}
         Dst: {{Object: [{", ".join(C.SCENERY_NAMES)}, cocoon]}}
 '''
@@ -256,23 +315,27 @@ def objects():
               init("butterfly_move", 3)),
         C.obj("spider", "S", 2, C.img("oryx/oryx_fantasy/avatars/spider1.png"), "[1.0, 0.0, 0.0]", "triangle", 0.6,
               init("spider_move", 3)),
-        C.obj("catcher", "A", 2, C.imgs(avatar), "[1.0, 1.0, 1.0]", "triangle", 0.8, C.FACE_INITIAL_ACTION, tiles=4),
+        C.obj("hunter", "H", 2, C.imgs(["gvgai/oryx/spider2.png", "gvgai/oryx/spider1.png"]), "[1.0, 0.5, 0.0]",
+              "triangle", 0.6, K.hunter_object_extra(), tiles=2),
+        C.obj("catcher", "A", 2, C.imgs(avatar), "[1.0, 1.0, 1.0]", "triangle", 0.8,
+              C.FACE_INITIAL_ACTION + K.SYNC_INIT, tiles=4),
     ])
 
 
 def main():
     parts = [C.header("Butterflies Remastered", """
         Catch every butterfly! Butterflies flutter at random and cocoons hatch new ones; spiders wander
-        the gardens eating butterflies - and catchers. You win when no butterflies or cocoons are left.
+        the gardens eating butterflies - and catchers. Red-eyed hunters track you down (pathfinding) unless
+        you hide in tall grass. You win when no butterflies or cocoons are left.
         Hedges, trees, bushes and water block the way; lawns, paths and bridges are walkable.
         """.replace("        ", ""), "catcher",
         ["and: [{eq: [butterfly:count, 0]}, {eq: [cocoon:count, 0]}]"], ["eq: [catcher:count, 0]"],
-        background="gvgai/oryx/grass_15.png")]
+        background="gvgai/oryx/grass_15.png", variables=K.hunter_globals({"hidden": 0, "caught": 0}))]
     for i, (name, blurb, build) in enumerate(LEVELS):
         m, _, recipe = build()
         rows = m.rows(solid=SOLIDS)
         info = validate(name, rows)
-        ground = C.decorate(rows, recipe, seed=9200 + i, stack_under="AfcS")
+        ground = C.decorate(rows, recipe, seed=9200 + i, stack_under="AfcSH")
         parts.append(C.level_block(name, blurb, rows, ground))
         print(f"{i}. {name:17s} {len(rows[0])}x{len(rows)} {info}", file=sys.stderr)
         if "-v" in sys.argv:
@@ -282,7 +345,7 @@ def main():
         "name": "Butterflies Remastered",
         "tagline": "Catch every butterfly before the spiders do.",
         "description": "Chase butterflies through cottage gardens, meadows, hedge mazes, orchards and marshes. "
-                       "Cocoons hatch more of them, and spiders hunt them - and you.",
+                       "Cocoons hatch more of them, spiders hunt them - and red-eyed hunters hunt you. Hide in the tall grass.",
         "tags": ["action", "arcade", "classic-port"],
         "difficulty": "medium",
         "original": "GVGAI/butterflies.yaml",
@@ -291,7 +354,8 @@ def main():
         "controls": {"move": "move", "extra": []},
         "hud": [{"label": "Butterflies", "kind": "count", "object": "butterfly", "tone": "sky"},
                 {"label": "Cocoons", "kind": "count", "object": "cocoon", "tone": "emerald"},
-                {"label": "Spiders", "kind": "count", "object": "spider", "tone": "rose"}],
+                {"label": "Spiders", "kind": "count", "object": "spider", "tone": "rose"},
+                {"label": "Hunters", "kind": "count", "object": "hunter", "tone": "orange"}],
         "win_text": "Every butterfly caught!",
         "lose_text": "Caught by a spider.",
     })

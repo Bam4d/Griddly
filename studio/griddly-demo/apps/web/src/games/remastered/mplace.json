@@ -1,0 +1,54 @@
+{
+  "id": "mplace",
+  "name": "m/place",
+  "tagline": "1 mayo = 1 pixel. Paint the office canvas, ban the trolls.",
+  "description": "The office pixel canvas, bufo edition: pick a colour at a paint bucket and paint the ghost image pixel by pixel, one mayo each. Mayo jars refill you, and troll bufos scribble over your art until you splat them with mayo.",
+  "tags": [
+    "meme",
+    "puzzle",
+    "planning"
+  ],
+  "difficulty": "medium",
+  "original": "new (Mistral office meme)",
+  "accent": "#ff8205",
+  "icon": "\ud83c\udfa8",
+  "controls": {
+    "move": "move",
+    "extra": [
+      {
+        "key": " ",
+        "label": "Paint / splat",
+        "action": "paint",
+        "directional": true
+      }
+    ]
+  },
+  "hud": [
+    {
+      "label": "Mayo",
+      "kind": "global",
+      "variable": "mayo",
+      "tone": "amber"
+    },
+    {
+      "label": "Pixels left",
+      "kind": "global",
+      "variable": "wrong",
+      "tone": "rose"
+    },
+    {
+      "label": "Mayo + jars",
+      "kind": "global",
+      "variable": "supply",
+      "tone": "sky"
+    },
+    {
+      "label": "Jars",
+      "kind": "remaining",
+      "object": "jar",
+      "tone": "lime"
+    }
+  ],
+  "win_text": "The canvas matches! 1 mayo = 1 pixel, well spent.",
+  "lose_text": "Not enough mayo left for the pixels still wrong."
+}

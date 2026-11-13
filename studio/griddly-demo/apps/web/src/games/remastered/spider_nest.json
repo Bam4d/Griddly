@@ -2,7 +2,7 @@
   "id": "spider_nest",
   "name": "Spider Nest Remastered",
   "tagline": "Gems, lava and a lot of spiders.",
-  "description": "Guide a gnome through volcanic caves, lava rivers and fire temples to collect every gem. Nests keep hatching spiders, and one step into the lava is the end.",
+  "description": "Guide a gnome through volcanic caves, lava rivers and fire temples to collect every gem. Nests keep hatching spiders, red-eyed hunters track you down with pathfinding (faster with every gem you take in the nightmare caves), and one step into the lava is the end.",
   "tags": [
     "action",
     "exploration",
@@ -28,6 +28,12 @@
       "kind": "count",
       "object": "spider",
       "tone": "rose"
+    },
+    {
+      "label": "Hunters",
+      "kind": "count",
+      "object": "hunter",
+      "tone": "orange"
     }
   ],
   "win_text": "Every gem collected!",

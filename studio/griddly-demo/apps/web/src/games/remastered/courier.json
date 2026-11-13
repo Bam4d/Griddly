@@ -1,0 +1,43 @@
+{
+  "id": "courier",
+  "name": "Le Chat Express",
+  "tagline": "Le chat delivers the mail. Mind the chairs, the coffee and the meetings.",
+  "description": "Take envelopes from the mailboxes (two at a time) and deliver each to the desk of its colour. Office chairs roll away when pushed, spilled coffee is slippery and meeting rooms only open now and then.",
+  "tags": [
+    "meme",
+    "puzzle",
+    "delivery"
+  ],
+  "difficulty": "medium",
+  "original": "new (Mistral office meme)",
+  "accent": "#38bdf8",
+  "icon": "\u2709\ufe0f",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "To deliver",
+      "kind": "global",
+      "variable": "left",
+      "tone": "sky"
+    },
+    {
+      "label": "Envelope 1",
+      "kind": "var",
+      "object": "chat",
+      "variable": "e1",
+      "tone": "amber"
+    },
+    {
+      "label": "Envelope 2",
+      "kind": "var",
+      "object": "chat",
+      "variable": "e2",
+      "tone": "amber"
+    }
+  ],
+  "win_text": "Every envelope delivered. Le chat est le meilleur facteur.",
+  "lose_text": "The office closed before all the mail was delivered."
+}

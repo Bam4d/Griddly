@@ -38,6 +38,12 @@
       "tone": "rose"
     },
     {
+      "label": "Hunters",
+      "kind": "count",
+      "object": "hunter",
+      "tone": "orange"
+    },
+    {
       "label": "Bats",
       "kind": "count",
       "object": "bat",

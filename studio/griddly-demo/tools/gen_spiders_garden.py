@@ -7,7 +7,7 @@ the demo's bundled copy at studio/griddly-demo/apps/web/src/games/minigrid-spide
 Structure characters (layout layer):
   W stone wall   H hedge   R cave rock   ~ water   = bridge   D door (needs a key)
   b bush   T tree   t tombstone   i torch   N spider nest            (solid props)
-  A gnome   G spider   g gem   K key   . floor
+  A gnome   G spider   P hunter (A* chaser)   B brood nest (hatches hunters)   g gem   K key   . floor
 Ground decoration (on walkable cells):  , grass  m moss  d dirt  o bones  u mushroom  x skull
 
 Every level is validated: rectangular, one gnome, every gem/key reachable (doors opened by keys
@@ -21,13 +21,15 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(Path(__file__).resolve().parent / "remaster"))
+import action_kit as K  # noqa: E402
 OUT = [
     ROOT / "resources/games/Single-Player/Mini-Grid/minigrid-spiders-garden.yaml",
     ROOT / "studio/griddly-demo/apps/web/src/games/minigrid-spiders-garden.yaml",
 ]
 
 STRUCTURE = set("WHR~=D")
-SOLID_PROPS = set("bTtiN")
+SOLID_PROPS = set("bTtiNB")
 BLOCKING = STRUCTURE - {"="} | SOLID_PROPS  # for the gnome, before doors are opened
 
 
@@ -193,6 +195,7 @@ def hedge_maze():
     for p in [(31, 1), (1, 19), (31, 19)]:
         m.set(*p, "g")
     m.scatter("G", 6, away_from=(1, 1), min_dist=12)
+    m.scatter("P", 1, away_from=(1, 1), min_dist=20)
     return m, dict(grass=14, dirt=4, mush=5)
 
 
@@ -263,16 +266,73 @@ def queens_lair():
     m.set(35, 17, "N")
     m.scatter("G", 6, away_from=(3, 3), min_dist=12)
     m.scatter("G", 2, (32, 8, 36, 19))
+    m.set(34, 11, "P")
+    return m, dict(dirt=12, bones=14, skull=8, moss=4, mush=4)
+
+
+def hunted_hedges():
+    """Braided hedge maze full of loops; four hunters and a locked gem vault you must come back out of."""
+    m = Map(35, 21, seed=77, border="H")
+    m.maze(0, 0, 34, 20, "H", braid=1.0)
+    for y in range(2, 19):  # knock out ~40% of the hedge segments: loops everywhere
+        for x in range(2, 33):
+            if (x + y) % 2 == 1 and m.get(x, y) == "H" and m.rng.random() < 0.4:
+                m.set(x, y, ".")
+    m.rect(14, 8, 20, 12, "W", filled=False)       # the vault
+    m.rect(15, 9, 19, 11, ".")
+    m.set(17, 8, "D")
+    m.set(1, 1, "A")
+    m.set(33, 19, "K")
+    for p in [(16, 10), (18, 10), (33, 1), (1, 19), (25, 5), (9, 15)]:
+        m.set(*p, "g")
+    for p in [(26, 3), (31, 11), (7, 17), (23, 17), (21, 5), (13, 13)]:
+        m.set(*p, "P")
+    return m, dict(grass=4, dirt=8, mush=5)
+
+
+def spider_queens_court():
+    """Open courtyards joined by narrow gates; brood nests keep hatching hunters while you search."""
+    m = Map(39, 23, seed=88, fill="R", border="R")
+    for x0, y0, x1, y1 in [(1, 1, 11, 9), (14, 1, 24, 9), (27, 1, 37, 9), (1, 13, 11, 21), (14, 13, 24, 21),
+                           (27, 13, 37, 21)]:
+        m.rect(x0, y0, x1, y1, ".")
+        cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
+        m.rect(cx - 1, cy - 1, cx + 1, cy + 1, "t" if m.rng.random() < 0.5 else "~")   # a pillar to loop around
+    for y in (3, 7, 15, 19):                       # gates between courtyards (two per wall: loops)
+        for x in (12, 13, 25, 26):
+            m.set(x, y, ".")
+    for x in (4, 8, 17, 21, 32):
+        for y in (10, 11, 12):
+            m.set(x, y, ".")
+    m.rect(27, 13, 37, 13, "W")                    # the queen's courtyard is walled off...
+    m.rect(26, 13, 26, 21, "W")
+    m.set(32, 13, "D")                             # ...behind one door
+    for y in (15, 19):
+        m.set(26, y, "W")
+        m.set(25, y, "W")
+    m.set(2, 2, "A")
+    m.set(36, 2, "K")
+    for p in [(36, 20), (28, 20), (20, 20), (2, 20), (20, 2), (36, 8)]:
+        m.set(*p, "g")
+    for p in [(19, 19), (35, 5), (6, 19), (18, 5), (5, 15)]:
+        m.set(*p, "P")
+    m.set(32, 19, "B")
+    m.set(10, 15, "B")
+    m.scatter("G", 3, away_from=(2, 2), min_dist=14)
     return m, dict(dirt=12, bones=14, skull=8, moss=4, mush=4)
 
 
 LEVELS = [
     ("Garden Gate", "Find the key to open the walled garden.", garden_gate),
     ("Riverlands", "Cross the river by bridge — nests are hatching on the far bank.", riverlands),
-    ("Hedge Maze", "Four gems hidden in a looping hedge maze.", hedge_maze),
+    ("Hedge Maze", "Four gems hidden in a looping hedge maze - and a hunter that tracks you through it.", hedge_maze),
     ("Sunken Crypt", "Tombs, torches and a locked treasure room.", sunken_crypt),
     ("The Bog", "Wade through the mire. Watch the spiders in the reeds.", bog),
-    ("Queen's Lair", "Deep caves, many nests. The queen guards her treasure.", queens_lair),
+    ("Queen's Lair", "Deep caves, many nests. A hunter guards the queen's treasure.", queens_lair),
+    ("Hunted Hedges", "☠ Nightmare: six red-eyed hunters track you through the hedges. Use the loops, hide in "
+     "the grass, and get the key for the vault.", hunted_hedges),
+    ("Spider Queen's Court", "☠ Nightmare: courtyards and narrow gates, hunters and brood nests that hatch more. "
+     "The last gems wait behind the queen's door.", spider_queens_court),
 ]
 
 
@@ -317,9 +377,10 @@ def validate(name, rows):
     missing = [p for p in gems if p not in seen]
     assert not missing, f"{name}: unreachable gems {missing}"
     ax, ay = a[0]
-    near = [p for p, c in cells.items() if c in "GN" and abs(p[0] - ax) + abs(p[1] - ay) <= 4]
+    near = [p for p, c in cells.items() if c in "GNPB" and abs(p[0] - ax) + abs(p[1] - ay) <= 4]
     assert not near, f"{name}: spider/nest within 4 of start {near}"
-    return len(gems), len(keys), sum(c == "G" for c in cells.values()), sum(c == "N" for c in cells.values())
+    return (len(gems), len(keys), sum(c == "G" for c in cells.values()), sum(c == "N" for c in cells.values()),
+            sum(c == "P" for c in cells.values()), sum(c == "B" for c in cells.values()))
 
 
 # ----------------------------------------------------------------------------- decoration
@@ -377,7 +438,9 @@ Environment:
   Name: Spiders Garden
   Description: |
     Collect every gem without touching a spider. Spiders wander at random and nests hatch more of
-    them. Keys open doors. Water, walls, hedges, rocks, bushes, trees, tombstones, torches and nests
+    them. Red-eyed hunters track you down (A* pathfinding) once you come within 9 tiles, one step every
+    3 ticks (every 2 once you hold 3 gems); they lose you beyond 14 tiles or when you hide in tall grass. Brood nests hatch hunters.
+    Keys open doors. Water, walls, hedges, rocks, bushes, trees, tombstones, torches and nests
     block the way; grass, moss, dirt and bridges are walkable.
     Generated by studio/griddly-demo/tools/gen_spiders_garden.py — edit that, not this file.
   # Cameras are observers. The demo picks one by name and the engine renders it; nothing about
@@ -411,6 +474,15 @@ Environment:
       Height: 9
     Block2D:
       TileSize: 24
+  Variables:
+    - Name: ax
+      InitialValue: 0
+    - Name: ay
+      InitialValue: 0
+    - Name: hidden
+      InitialValue: 0
+    - Name: taken
+      InitialValue: 0
   Player:
     Observer:
       TrackAvatar: true
@@ -428,7 +500,20 @@ Environment:
 '''
 
 GROUND = "[grass, moss, dirt, bones, mushroom, skull, bridge]"
-SOLID = "[wall, hedge, rock, water, door, bush, tree, tombstone, torch, nest, gem, key]"
+SOLID = "[wall, hedge, rock, water, door, bush, tree, tombstone, torch, nest, brood, gem, key, hunter]"
+ALL_OBJECTS = ["wall", "hedge", "rock", "water", "bridge", "door", "grass", "moss", "dirt", "bones", "mushroom", "skull",
+               "bush", "tree", "tombstone", "torch", "nest", "brood", "key", "gem", "spider", "hunter", "gnome"]
+K.GROUND = {"grass", "moss", "dirt", "bones", "mushroom", "skull", "bridge"}
+# the gnome walking onto tall grass sets `hidden` (hunters more than 2 tiles away lose track)
+SYNC_MOVE = "{exec: {Action: sync, ActionId: 1}}"
+
+
+FIX_GROUND = lambda t: t.replace("[_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge]",
+                                 "[_empty, grass, moss, dirt, bones, mushroom, skull, bridge]")
+HATCH_HUNTER = FIX_GROUND(K.hatch("hatch_hunter", "brood", "hunter", 90, 15, ALL_OBJECTS, limit=2))
+HUNTER = FIX_GROUND(K.hunter("hunter", "gnome", ALL_OBJECTS, {
+    "gnome": "      - Src: {Object: hunter}\n        Dst: {Object: gnome, Commands: [{remove: true}, {reward: -1}]}\n"},
+    sense=9, lose=14, pace=3, hide=True, fast=("taken", 3, 2)))
 
 
 def exec_(action, delay=3):
@@ -477,7 +562,30 @@ Actions:
           Object: nest
           Preconditions: [{{lt: [src.hatched, 2]}}]
           Commands: [{{exec: {exec_("hatch", 10)}}}]
-        Dst: {{Object: [wall, hedge, rock, water, door, bush, tree, tombstone, torch, nest, gem, key, spider, gnome]}}
+        Dst: {{Object: [wall, hedge, rock, water, door, bush, tree, tombstone, torch, nest, brood, gem, key, spider, hunter, gnome]}}
+
+  # Brood nests hatch up to 2 hunters each.
+{HATCH_HUNTER}
+  # The gnome publishes its position (ax, ay) and whether it stands in tall grass (hidden).
+  - Name: sync
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {{Description: Sync, VectorToDest: [0, 0]}}
+    Behaviours:
+      - Src: {{Object: gnome, Commands: [{{set: [ax, _x]}}, {{set: [ay, _y]}}, {{set: [hidden, 0]}}]}}
+        Dst: {{Object: gnome}}
+  - Name: hide
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {{Description: Hide, VectorToDest: [0, 0]}}
+    Behaviours:
+      - Src: {{Object: gnome, Commands: [{{set: [hidden, 1]}}]}}
+        Dst: {{Object: gnome}}
+
+  # Hunters: one step every 3 ticks towards the gnome (A*) while alert, else a random step.
+{HUNTER}
 
   # Start the gnome facing down (render tile 2).
   - Name: face
@@ -500,12 +608,14 @@ Actions:
         4: {{Description: Down, VectorToDest: [0, 1], MetaData: {{facing: 2}}}}
     Behaviours:
       - Src: {{Object: gnome, Commands: [{{remove: true}}, {{reward: -1}}]}}
-        Dst: {{Object: spider}}
-      - Src: {{Object: gnome, Commands: [{{set_tile: meta.facing}}, {{mov: _dest}}]}}
+        Dst: {{Object: [spider, hunter]}}
+      - Src: {{Object: gnome, Commands: [{{set_tile: meta.facing}}, {{mov: _dest}}, {SYNC_MOVE}]}}
         Dst: {{Object: _empty}}
-      - Src: {{Object: gnome, Commands: [{{set_tile: meta.facing}}, {{mov: _dest}}]}}
-        Dst: {{Object: {GROUND}}}
-      - Src: {{Object: gnome, Commands: [{{set_tile: meta.facing}}, {{reward: 1}}]}}
+      - Src: {{Object: gnome, Commands: [{{set_tile: meta.facing}}, {{mov: _dest}}, {SYNC_MOVE}, {{exec: {{Action: hide, ActionId: 1}}}}]}}
+        Dst: {{Object: grass}}
+      - Src: {{Object: gnome, Commands: [{{set_tile: meta.facing}}, {{mov: _dest}}, {SYNC_MOVE}]}}
+        Dst: {{Object: [moss, dirt, bones, mushroom, skull, bridge]}}
+      - Src: {{Object: gnome, Commands: [{{set_tile: meta.facing}}, {{reward: 1}}, {{incr: taken}}]}}
         Dst: {{Object: gem, Commands: [{{remove: true}}]}}
       - Src: {{Object: gnome, Commands: [{{set_tile: meta.facing}}, {{incr: keys}}]}}
         Dst: {{Object: key, Commands: [{{remove: true}}]}}
@@ -515,7 +625,7 @@ Actions:
           Commands: [{{set_tile: meta.facing}}, {{decr: keys}}]
         Dst: {{Object: door, Commands: [{{remove: true}}]}}
       - Src: {{Object: gnome, Commands: [{{set_tile: meta.facing}}]}}
-        Dst: {{Object: [wall, hedge, rock, water, bush, tree, tombstone, torch, nest]}}
+        Dst: {{Object: [wall, hedge, rock, water, bush, tree, tombstone, torch, nest, brood]}}
 '''
 
 
@@ -550,7 +660,8 @@ SPIDER_INIT = "    InitialActions:\n      - Action: random_movement\n        Del
 NEST_INIT = ("    Variables:\n      - Name: hatched\n        InitialValue: 0\n"
              "    InitialActions:\n      - Action: hatch\n        Delay: 40\n        Randomize: true\n")
 GNOME_VARS = ("    Variables:\n      - Name: keys\n        InitialValue: 0\n"
-              "    InitialActions:\n      - Action: face\n        ActionId: 2\n")
+              "    InitialActions:\n      - Action: face\n        ActionId: 2\n      - Action: sync\n        ActionId: 1\n")
+BROOD_INIT = NEST_INIT.replace("Action: hatch\n        Delay: 40", "Action: hatch_hunter\n        Delay: 45")
 
 OBJECTS = "\nObjects:\n" + "".join([
     obj("wall", "W", 0, tiled("oryx/oryx_fantasy/wall2"), "[0.45, 0.45, 0.45]"),
@@ -570,9 +681,12 @@ OBJECTS = "\nObjects:\n" + "".join([
     obj("tombstone", "t", 1, img("gvgai/oryx/tombstone1.png"), "[0.5, 0.5, 0.5]", "square", 0.7),
     obj("torch", "i", 1, img("gvgai/oryx/torch1.png"), "[1.0, 0.6, 0.1]", "circle", 0.5),
     obj("nest", "N", 1, img("gvgai/newset/cocoonb1.png"), "[0.6, 0.6, 0.5]", "circle", 0.7, NEST_INIT),
+    obj("brood", "B", 1, img("gvgai/newset/cocoonb1.png"), "[0.6, 0.0, 0.0]", "circle", 0.7, BROOD_INIT),
     obj("key", "K", 1, img("oryx/oryx_fantasy/key-0.png"), "[1.0, 0.85, 0.1]", "triangle", 0.5),
     obj("gem", "g", 1, img("oryx/oryx_fantasy/ore-6.png"), "[0.0, 1.0, 0.0]", "triangle", 0.5),
     obj("spider", "G", 2, img("oryx/oryx_fantasy/avatars/spider1.png"), "[1.0, 0.0, 0.0]", "triangle", 0.8, SPIDER_INIT),
+    obj("hunter", "P", 2, img("gvgai/oryx/spider2.png") + "\n" + img("gvgai/oryx/spider1.png"), "[1.0, 0.5, 0.0]",
+        "triangle", 0.8, K.hunter_object_extra(), tiles=2),
     obj("gnome", "A", 2, "\n".join(img(f"spiders-garden/gnome-{d}.png") for d in ("up", "right", "down", "left")),
         "[0.0, 0.0, 1.0]", "triangle", 0.8, GNOME_VARS, tiles=4),
 ])
@@ -583,10 +697,10 @@ def main():
     for i, (name, blurb, build) in enumerate(LEVELS):
         m, recipe = build()
         rows = m.rows()  # (crops m.w/m.h)
-        gems, keys, spiders, nests = validate(name, rows)
+        gems, keys, spiders, nests, hunters, broods = validate(name, rows)
         body = level_tokens(rows, decorate(rows, recipe, seed=1000 + i))
         parts.append(f"    # {name} | {blurb}\n    - |\n" + "\n".join("      " + r for r in body.split("\n")) + "\n")
-        print(f"{i + 1}. {name:13s} {m.w}x{m.h}  gems={gems} keys={keys} spiders={spiders} nests={nests}", file=sys.stderr)
+        print(f"{i + 1}. {name:13s} {m.w}x{m.h}  gems={gems} keys={keys} spiders={spiders} nests={nests} hunters={hunters} broods={broods}", file=sys.stderr)
         if "-v" in sys.argv:
             print("\n".join(rows), file=sys.stderr)
     gdy = "".join(parts) + ACTIONS + OBJECTS
