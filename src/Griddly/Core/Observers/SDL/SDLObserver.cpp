@@ -270,18 +270,56 @@ SDL_Texture* SDLObserver::loadSpriteTexture(const std::string& spriteName, const
     return existing->second;  // already loaded by another observer sharing the renderer
   }
   std::string absoluteFilePath = config_.resourceConfig.imagePath + "/" + imageFilename;
+  std::vector<uint8_t> resizedPixels = loadSpriteImage(absoluteFilePath, tileSize);
+  return createSpriteTexture(spriteName, resizedPixels, tileSize, absoluteFilePath);
+}
+
+SDL_Texture* SDLObserver::loadGlowTexture(const std::string& spriteName, glm::ivec2 tileSize) {
+  auto& textures = sprites();
+  auto existing = textures.find(spriteName);
+  if (existing != textures.end() && sharedSprites_ != nullptr) {
+    return existing->second;
+  }
+  return createSpriteTexture(spriteName, makeGlowImage(tileSize), tileSize, spriteName);
+}
+
+std::vector<uint8_t> SDLObserver::makeGlowImage(glm::ivec2 tileSize) {
+  // White disc with a small solid centre whose alpha falls off quickly towards the edge,
+  // so the tinted glow reads as one colour around the object without swamping it
+  const float solidRadius = 0.2f;
+  const float peakAlpha = 0.8f;
+  auto width = static_cast<uint32_t>(tileSize.x);
+  auto height = static_cast<uint32_t>(tileSize.y);
+  std::vector<uint8_t> pixels(static_cast<size_t>(width) * height * 4);
+  for (uint32_t y = 0; y < height; y++) {
+    for (uint32_t x = 0; x < width; x++) {
+      // distance from the image centre, 1.0 at the middle of each edge
+      float dx = (static_cast<float>(x) + 0.5f) / static_cast<float>(width) * 2.0f - 1.0f;
+      float dy = (static_cast<float>(y) + 0.5f) / static_cast<float>(height) * 2.0f - 1.0f;
+      float d = std::sqrt(dx * dx + dy * dy);
+      float t = std::clamp((d - solidRadius) / (1.0f - solidRadius), 0.0f, 1.0f);
+      float alpha = peakAlpha * (1.0f - t) * (1.0f - t) * (1.0f - t);
+      auto* p = &pixels[(static_cast<size_t>(y) * width + x) * 4];
+      p[0] = p[1] = p[2] = 255;
+      p[3] = static_cast<uint8_t>(alpha * 255.0f);
+    }
+  }
+  return pixels;
+}
+
+SDL_Texture* SDLObserver::createSpriteTexture(const std::string& spriteName, const std::vector<uint8_t>& pixels, glm::ivec2 tileSize, const std::string& source) {
+  auto& textures = sprites();
   auto outputWidth = static_cast<uint32_t>(tileSize.x);
   auto outputHeight = static_cast<uint32_t>(tileSize.y);
-  std::vector<uint8_t> resizedPixels = loadSpriteImage(absoluteFilePath, tileSize);
 
-  SDL_Surface* spriteSurface = SDL_CreateSurfaceFrom(static_cast<int>(outputWidth), static_cast<int>(outputHeight), SDL_PIXELFORMAT_RGBA32, resizedPixels.data(), static_cast<int>(outputWidth * 4));
+  SDL_Surface* spriteSurface = SDL_CreateSurfaceFrom(static_cast<int>(outputWidth), static_cast<int>(outputHeight), SDL_PIXELFORMAT_RGBA32, const_cast<uint8_t*>(pixels.data()), static_cast<int>(outputWidth * 4));
   if (spriteSurface == nullptr) {
     throw std::runtime_error(fmt::format("SDL: failed to create sprite surface: {0}", SDL_GetError()));
   }
   SDL_Texture* texture = SDL_CreateTextureFromSurface(activeRenderer(), spriteSurface);
   SDL_DestroySurface(spriteSurface);
   if (texture == nullptr) {
-    throw std::runtime_error(fmt::format("SDL: failed to create sprite texture for {0}: {1}", absoluteFilePath, SDL_GetError()));
+    throw std::runtime_error(fmt::format("SDL: failed to create sprite texture for {0}: {1}", source, SDL_GetError()));
   }
   SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
   SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_LINEAR);

@@ -24,6 +24,7 @@ import type {
   GriddlyJSGameWrapper,
   GriddlyJSPlayerWrapper,
   GriddlyModule,
+  StepResult,
 } from "./module.js";
 
 export * from "./module.js";
@@ -188,6 +189,33 @@ export class Griddly {
     } catch (e) {
       rethrow(this.griddlyjs, e);
     }
+  }
+
+  /**
+   * Submit several actions for one player (0-based index) in the same tick, e.g. one order per unit in
+   * an RTS. Each action is [x, y, actionTypeIdx, actionId] for location-based games (or
+   * [actionTypeIdx, actionId] with an avatar). Time only advances when `updateTicks` is true, so submit
+   * every player's actions with updateTicks=false except the last call.
+   */
+  stepPlayer(playerIdx: number, actions: number[][], updateTicks = true): StepResult {
+    try {
+      return this.requireGame().stepPlayer(playerIdx, actions, updateTicks);
+    } catch (e) {
+      rethrow(this.griddlyjs, e);
+    }
+  }
+
+  /**
+   * Actions each of a player's objects can currently perform, keyed by "x,y" (player ids are 1-based,
+   * as in the GDY). Internal actions are excluded.
+   */
+  getAvailableActionNames(playerId: number): Record<string, string[]> {
+    return this.requireGame().getAvailableActionNames(playerId);
+  }
+
+  /** The action ids of `actionNames` that are valid right now for the object at (x, y). */
+  getAvailableActionIds(x: number, y: number, actionNames: string[]): Record<string, number[]> {
+    return this.requireGame().getAvailableActionIds(x, y, actionNames);
   }
 
   /** Convenience for single-player games. */

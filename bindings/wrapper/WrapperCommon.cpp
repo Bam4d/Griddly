@@ -60,9 +60,11 @@ inline RawObservation updateObservationRaw(std::shared_ptr<Observer> observer) {
   } else {
     auto tensorObserver = std::dynamic_pointer_cast<TensorObservationInterface>(observer);
     raw.isEntity = false;
+    // update() first: observers may only (re)compute their shape/strides when the
+    // first frame after a reset is rendered
+    raw.tensorData = &tensorObserver->update();
     raw.shape = tensorObserver->getShape();
     raw.strides = tensorObserver->getStrides();
-    raw.tensorData = &tensorObserver->update();
   }
   return raw;
 }

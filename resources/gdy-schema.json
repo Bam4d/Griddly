@@ -265,6 +265,21 @@
                   "description": "Add highlights to the players in visual observers.",
                   "default": true
                 },
+                "HighlightStyle": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/HighlightStyle",
+                  "type": "string",
+                  "title": "Highlight Style",
+                  "description": "How player highlights are drawn in Sprite2D observers: OUTLINE (a player-coloured silhouette behind the sprite), GLOW (a soft player-coloured glow centred on the object) or SHADOW (the glow flattened into an ellipse under the bottom of the sprite).",
+                  "enum": ["OUTLINE", "GLOW", "SHADOW"],
+                  "default": "OUTLINE"
+                },
+                "HighlightScale": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/HighlightScale",
+                  "type": "number",
+                  "title": "Highlight Scale",
+                  "description": "Size of the player highlight relative to the sprite in Sprite2D observers.",
+                  "default": 1.1
+                },
                 "RotateWithAvatar": {
                   "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/RotateWithAvatar",
                   "type": "boolean",

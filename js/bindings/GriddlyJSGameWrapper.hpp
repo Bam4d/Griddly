@@ -38,6 +38,17 @@ class GriddlyJSGameWrapper {
 
   e::val stepParallel(e::val stepArray);
 
+  // Several actions for one player in the same tick: each entry is [x, y, actionTypeIdx, actionId]
+  // (or [actionTypeIdx, actionId] for avatar games). The game only advances when updateTicks is true,
+  // so RTS UIs can submit every unit order of every player and tick once.
+  e::val stepPlayer(uint32_t playerIdx, e::val actions, bool updateTicks);
+
+  // {"x,y": [action names]} the player's objects can currently perform (internal actions excluded)
+  e::val getAvailableActionNames(uint32_t playerId) const;
+
+  // {action name: [valid action ids]} for the object at (x, y)
+  e::val getAvailableActionIds(int32_t x, int32_t y, e::val actionNames) const;
+
   uint32_t getWidth() const;
 
   uint32_t getHeight() const;

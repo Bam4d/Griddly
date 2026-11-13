@@ -766,4 +766,126 @@ TEST(SpriteObserverTest, reset) {
   testEnvironment.verifyAndClearExpectations();
 }
 
+TEST(SpriteObserverTest, strides_valid_before_first_update) {
+  // Bindings read shape/strides around update(); they must already be valid straight after reset()
+  SpriteObserverConfig observerConfig;
+  observerConfig.tileSize = glm::ivec2(24, 24);
+  observerConfig.resourceConfig.imagePath = "resources/images";
+  observerConfig.spriteDefinitions = getMockSpriteDefinitions();
+
+  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, observerConfig));
+  spriteObserver->init({spriteObserver});
+
+  spriteObserver->reset();
+  ASSERT_EQ(spriteObserver->getShape(), (std::vector<uint32_t>{3, 120, 120}));
+  ASSERT_EQ(spriteObserver->getStrides(), (std::vector<uint32_t>{1, 4, 4 * 120}));
+
+  spriteObserver->update();
+  ASSERT_EQ(spriteObserver->getStrides(), (std::vector<uint32_t>{1, 4, 4 * 120}));
+}
+
+// Renders the RTS test grid with tiny (1/10 tile) sprites and a highlight that covers exactly one
+// tile, so the highlight around each object can be sampled; observer is player 1 (green), player 2 is red
+std::shared_ptr<SpriteObserver> renderHighlightTest(HighlightStyle style, ObserverRTSTestData& testEnvironment, SpriteObserverConfig& observerConfig) {
+  observerConfig.highlightStyle = style;
+  auto spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, observerConfig));
+  spriteObserver->init({spriteObserver, spriteObserver, spriteObserver});
+  spriteObserver->reset();
+  spriteObserver->update();
+  return spriteObserver;
+}
+
+SpriteObserverConfig highlightTestConfig() {
+  SpriteObserverConfig observerConfig = {5, 5, 0, 0};
+  observerConfig.playerId = 1;
+  observerConfig.playerCount = 3;
+  observerConfig.tileSize = glm::ivec2(50, 50);
+  observerConfig.highlightPlayers = true;
+  observerConfig.highlightScale = 10.0f;
+  observerConfig.playerColors = {{0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}};
+  observerConfig.resourceConfig.imagePath = "resources/images";
+  auto spriteDefinitions = getMockRTSSpriteDefinitions();
+  for (const auto& name : {"A0", "B0", "C0"}) {
+    spriteDefinitions[name].scale = 0.1f;
+  }
+  observerConfig.spriteDefinitions = spriteDefinitions;
+  return observerConfig;
+}
+
+TEST(SpriteObserverTest, multiPlayer_Glow_centred_on_object) {
+  // GLOW highlights are a single player colour, fade out, and are centred on the object
+  auto observerConfig = highlightTestConfig();
+  ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
+  auto spriteObserver = renderHighlightTest(HighlightStyle::GLOW, testEnvironment, observerConfig);
+
+  const uint8_t* pixels = &spriteObserver->update();
+  auto width = spriteObserver->getShape()[1];
+  auto pixel = [&](uint32_t x, uint32_t y) { return pixels + (static_cast<size_t>(y) * width + x) * 4; };
+
+  // A1 at (1,1) is owned by the observing player -> first colour (green)
+  const uint32_t tile = 50;
+  const uint32_t cx = 1 * tile + tile / 2, cy = 1 * tile + tile / 2;
+  // just outside the 5px sprite: mostly green
+  auto* core = pixel(cx + 6, cy);
+  ASSERT_GT(core[1], 150);
+  ASSERT_GT(core[1], core[0] + 100);
+  ASSERT_GT(core[1], core[2] + 100);
+
+  // fades towards the tile edge
+  ASSERT_LT(pixel(1 * tile + 1, cy)[1] + 80, core[1]);
+
+  // C2 at (3,2) belongs to player 2 -> second colour (red)
+  auto* enemy = pixel(3 * tile + tile / 2 + 6, 2 * tile + tile / 2);
+  ASSERT_GT(enemy[0], 150);
+  ASSERT_GT(enemy[0], enemy[1] + 100);
+
+  // symmetric about the object centre: mirrored samples match (sampled where the glow
+  // dominates; at the faint outer edge the textured floor shows through)
+  for (uint32_t d : {6u, 9u, 12u}) {
+    auto* left = pixel(cx - d, cy);
+    auto* right = pixel(cx + d - 1, cy);
+    auto* up = pixel(cx, cy - d);
+    auto* down = pixel(cx, cy + d - 1);
+    ASSERT_NEAR(left[1], right[1], 8) << "horizontal asymmetry at d=" << d;
+    ASSERT_NEAR(up[1], down[1], 8) << "vertical asymmetry at d=" << d;
+  }
+}
+
+TEST(SpriteObserverTest, multiPlayer_Shadow_under_object) {
+  // SHADOW highlights are the glow squashed into an ellipse centred on the bottom edge of the sprite
+  auto observerConfig = highlightTestConfig();
+  ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
+  auto spriteObserver = renderHighlightTest(HighlightStyle::SHADOW, testEnvironment, observerConfig);
+
+  const uint8_t* pixels = &spriteObserver->update();
+  auto width = spriteObserver->getShape()[1];
+  auto pixel = [&](uint32_t x, uint32_t y) { return pixels + (static_cast<size_t>(y) * width + x) * 4; };
+  auto greenness = [&](uint32_t x, uint32_t y) { auto* p = pixel(x, y); return static_cast<int>(p[1]) - static_cast<int>(p[0]); };
+
+  // A1 at (1,1): sprite is 5px tall, so its bottom edge is 2.5px below the tile centre
+  const uint32_t tile = 50;
+  const uint32_t cx = 1 * tile + tile / 2, cy = 1 * tile + tile / 2;
+  const uint32_t shadowY = cy + 3;
+
+  // strongly green on the shadow line beside the sprite, nothing above the sprite
+  ASSERT_GT(greenness(cx + 6, shadowY), 100);
+  ASSERT_LT(greenness(cx, cy - 8), 20);
+  ASSERT_LT(greenness(cx + 6, cy - 8), 20);
+
+
+  // wider than tall: still green 9px out sideways, but already gone 6px below the line
+  ASSERT_GT(greenness(cx + 9, shadowY), 40);
+  ASSERT_LT(greenness(cx, shadowY + 6), 20);
+
+  // symmetric left / right (compared on green minus red, so the floor showing through mostly cancels)
+  for (uint32_t d : {6u, 9u, 12u}) {
+    ASSERT_NEAR(greenness(cx - d, shadowY), greenness(cx + d - 1, shadowY), 8) << "horizontal asymmetry at d=" << d;
+  }
+
+  // the enemy (C2 at (3,2), player 2) gets a red shadow
+  auto* enemy = pixel(3 * tile + tile / 2 + 6, 2 * tile + tile / 2 + 3);
+  ASSERT_GT(enemy[0], enemy[1] + 100);
+}
+
 }  // namespace griddly

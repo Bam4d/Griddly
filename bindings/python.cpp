@@ -170,6 +170,9 @@ NB_MODULE(python_griddly, m) {
       .def("to_image", [](NumpyWrapper<uint8_t> &m) {
         auto shape = m.getShape();    // {3, width, height}
         auto strides = m.getStrides(); // {1, 4, 4*width}
+        if (shape.size() != 3 || strides.size() != 3) {
+          throw std::runtime_error("to_image() needs a 3D image observation with strides");
+        }
         std::vector<size_t> imgShape = {shape[2], shape[1], 4};
         std::vector<int64_t> imgStrides = {(int64_t)strides[2], (int64_t)strides[1], (int64_t)strides[0]};
         return py::ndarray<uint8_t, py::ndim<3>, py::ro, py::numpy>(&m.getData(), imgShape.size(), imgShape.data(), py::handle(), imgStrides.data());

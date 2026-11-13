@@ -1,5 +1,6 @@
 #include <emscripten/val.h>
 
+#include <algorithm>
 #include <memory>
 
 #include "GriddlyJSGameWrapper.hpp"
@@ -141,6 +142,79 @@ e::val GriddlyJSGameWrapper::stepParallel(e::val stepArray) {
   js_result.set("reward", playerRewards);
 
   return js_result;
+}
+
+e::val GriddlyJSGameWrapper::stepPlayer(uint32_t playerIdx, e::val actions, bool updateTicks) {
+  if (playerIdx >= players_.size()) {
+    throw std::invalid_argument(fmt::format("No player with index {0}", playerIdx));
+  }
+  const auto& externalActionNames = gdyFactory_->getExternalActionNames();
+  auto count = actions["length"].as<uint32_t>();
+
+  bool terminated = false;
+  e::val info = e::val::object();
+  auto collect = [&](e::val result) {
+    if (result["terminated"].as<bool>()) {
+      terminated = true;
+      info = result["info"];
+    }
+  };
+
+  for (uint32_t a = 0; a < count; a++) {
+    auto action = e::convertJSArrayToNumberVector<int32_t>(actions.call<e::val>("at", a));
+    std::string actionName;
+    std::vector<int32_t> actionArray;
+    if (action.size() == 4) {
+      actionName = externalActionNames.at(action[2]);
+      actionArray = {action[0], action[1], action[3]};
+    } else if (action.size() == 2) {
+      actionName = externalActionNames.at(action[0]);
+      actionArray = {action[1]};
+    } else {
+      throw std::invalid_argument(fmt::format("Invalid action size {0}, expected [x, y, actionTypeIdx, actionId] or [actionTypeIdx, actionId]", action.size()));
+    }
+    bool last = a == count - 1;
+    collect(players_[playerIdx]->stepSingle(actionName, actionArray, updateTicks && last));
+  }
+
+  if (count == 0 && updateTicks) {
+    // nothing to do this tick: an empty action still advances the game
+    collect(players_[playerIdx]->stepSingle(externalActionNames.at(0), {0, 0, 0}, true));
+  }
+
+  e::val playerRewards = e::val::array();
+  for (uint32_t p = 0; p < players_.size(); p++) {
+    playerRewards.call<void>("push", gameProcess_->getAccumulatedRewards(p + 1));
+  }
+
+  auto js_result = e::val::object();
+  js_result.set("terminated", terminated);
+  js_result.set("info", info);
+  js_result.set("reward", playerRewards);
+  return js_result;
+}
+
+e::val GriddlyJSGameWrapper::getAvailableActionNames(uint32_t playerId) const {
+  e::val js_available = e::val::object();
+  for (const auto& [location, names] : gameProcess_->getAvailableActionNames(playerId)) {
+    std::vector<std::string> sorted(names.begin(), names.end());
+    std::sort(sorted.begin(), sorted.end());
+    js_available.set(fmt::format("{0},{1}", location.x, location.y), e::val::array(sorted));
+  }
+  return js_available;
+}
+
+e::val GriddlyJSGameWrapper::getAvailableActionIds(int32_t x, int32_t y, e::val actionNames) const {
+  e::val js_ids = e::val::object();
+  const auto& actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
+  for (const auto& actionName : e::vecFromJSArray<std::string>(actionNames)) {
+    if (actionInputsDefinitions.find(actionName) == actionInputsDefinitions.end()) {
+      continue;
+    }
+    auto ids = gameProcess_->getAvailableActionIdsAtLocation({x, y}, actionName);
+    js_ids.set(actionName, e::val::array(ids));
+  }
+  return js_ids;
 }
 
 uint32_t GriddlyJSGameWrapper::getWidth() const {

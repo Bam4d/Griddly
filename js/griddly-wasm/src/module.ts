@@ -74,6 +74,12 @@ export interface GriddlyJSGameWrapper {
   observe(): any;
   observeImage(): Promise<Uint8Array> | Uint8Array;
   stepParallel(playerActions: number[][]): number;
+  /** Several actions for one player in one tick: [x, y, actionTypeIdx, actionId] (or [actionTypeIdx, actionId]). */
+  stepPlayer(playerIdx: number, actions: number[][], updateTicks: boolean): StepResult;
+  /** {"x,y": [action names]} the player's objects can currently perform (internal actions excluded). */
+  getAvailableActionNames(playerId: number): Record<string, string[]>;
+  /** {action name: [valid action ids]} for the object at (x, y). */
+  getAvailableActionIds(x: number, y: number, actionNames: string[]): Record<string, number[]>;
   getWidth(): number;
   getHeight(): number;
   /** Game state as a plain JS object (embind `val`). */
@@ -89,6 +95,12 @@ export interface GriddlyJSGameWrapper {
   seedRandomGenerator(seed: number): void;
   delete(): void;
 }
+
+export type StepResult = {
+  terminated: boolean;
+  info: { playerResults?: Record<string, string> };
+  reward: number[];
+};
 
 export interface GriddlyJSPlayerWrapper {
   getObservationDescription(): ObservationDescription;

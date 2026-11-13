@@ -34,6 +34,7 @@ void IsometricSpriteObserver::resetShape() {
   pixelHeight_ = (gridWidth_ + gridHeight_) * (config_.isoTileHeight / 2) + tileSize.y;
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
+  observationStrides_ = {1, 4, pixelWidth_ * 4};
 
   isoHeightRatio_ = static_cast<float>(config_.isoTileHeight) / static_cast<float>(tileSize.y);
 }

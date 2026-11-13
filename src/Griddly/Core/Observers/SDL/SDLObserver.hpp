@@ -35,11 +35,23 @@ enum class GlobalObserverAvatarMode {
   HIGHLIGHT_VISIBLE,
 };
 
+enum class HighlightStyle {
+  OUTLINE,
+  GLOW,
+  SHADOW,
+};
+
 struct SDLObserverConfig : ObserverConfig {
   ResourceConfig resourceConfig{};
   ShaderVariableConfig shaderVariableConfig{};
 
   bool highlightPlayers = false;
+  // OUTLINE: a solid player-coloured copy of the sprite drawn behind it.
+  // GLOW: a soft player-coloured radial glow centred on the object.
+  // SHADOW: the glow squashed into an ellipse under the bottom of the sprite.
+  HighlightStyle highlightStyle = HighlightStyle::OUTLINE;
+  // size of the highlight relative to the sprite
+  float highlightScale = 1.1f;
   std::vector<glm::vec3> playerColors{};
   glm::ivec2 tileSize = {24, 24};
   glm::vec3 globalObserverAvatarHighlightColor{0.3, 0.3, 0.3};
@@ -85,6 +97,9 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   SDL_Texture* loadSpriteTexture(const std::string& spriteName, const std::string& imageFilename, glm::ivec2 tileSize);
   // Load an image file as tightly packed RGBA8 resized to tileSize (shared with the CUDA tiled renderer)
   static std::vector<uint8_t> loadSpriteImage(const std::string& absoluteFilePath, glm::ivec2 tileSize);
+  // White radial glow (opaque centre, fast fall-off), tinted per player with the item colour
+  SDL_Texture* loadGlowTexture(const std::string& spriteName, glm::ivec2 tileSize);
+  static std::vector<uint8_t> makeGlowImage(glm::ivec2 tileSize);
 
   bool isUsingGPU() const { return usingGPU_; }
   SDL_Texture* getTargetTexture() const { return usingGPU_ ? targetTexture_ : nullptr; }
@@ -236,6 +251,8 @@ class SDLObserver : public Observer, public TensorObservationInterface {
  private:
   void initSDL();
   void destroySDL();
+
+  SDL_Texture* createSpriteTexture(const std::string& spriteName, const std::vector<uint8_t>& pixels, glm::ivec2 tileSize, const std::string& source);
 
   SpriteTextureMap& sprites() { return sharedSprites_ != nullptr ? *sharedSprites_ : spriteTextures_; }
   SDL_Renderer* activeRenderer() const { return sharedRenderer_ != nullptr ? sharedRenderer_ : renderer_; }

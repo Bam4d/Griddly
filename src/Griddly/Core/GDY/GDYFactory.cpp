@@ -320,6 +320,17 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
   config.playerColors = playerColors_;
   config.tileSize = parseTileSize(observerConfigNode);
   config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
+  config.highlightScale = resolveObserverConfigValue<float>("HighlightScale", observerConfigNode, config.highlightScale, !isGlobalObserver);
+  auto highlightStyle = resolveObserverConfigValue<std::string>("HighlightStyle", observerConfigNode, "OUTLINE", !isGlobalObserver);
+  if (highlightStyle == "GLOW") {
+    config.highlightStyle = HighlightStyle::GLOW;
+  } else if (highlightStyle == "SHADOW") {
+    config.highlightStyle = HighlightStyle::SHADOW;
+  } else if (highlightStyle == "OUTLINE") {
+    config.highlightStyle = HighlightStyle::OUTLINE;
+  } else {
+    throwParserError(fmt::format("Unknown HighlightStyle {0}, must be OUTLINE, GLOW or SHADOW", highlightStyle));
+  }
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
 
   auto backgroundTileNode = observerConfigNode["BackgroundTile"];

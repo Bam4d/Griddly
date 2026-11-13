@@ -47,6 +47,12 @@ class SpriteObserver : public SDLGridObserver {
 
   std::map<std::string, SpriteDefinition> spriteDefinitions_;
   SpriteObserverConfig config_;
+
+  // generated texture used by HighlightStyle::GLOW / SHADOW (higher resolution than tiles so it scales smoothly)
+  static constexpr const char* kHighlightGlowSprite = "__highlight_glow";
+  static constexpr int32_t kHighlightGlowSize = 64;
+  // SHADOW height relative to its width
+  static constexpr float kHighlightShadowAspect = 0.35f;
 };
 
 }  // namespace griddly

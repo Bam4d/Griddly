@@ -34,6 +34,8 @@ void SDLGridObserver::resetShape() {
   pixelHeight_ = gridHeight_ * tileSize.y;
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
+  // RGBA8 interleaved, tightly packed (see SDLObserver::resetRenderSurface)
+  observationStrides_ = {1, 4, pixelWidth_ * 4};
 }
 
 glm::vec2 SDLGridObserver::getTilePixelCenter(glm::ivec2 location) const {

@@ -46,6 +46,10 @@ void SpriteObserver::lazyInit() {
       loadSpriteTexture(spriteName, spriteDefinition.images[0], config_.tileSize);
     }
   }
+
+  if (config_.highlightPlayers && config_.highlightStyle != HighlightStyle::OUTLINE) {
+    loadGlowTexture(kHighlightGlowSprite, {kHighlightGlowSize, kHighlightGlowSize});
+  }
 }
 
 std::string SpriteObserver::getSpriteName(const std::string& objectName, const std::string& tileName, const glm::ivec2& location, Direction orientation) const {
@@ -259,16 +263,42 @@ void SpriteObserver::appendObjectItems(const std::shared_ptr<ObjectRules>& objec
       item.angle = getObjectAngle(object, globalOrientation_);
     }
 
-    // Approximate the old shader's player-color outline with a slightly larger quad behind the sprite
-    if (config_.highlightPlayers) {
+    if (config_.highlightPlayers && config_.highlightStyle != HighlightStyle::OUTLINE) {
+      // Soft radial glow in the player's colour (neutral objects get none): GLOW is centred on the
+      // object, SHADOW is the same glow flattened into an ellipse centred on the sprite's bottom edge
+      auto* glowTexture = getSpriteTexture(kHighlightGlowSprite);
+      if (objectPlayerId != 0 && glowTexture != nullptr) {
+        auto playerColorId = getEgocentricPlayerId(objectPlayerId);
+        glm::vec4 playerColor = (playerColorId >= 1 && playerColorId <= playerColors_.size()) ? playerColors_[playerColorId - 1] : glm::vec4(1.0f);
+        SDLRenderItem glow;
+        glow.texture = glowTexture;
+        glow.src = {0, 0, static_cast<float>(kHighlightGlowSize), static_cast<float>(kHighlightGlowSize)};
+        auto glowWidth = static_cast<float>(tileSize.x) * scale * config_.highlightScale;
+        auto glowHeight = static_cast<float>(tileSize.y) * scale * config_.highlightScale;
+        auto glowCenterY = center.y;
+        if (config_.highlightStyle == HighlightStyle::SHADOW) {
+          glowHeight *= kHighlightShadowAspect;
+          glowCenterY = center.y + static_cast<float>(tileSize.y) * scale / 2.0f;
+        }
+        glow.dst = {center.x - glowWidth / 2.0f, glowCenterY - glowHeight / 2.0f, glowWidth, glowHeight};
+        glow.r = static_cast<uint8_t>(playerColor.r * 255.0f);
+        glow.g = static_cast<uint8_t>(playerColor.g * 255.0f);
+        glow.b = static_cast<uint8_t>(playerColor.b * 255.0f);
+        glow.z = static_cast<float>(zIdx) - 0.5f;
+        glow.sortY = center.y;
+        out.push_back(glow);
+      }
+    } else if (config_.highlightPlayers) {
+      // Approximate the old shader's player-color outline with a slightly larger quad behind the sprite
       auto playerColorId = getEgocentricPlayerId(objectPlayerId);
       glm::vec4 playerColor = (playerColorId >= 1 && playerColorId <= playerColors_.size()) ? playerColors_[playerColorId - 1] : glm::vec4(1.0f);
       SDLRenderItem outline = item;
       outline.r = static_cast<uint8_t>(playerColor.r * 255.0f);
       outline.g = static_cast<uint8_t>(playerColor.g * 255.0f);
       outline.b = static_cast<uint8_t>(playerColor.b * 255.0f);
-      outline.dst = {center.x - tileSize.x * scale * 1.1f / 2.0f, center.y - tileSize.y * scale * 1.1f / 2.0f,
-                     tileSize.x * scale * 1.1f, tileSize.y * scale * 1.1f};
+      auto outlineScale = scale * config_.highlightScale;
+      outline.dst = {center.x - tileSize.x * outlineScale / 2.0f, center.y - tileSize.y * outlineScale / 2.0f,
+                     tileSize.x * outlineScale, tileSize.y * outlineScale};
       outline.z = static_cast<float>(zIdx) - 0.5f;
       out.push_back(outline);
     }

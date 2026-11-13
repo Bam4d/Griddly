@@ -99,6 +99,21 @@ const Library = () => {
           </div>
         </header>
 
+        <Link
+          to="/rts"
+          data-testid="rts-link"
+          className="group flex flex-col gap-1 rounded-2xl border border-amber-400/20 bg-gradient-to-r from-amber-500/10 via-emerald-500/5 to-rose-500/10 px-6 py-4 transition hover:border-amber-400/50 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-amber-300/80">New · two-player strategy</span>
+            <span className="block text-xl font-black text-stone-100">Griddly RTS: Frontiers</span>
+            <span className="block text-sm text-stone-400">
+              Seven large maps, relays, towers, a tech tree and six unit types. Command your army with the mouse against a scripted AI.
+            </span>
+          </span>
+          <span className="shrink-0 font-mono text-sm text-amber-200 transition group-hover:translate-x-1">Play RTS →</span>
+        </Link>
+
         {/* search + filters */}
         <section className="flex flex-col gap-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
