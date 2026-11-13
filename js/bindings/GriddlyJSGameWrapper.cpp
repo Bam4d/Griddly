@@ -5,6 +5,7 @@
 
 #include "GriddlyJSGameWrapper.hpp"
 #include "../../src/Griddly/Core/Observers/SDL/SDLObserver.hpp"
+#include "../../src/Griddly/Core/Observers/SDLGridObserver.hpp"
 #include "GriddlyJSWrapperCommon.cpp"
 
 namespace e = emscripten;
@@ -68,6 +69,40 @@ e::val GriddlyJSGameWrapper::observe() {
 
 e::val GriddlyJSGameWrapper::observeImage() {
   return wrapObservationImage(gameProcess_->getObserver());
+}
+
+e::val GriddlyJSGameWrapper::observePlayerObserverImage(uint32_t playerId, std::string observerName) {
+  auto observer = gameProcess_->getPlayerObserver(playerId, observerName);
+  auto result = e::val::object();
+  // render first: the shape is only final after the frame is drawn
+  auto pixels = wrapObservationImage(observer);
+  result.set("pixels", pixels);
+  result.set("shape", wrapObservationDescription(observer)["Shape"]);
+  return result;
+}
+
+e::val GriddlyJSGameWrapper::getPlayerObserverState(uint32_t playerId, std::string observerName) {
+  auto observer = std::dynamic_pointer_cast<griddly::SDLGridObserver>(gameProcess_->getPlayerObserver(playerId, observerName));
+  if (observer == nullptr) {
+    throw std::invalid_argument(fmt::format("Observer {0} is not a Sprite2D / Block2D observer", observerName));
+  }
+  auto result = e::val::object();
+  auto origin = e::val::array();
+  origin.call<void>("push", observer->cameraOrigin().x);
+  origin.call<void>("push", observer->cameraOrigin().y);
+  auto cells = e::val::array();
+  cells.call<void>("push", observer->viewCells().x);
+  cells.call<void>("push", observer->viewCells().y);
+  result.set("origin", origin);
+  result.set("cells", cells);
+  const auto& fog = observer->fogState();
+  if (fog.empty()) {
+    result.set("fog", e::val::null());
+  } else {
+    // copy: the observer's buffer is reused on the next render
+    result.set("fog", e::val::global("Uint8Array").new_(e::typed_memory_view(fog.size(), fog.data())));
+  }
+  return result;
 }
 
 e::val GriddlyJSGameWrapper::stepParallel(e::val stepArray) {
@@ -194,6 +229,78 @@ e::val GriddlyJSGameWrapper::stepPlayer(uint32_t playerIdx, e::val actions, bool
   return js_result;
 }
 
+std::vector<std::shared_ptr<griddly::Action>> GriddlyJSGameWrapper::buildActions(uint32_t playerIdx, e::val actions) {
+  if (playerIdx >= players_.size()) {
+    throw std::invalid_argument(fmt::format("No player with index {0}", playerIdx));
+  }
+  const auto& externalActionNames = gdyFactory_->getExternalActionNames();
+  std::vector<std::shared_ptr<griddly::Action>> built;
+  auto count = actions["length"].as<uint32_t>();
+  for (uint32_t a = 0; a < count; a++) {
+    auto action = e::convertJSArrayToNumberVector<int32_t>(actions.call<e::val>("at", a));
+    std::shared_ptr<griddly::Action> engineAction;
+    if (action.size() == 4) {
+      engineAction = players_[playerIdx]->buildAction(externalActionNames.at(action[2]), {action[0], action[1], action[3]});
+    } else if (action.size() == 2) {
+      engineAction = players_[playerIdx]->buildAction(externalActionNames.at(action[0]), {action[1]});
+    } else {
+      throw std::invalid_argument(fmt::format("Invalid action size {0}, expected [x, y, actionTypeIdx, actionId] or [actionTypeIdx, actionId]", action.size()));
+    }
+    if (engineAction != nullptr) built.push_back(engineAction);
+  }
+  return built;
+}
+
+void GriddlyJSGameWrapper::queueActions(uint32_t playerIdx, e::val actions) {
+  gameProcess_->queueActions(playerIdx + 1, buildActions(playerIdx, actions));
+}
+
+void GriddlyJSGameWrapper::clearQueuedActions(int32_t playerIdx) {
+  gameProcess_->clearQueuedActions(playerIdx < 0 ? 0 : static_cast<uint32_t>(playerIdx) + 1);
+}
+
+uint32_t GriddlyJSGameWrapper::getQueuedActionCount(int32_t playerIdx) const {
+  return static_cast<uint32_t>(gameProcess_->getQueuedActionCount(playerIdx < 0 ? 0 : static_cast<uint32_t>(playerIdx) + 1));
+}
+
+e::val GriddlyJSGameWrapper::tickResult(const griddly::TickResult& result) {
+  e::val playerRewards = e::val::array();
+  for (uint32_t p = 0; p < players_.size(); p++) {
+    playerRewards.call<void>("push", gameProcess_->getAccumulatedRewards(p + 1));
+  }
+  auto js_result = e::val::object();
+  js_result.set("ticks", result.ticks);
+  js_result.set("actions", result.actions);
+  js_result.set("terminated", result.result.terminated);
+  js_result.set("info", GriddlyJSPlayerWrapper::buildInfo(result.result));
+  js_result.set("reward", playerRewards);
+  return js_result;
+}
+
+e::val GriddlyJSGameWrapper::tick() {
+  return tickResult(gameProcess_->tick());
+}
+
+e::val GriddlyJSGameWrapper::advanceTime(double seconds, uint32_t maxTicks) {
+  return tickResult(gameProcess_->advanceTime(seconds, maxTicks));
+}
+
+void GriddlyJSGameWrapper::setTickRate(double ticksPerSecond) {
+  gameProcess_->setTickRate(ticksPerSecond);
+}
+
+double GriddlyJSGameWrapper::getTickRate() const {
+  return gameProcess_->getTickRate();
+}
+
+void GriddlyJSGameWrapper::setPaused(bool paused) {
+  gameProcess_->setPaused(paused);
+}
+
+bool GriddlyJSGameWrapper::isPaused() const {
+  return gameProcess_->isPaused();
+}
+
 e::val GriddlyJSGameWrapper::getAvailableActionNames(uint32_t playerId) const {
   e::val js_available = e::val::object();
   for (const auto& [location, names] : gameProcess_->getAvailableActionNames(playerId)) {
@@ -225,18 +332,16 @@ uint32_t GriddlyJSGameWrapper::getHeight() const {
   return gameProcess_->getGrid()->getHeight();
 }
 
-e::val GriddlyJSGameWrapper::getState() const {
+e::val GriddlyJSGameWrapper::serializeState(const griddly::GameState& gameState) const {
   e::val js_state = e::val::object();
 
   const auto& objectGenerator = gdyFactory_->getObjectGenerator();
-
-  const auto& gameState = gameProcess_->getGameState();
   const auto& stateMapping = objectGenerator->getStateMapping();
   const auto& objectDefinitions = objectGenerator->getObjectDefinitions();
 
   js_state.set("gameTicks", gameState.tickCount);
   js_state.set("hash", gameState.hash);
-  js_state.set("playerCount", gameState.hash);
+  js_state.set("playerCount", gameState.playerCount);
 
   e::val js_grid = e::val::object();
   js_grid.set("width", gameProcess_->getGrid()->getWidth());
@@ -283,6 +388,21 @@ e::val GriddlyJSGameWrapper::getState() const {
 
   //TODO: delayed action serialization and loading of serialized state
 
+  return js_state;
+}
+
+e::val GriddlyJSGameWrapper::getState() const {
+  return serializeState(gameProcess_->getGameState());
+}
+
+e::val GriddlyJSGameWrapper::getPlayerState(uint32_t playerId) const {
+  auto js_state = serializeState(gameProcess_->getPlayerGameState(playerId));
+  const auto& visibility = gameProcess_->getPlayerVisibility(playerId);
+  if (visibility.empty()) {
+    js_state.set("visibility", e::val::null());
+  } else {
+    js_state.set("visibility", e::val::global("Uint8Array").new_(e::typed_memory_view(visibility.size(), visibility.data())));
+  }
   return js_state;
 }
 

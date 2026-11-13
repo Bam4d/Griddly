@@ -1014,6 +1014,12 @@ Environment:
     Research  Mining, Weapons, Armour, Gunnery (needs Weapons), Vehicles (needs Armour),
               Fortify (needs Armour): stronger towers.
     Victory   destroy the enemy base.
+  # Game clock: real-time play runs this many ticks per second. Players record their actions
+  # between ticks (queue_actions / queueActions); each tick runs every player's recorded actions
+  # together, then time advances once.
+  TickRate: 4
+  # Every view is rendered by the engine. Colours are egocentric in a player's views (their objects
+  # use Colors[0], green; the enemy Colors[1], red); the global views use player 1 / player 2.
   Observers:
     Block2D:
       TileSize: 6
@@ -1021,11 +1027,60 @@ Environment:
     Sprite2D:
       TileSize: 16
       BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
-      # a soft player-coloured shadow under every owned object. Colours are egocentric:
-      # in a player's own view their objects use Colors[0] (green), the enemy Colors[1].
       HighlightPlayers: true
       HighlightStyle: SHADOW
       HighlightScale: 1.6
+      HealthBars: true
+    # a player's main view: a 24x15 cell window on their camera (cam_x, cam_y), under fog of war
+    PlayerView:
+      Type: SPRITE_2D
+      TileSize: 16
+      Width: 24
+      Height: 15
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+      Camera: { X: cam_x, Y: cam_y }
+      FogOfWar:
+        SightVariable: sight
+        ExploredOpacity: 0.55
+    # the same camera window without fog (spectating, or playing with fog off)
+    CameraView:
+      Type: SPRITE_2D
+      TileSize: 16
+      Width: 24
+      Height: 15
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+      Camera: { X: cam_x, Y: cam_y }
+    # a player's mini-map: the whole map under their fog of war, with their camera window outlined
+    MiniMap:
+      Type: BLOCK_2D
+      TileSize: 4
+      BackgroundColor: [ 0.12, 0.13, 0.11 ]
+      FogOfWar:
+        SightVariable: sight
+        ExploredOpacity: 0.5
+      CameraFrame: { X: cam_x, Y: cam_y, Width: 24, Height: 15 }
+    # spectators: the whole map without fog
+    Overview:
+      Type: SPRITE_2D
+      TileSize: 16
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+    GlobalMap:
+      Type: BLOCK_2D
+      TileSize: 6
+      BackgroundColor: [ 0.12, 0.13, 0.11 ]
+      CameraFrame: { X: cam_x, Y: cam_y, Width: 24, Height: 15 }
     Vector:
       IncludePlayerId: true
       IncludeVariables: true
@@ -1065,6 +1120,10 @@ Environment:
       PerPlayer: true
   Player:
     Count: 2
+    # each player only knows what their objects can see: the engine filters every player's state
+    # query (get_player_state / getPlayerState) and their fog-of-war views with this
+    FogOfWar:
+      SightVariable: sight
     # egocentric player colours: each player sees itself as the first colour (green) and the
     # enemy as the second. The global mini-map uses player 1 / player 2 directly.
     Colors:
@@ -1439,6 +1498,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 1 ]
+            - set_tile: 1
         Dst:
           ObjectRules: minerals
           Commands:
@@ -1452,6 +1512,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 3 ]
+            - set_tile: 3
         Dst:
           ObjectRules: gems
           Commands:
@@ -1463,6 +1524,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 2 ]
+            - set_tile: 2
         Dst:
           ObjectRules: forest
           Commands:
@@ -1481,6 +1543,7 @@ Actions:
             - eq: { Arguments: [ src.carrying, 2 ], Commands: [ { incr: player_resources } ] }
             - eq: { Arguments: [ src.carrying, 3 ], Commands: [ { add: [ player_resources, 3 ] } ] }
             - set: [ src.carrying, 0 ]
+            - set_tile: 0
             - reward: 1
         Dst:
           ObjectRules: base
@@ -1797,6 +1860,7 @@ Actions:
             - sub: [ player_resources, 8 ]
             - set: [ res_mining, 1 ]
             - set: [ src.busy, 1 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 8
@@ -1814,6 +1878,7 @@ Actions:
             - sub: [ player_resources, 10 ]
             - set: [ res_weapons, 1 ]
             - set: [ src.busy, 2 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 8
@@ -1831,6 +1896,7 @@ Actions:
             - sub: [ player_resources, 10 ]
             - set: [ res_armor, 1 ]
             - set: [ src.busy, 3 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 8
@@ -1849,6 +1915,7 @@ Actions:
             - sub: [ player_resources, 12 ]
             - set: [ res_gunnery, 1 ]
             - set: [ src.busy, 4 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 10
@@ -1867,6 +1934,7 @@ Actions:
             - sub: [ player_resources, 12 ]
             - set: [ res_vehicles, 1 ]
             - set: [ src.busy, 5 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 10
@@ -1885,6 +1953,7 @@ Actions:
             - sub: [ player_resources, 10 ]
             - set: [ res_fortify, 1 ]
             - set: [ src.busy, 6 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 8
@@ -1927,6 +1996,7 @@ Actions:
                 Commands:
                   - set: [ res_fortify, 2 ]
             - set: [ src.busy, 0 ]
+            - set_tile: 0
         Dst:
           ObjectRules: lab
 
@@ -2066,7 +2136,48 @@ Objects:
           Scale: 0.75
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
           Scale: 0.5
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 1.0
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.75
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.5
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 1.0
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.75
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.5
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 1.0
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.75
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.5
       Block2D:
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+      MiniMap:
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+      GlobalMap:
         - Shape: triangle
           Color: [ 0.2, 0.9, 0.4 ]
           Scale: 1.0
@@ -2086,7 +2197,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_purple.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_purple.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_purple.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_purple.png
       Block2D:
+        - Shape: triangle
+          Color: [ 0.8, 0.4, 1.0 ]
+          Scale: 1.0
+      MiniMap:
+        - Shape: triangle
+          Color: [ 0.8, 0.4, 1.0 ]
+          Scale: 1.0
+      GlobalMap:
         - Shape: triangle
           Color: [ 0.8, 0.4, 1.0 ]
           Scale: 1.0
@@ -2097,7 +2222,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: gvgai/oryx/tree2.png
+      PlayerView:
+        - Image: gvgai/oryx/tree2.png
+      CameraView:
+        - Image: gvgai/oryx/tree2.png
+      Overview:
+        - Image: gvgai/oryx/tree2.png
       Block2D:
+        - Shape: square
+          Color: [ 0.1, 0.35, 0.15 ]
+          Scale: 0.9
+      MiniMap:
+        - Shape: square
+          Color: [ 0.1, 0.35, 0.15 ]
+          Scale: 0.9
+      GlobalMap:
         - Shape: square
           Color: [ 0.1, 0.35, 0.15 ]
           Scale: 0.9
@@ -2108,7 +2247,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_rubble_a.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_rubble_a.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_rubble_a.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_rubble_a.png
       Block2D:
+        - Shape: square
+          Color: [ 0.45, 0.42, 0.4 ]
+          Scale: 1.0
+      MiniMap:
+        - Shape: square
+          Color: [ 0.45, 0.42, 0.4 ]
+          Scale: 1.0
+      GlobalMap:
         - Shape: square
           Color: [ 0.45, 0.42, 0.4 ]
           Scale: 1.0
@@ -2119,7 +2272,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
       Block2D:
+        - Shape: square
+          Color: [ 0.15, 0.35, 0.7 ]
+          Scale: 1.0
+      MiniMap:
+        - Shape: square
+          Color: [ 0.15, 0.35, 0.7 ]
+          Scale: 1.0
+      GlobalMap:
         - Shape: square
           Color: [ 0.15, 0.35, 0.7 ]
           Scale: 1.0
@@ -2130,7 +2297,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: gvgai/newset/logm.png
+      PlayerView:
+        - Image: gvgai/newset/logm.png
+      CameraView:
+        - Image: gvgai/newset/logm.png
+      Overview:
+        - Image: gvgai/newset/logm.png
       Block2D:
+        - Shape: square
+          Color: [ 0.55, 0.4, 0.25 ]
+          Scale: 0.9
+      MiniMap:
+        - Shape: square
+          Color: [ 0.55, 0.4, 0.25 ]
+          Scale: 0.9
+      GlobalMap:
         - Shape: square
           Color: [ 0.55, 0.4, 0.25 ]
           Scale: 0.9
@@ -2141,7 +2322,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_off.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_off.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_off.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_off.png
       Block2D:
+        - Shape: hexagon
+          Color: [ 0.85, 0.85, 0.85 ]
+          Scale: 0.8
+      MiniMap:
+        - Shape: hexagon
+          Color: [ 0.85, 0.85, 0.85 ]
+          Scale: 0.8
+      GlobalMap:
         - Shape: hexagon
           Color: [ 0.85, 0.85, 0.85 ]
           Scale: 0.8
@@ -2149,6 +2344,9 @@ Objects:
   - Name: relay_owned
     MapCharacter: r
     Z: 1
+    Variables:
+      - Name: sight
+        InitialValue: 4
     InitialActions:
       - Action: relay_income
         ActionId: 1
@@ -2156,7 +2354,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_on.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_on.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_on.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_on.png
       Block2D:
+        - Shape: hexagon
+          Color: PLAYER
+          Scale: 0.8
+      MiniMap:
+        - Shape: hexagon
+          Color: PLAYER
+          Scale: 0.8
+      GlobalMap:
         - Shape: hexagon
           Color: PLAYER
           Scale: 0.8
@@ -2170,7 +2382,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
       Block2D:
+        - Shape: square
+          Color: [ 0.12, 0.13, 0.11 ]
+          Scale: 0.0
+      MiniMap:
+        - Shape: square
+          Color: [ 0.12, 0.13, 0.11 ]
+          Scale: 0.0
+      GlobalMap:
         - Shape: square
           Color: [ 0.12, 0.13, 0.11 ]
           Scale: 0.0
@@ -2186,10 +2412,65 @@ Objects:
         InitialValue: 1
       - Name: carrying
         InitialValue: 0
+      - Name: sight
+        InitialValue: 4
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d2.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_l1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_r1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d2.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_l1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_r1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d2.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_l1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_r1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d2.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_l1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_r1.png
       Block2D:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+      MiniMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+      GlobalMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
         - Shape: circle
           Color: PLAYER
           Scale: 0.5
@@ -2203,10 +2484,26 @@ Objects:
         InitialValue: 5
       - Name: damage
         InitialValue: 1
+      - Name: sight
+        InitialValue: 7
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_drone_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_drone_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_drone_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_drone_d1.png
       Block2D:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.7
+      MiniMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.7
+      GlobalMap:
         - Shape: circle
           Color: PLAYER
           Scale: 0.7
@@ -2220,10 +2517,26 @@ Objects:
         InitialValue: 12
       - Name: damage
         InitialValue: 3
+      - Name: sight
+        InitialValue: 4
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
       Block2D:
+        - Shape: pentagon
+          Color: PLAYER
+          Scale: 0.85
+      MiniMap:
+        - Shape: pentagon
+          Color: PLAYER
+          Scale: 0.85
+      GlobalMap:
         - Shape: pentagon
           Color: PLAYER
           Scale: 0.85
@@ -2237,10 +2550,26 @@ Objects:
         InitialValue: 8
       - Name: damage
         InitialValue: 2
+      - Name: sight
+        InitialValue: 5
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_marine_m_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_marine_m_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_marine_m_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_marine_m_d1.png
       Block2D:
+        - Shape: triangle
+          Color: PLAYER
+          Scale: 0.8
+      MiniMap:
+        - Shape: triangle
+          Color: PLAYER
+          Scale: 0.8
+      GlobalMap:
         - Shape: triangle
           Color: PLAYER
           Scale: 0.8
@@ -2254,10 +2583,26 @@ Objects:
         InitialValue: 7
       - Name: damage
         InitialValue: 1
+      - Name: sight
+        InitialValue: 4
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_scientist_f_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_scientist_f_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_scientist_f_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_scientist_f_d1.png
       Block2D:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.8
+      MiniMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.8
+      GlobalMap:
         - Shape: circle
           Color: PLAYER
           Scale: 0.8
@@ -2273,10 +2618,26 @@ Objects:
         InitialValue: 5
       - Name: cooldown
         InitialValue: 0
+      - Name: sight
+        InitialValue: 5
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_robot_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_robot_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_robot_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_robot_d1.png
       Block2D:
+        - Shape: fill
+          Color: PLAYER
+          Scale: 0.75
+      MiniMap:
+        - Shape: fill
+          Color: PLAYER
+          Scale: 0.75
+      GlobalMap:
         - Shape: fill
           Color: PLAYER
           Scale: 0.75
@@ -2288,13 +2649,29 @@ Objects:
         InitialValue: 50
       - Name: max_health
         InitialValue: 50
+      - Name: sight
+        InitialValue: 6
     InitialActions:
       - Action: init_camera
         ActionId: 1
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
       Block2D:
+        - Shape: hexagon
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: hexagon
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
         - Shape: hexagon
           Color: PLAYER
           Scale: 1.0
@@ -2306,10 +2683,26 @@ Objects:
         InitialValue: 25
       - Name: max_health
         InitialValue: 25
+      - Name: sight
+        InitialValue: 4
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img320.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img320.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img320.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img320.png
       Block2D:
+        - Shape: square
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: square
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
         - Shape: square
           Color: PLAYER
           Scale: 1.0
@@ -2323,10 +2716,39 @@ Objects:
         InitialValue: 20
       - Name: busy
         InitialValue: 0
+      - Name: sight
+        InitialValue: 3
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_green.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_blue.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_green.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_blue.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_green.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_blue.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_green.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_blue.png
       Block2D:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
         - Shape: circle
           Color: PLAYER
           Scale: 1.0
@@ -2340,10 +2762,26 @@ Objects:
         InitialValue: 20
       - Name: loaded
         InitialValue: 1
+      - Name: sight
+        InitialValue: 6
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_sentry_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_sentry_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_sentry_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_sentry_d1.png
       Block2D:
+        - Shape: triangle
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: triangle
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
         - Shape: triangle
           Color: PLAYER
           Scale: 1.0
@@ -2355,10 +2793,26 @@ Objects:
         InitialValue: 15
       - Name: max_health
         InitialValue: 15
+      - Name: sight
+        InitialValue: 1
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
       Block2D:
+        - Shape: square
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: square
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
         - Shape: square
           Color: PLAYER
           Scale: 1.0
@@ -3517,7 +3971,383 @@ Objects:
           Scale: 1.0
       Isometric:
         - Image: stratega/healer.png
-"""Rules check for GriddlyRTS-FoW (units, buildings, research, towers, relays, ...) on compact test levels.
+ó
+    «õöj»6  ã                   óV  • S r SSKrSSKJr  Sr\" S5      r " S S5      rSS jrS	 r	S
+ r
+S rS rS rS rS r\	\
+\\\\\/rS rS rS rSS jr\S:X  aÌ  \" 5        HÀ  u  rrr0 r\ H*  r\ H!  r\R9                  \S   S5      S-   \\S   '   M#     M,     \" S\ S\" \S   5       S\" \5       S\ 35        \" S\" \RA                  5       5       V Vs0 s H  u  pU S:w  d  M  X_M     snn 5        \ H$  r\" SSRC                  S \ 5       5      -   5        M&     MÂ     ggs  snn f )a   Map generator for GriddlyRTS-FoW ("Frontiers").
+
+Every map is a two-player map that is point-symmetric (rotated 180 degrees about the centre), so
+neither side has a terrain advantage. Each map has its own style - the terrain mix, layout of
+chokepoints and where the valuable resources are - but they all share the same ingredients:
+
+    A / H     base and two starting workers per player (player id appended, e.g. A1, H2)
+    M         mineral field (15 ore per patch)
+    G         gem deposit (worth 3 resources per trip, few of them, usually contested)
+    R         neutral relay: stand next to it to capture it; it pays its owner income
+    W         rock / wall          (blocks everything)
+    ~         water                (blocks everything; gunners can shoot over it)
+    T         forest               (blocks units; workers can cut it down for wood -> 1 resource)
+    =         bridge               (walkable, cannot be built on)
+    .         open ground
+
+`python fow_maps.py` prints every map with its stats.
+é    N)ÚdequeÚ.zW~Tc                   óx   • \ rS rSrSrS rS rS rS rS r	SS	 jr
+SS
+ jr\S4S jrS rSS jrSS jrS rSrg)ÚCanvasé   z@One half of a symmetric map is painted; `mirror()` completes it.c                 ó²   • XsU l         U l        [        R                  " U5      U l        [        U5       Vs/ s H  n[        /U-  PM     snU l        g s  snf ©N)ÚwÚhÚrandomÚRandomÚrngÚrangeÚOPENÚg)Úselfr
+   r   ÚseedÚ_s        Úd/mnt/vast/home/bam4d/.vibe/worktrees/Griddly-c5a12f524638/fog-of-war/resources/games/RTS/fow_maps.pyÚ__init__ÚCanvas.__init__   sB   € ØˆˆŒ”Ü—=’= Ó&ˆŒÜ&+¨A¤hÓ/¢h ”4&˜1”*¡hÑ/ˆùÒ/s   ·Ac                 óŒ   • SUs=:*  =(       a    U R                   :  Os  =(       a    SUs=:*  =(       a    U R                  :  $ s  $ )Nr   )r
+   r   ©r   ÚxÚys      r   ÚinsideÚCanvas.inside"   s.   € ØA‹˜Ÿ™Œ×2 1¨§?£?¨D¯F©F¡?Ğ2¡?Ğ2ó    c                 óT   • U R                  X5      (       a  X0R                  U   U'   g g r	   ©r   r   )r   r   r   Úcs       r   ÚsetÚ
+Canvas.set%   s%   € Ø;‰;q×ÑØF‰F1‰IaŠLğ r   c                 ó&   • U R                   U   U   $ r	   ©r   r   s      r   ÚgetÚ
+Canvas.get)   s   € Øv‰va‰y˜‰|Ğr   c                 ó|   • [        X$S-   5       H*  n[        XS-   5       H  nU R                  XvU5        M     M,     g ©Né   )r   r"   )r   Úx0Úy0Úx1Úy1r!   r   r   s           r   ÚrectÚCanvas.rect,   s6   € Ür ™6Ö"ˆAÜ˜2 A™vÖ&Ø—‘˜˜qÖ!ó 'ò #r   Nc                 óÈ  • [        [        X#-
+  S-
+  5      [        X#-   S-   5      5       H¶  n[        [        X-
+  S-
+  5      [        X-   S-   5      5       H‡  nU R                  X‡5      (       d  M  X-
+  S-  Xr-
+  S-  -   S-  n	X“SUS-  -
+  U R                  R	                  5       U-  -   -  ::  d  M[  Ub  U R
+                  U   U   U;   d  Mv  X@R
+                  U   U'   M‰     M¸     g )Nr*   é   g      à?)r   Úintr   r   r   r   )
+r   ÚcxÚcyÚrr!   ÚjitterÚonlyr   r   Úds
+             r   ÚblobÚCanvas.blob1   sÏ   € Ü”s˜2™6 A™:“¬¨B©F°Q©J«Ö8ˆAÜœ3˜r™v¨™z›?¬C°±¸±
+«OÖ<Ø—{‘{ 1×(Ñ(ÙØ‘f ‘] a¡f°¡]Ñ2°sÑ:Ø˜Q ¨!¡™^¨d¯h©h¯o©oÓ.?À&Ñ.HÑHÑIÕIÈtÉ|Ğ_c×_eÑ_eĞfgÑ_hĞijÑ_kĞosÕ_sØ#$—F‘F˜1‘I˜a“Ló =ò 9r   c                 óL  • Uu  pxUu  pš[        SU R                  U R                  -   -  5       GHr  n[        US-  * XDS-  -
+  5       Hp  n[        US-  * XDS-  -
+  5       HT  nU R                  X}-   XŒ-   5      (       d  M   Ub  U R                  XŒ-      X}-      U;   d  M?  X0R                  XŒ-      X}-   '   MV     Mr     Xx4Xš4:X  a    gU(       aY  U R
+                  R                  5       U:  a;  XpR
+                  R                  S5      -  nX€R
+                  R                  S5      -  nO5[        X—-
+  5      [        X¨-
+  5      :¼  a  XyU:„  X—:  -
+  -  nOXŠU:„  X¨:  -
+  -  n[        [        US5      U R                  S-
+  5      n[        [        US5      U R                  S-
+  5      nGMu     g)z:Wobbly brush stroke from p0 to p1 (rivers, ridges, roads).é   r2   N)éÿÿÿÿr   r*   r   r*   )r   r
+   r   r   r   r   r   ÚchoiceÚabsÚminÚmax)r   Úp0Úp1r!   ÚwidthÚwobbler8   r   r   ÚtxÚtyr   ÚdyÚdxs                 r   ÚlineÚCanvas.line:   ss  € à‰ˆØ‰ˆÜq˜DŸF™F T§V¡V™OÑ,×-ˆAÜ˜e q™j˜M¨5¸A±:Ñ+=Ö>Ü %¨1¡* ¨uÀ±zÑ/AÖBBØ—{‘{ 1¡6¨1©6×2Ó2¸¹ÈÏÉÈqÉvÉĞWXÑW]ÑH^ĞbfÕHfØ12Ÿ™˜q™v™ q¡vÓ.ó Cñ ?ğ ˆv˜"˜Ó!ÙŞ˜$Ÿ(™(Ÿ/™/Ó+¨fÓ4Ø—X‘X—_‘_ ZÓ0Ñ0Ø—X‘X—_‘_ ZÓ0Ñ0‘ÜR‘V“¤ B¡F£Ó+Ø˜1‘f ¡Ñ(Ñ(‘à˜1‘f ¡Ñ(Ñ(Ü”C˜˜1“I˜tŸv™v¨™zÓ*ˆAÜ”C˜˜1“I˜tŸv™v¨™zÓ*‹Aò .r   r   c           	      ó¸  ^ ^^^^• Uu  pgp‰Sn
+[        US-  5       H¼  nX¢:¼  a    g T R                  R                  Xh5      T R                  R                  Xy5      smmT R                  TT5      (       a  T R                  T   T   U;  a  Mp  T(       a.  [        UUU UU4S j[        T* TS-   5       5       5      (       a  M¥  TT R                  T   T'   U
+S-  n
+M¾     g )Nr   é(   c              3   óÈ   >#   • U  HW  n[        T* TS -   5        H?  nTR                  TU-   TU-   5      =(       a    TR                  TU-      TU-      T:H  v •  MA     MY     g7f)r*   N)r   r   r   )Ú.0rJ   rI   r!   Úmin_gapr   r   r   s      €€€€€r   Ú	<genexpr>Ú!Canvas.scatter.<locals>.<genexpr>X   sp   øé € ğ nÚ)E 2ÔPUĞW^ĞV^Ğ`gĞjkÑ`k×PlÈ"ğ  $Ÿ{™{¨1¨r©6°1°r±6Ó:×Z¸t¿v¹vÀaÈ"Áf¹~ÈaĞRTÉfÑ?UĞYZÑ?ZÔZÙPlñ  [Ú)Eùs   ƒAA"r*   )r   r   Úrandintr   r   Úany)r   r!   ÚnÚregionr8   rQ   r+   r,   r-   r.   Úplacedr   r   r   s   ``   `      @@r   ÚscatterÚCanvas.scatterO   sË   ü€ Ø‰ˆØˆÜq˜2‘v–ˆAØ‹{ÙØ—8‘8×#Ñ# BÓ+¨T¯X©X×-=Ñ-=¸bÓ-EˆDˆAˆqØ—;‘;˜q !×$Ñ$¨¯©¨q©	°!©¸DÓ(@ÙŞœ3÷ nğ nÜ).°¨x¸À1¹Ô)Eón÷ nñ náØˆDF‰F1‰Ia‰LØa‰KŠFò r   c                 óN  • U R                   U R                  p![        U5       H  n[        U5       Hm  nX1-  U-   US-
+  U-
+  U-  US-
+  U-
+  -   :  d  M"  U R                  U   U   nUSS S:X  a  UR	                  SS5      OUU R                  US-
+  U-
+     US-
+  U-
+  '   Mo     M     g)zVPoint symmetry: the lower-right half becomes a 180-degree copy of the upper-left half.r*   r>   NÚ1Ú2)r
+   r   r   r   Úreplace)r   r
+   r   r   r   r!   s         r   ÚmirrorÚCanvas.mirror^   s£   € àv‰vt—v‘vˆ1Üq–ˆAÜ˜1–Xà‘5˜1‘9  A¡¨¡	¨Q™°!°a±%¸!±)Ñ<Õ<ØŸ™˜q™	 !™AØJKÈBÈCÈ&ĞTWË-°1·9±9¸SÀ#Ô3FĞ]^D—F‘F˜1˜q™5 1™9Ñ% a¨!¡e¨a¡iÓ0ó	 ò r   c                 óø   • [        X#-
+  X#-   S-   5       Hc  n[        X-
+  X-   S-   5       HI  nU R                  Xe5      (       d  M  U R                  U   U   U;  d  M3  [        U R                  U   U'   MK     Me     g r)   )r   r   r   r   )r   r   r   r6   ÚkeepÚyyÚxxs          r   ÚclearÚCanvas.clearh   sg   € Ü˜™˜q™u q™yÖ)ˆBÜ˜A™E 1¡5¨1¡9Ö-Ø—;‘;˜r×&Ó&¨4¯6©6°"©:°b©>ÀÕ+EÜ%)D—F‘F˜2‘J˜r“Nó .ò *r   c                 óx  • U R                  XS5        [        U5      [        U5      -    H  u  pVU R                  XVS5        M     SU R                  U   U'   SU R                  U   US-   '   SU R                  US-      U'   U H  u  pVU R                  XVS5        M     U H  u  pVU R                  XVS5        M     g)zPPlayer 1's base, two workers and its starting resources (mirrored for player 2).é   r*   ÚA1ÚH1ÚMÚGN)re   Úlistr   r"   )r   ÚbxÚbyÚmineralsÚgemsr   r   s          r   ÚstartÚCanvas.startn   s¨   € à
+‰
+2˜1ÔÜ˜“N¤T¨$£ZÔ/‰DˆAØJ‰Jq˜QÖñ 0àˆ‰ˆr‰
+2‰Ø!ˆ‰ˆr‰
+2˜‘6ÑØ!ˆ‰ˆrA‰v‰rÑÛ‰DˆAØH‰HQ˜3Öñ ã‰DˆAØH‰HQ˜3Öò r   c                 ó   • U R                   $ r	   r%   )r   s    r   ÚrowsÚCanvas.rows{   s   € Øv‰vˆr   )r   r   r   r
+   )ç333333Ó?N)r*   g        N)© )Ú__name__Ú
+__module__Ú__qualname__Ú__firstlineno__Ú__doc__r   r   r"   r&   r/   r:   rK   r   rY   r_   re   rr   ru   Ú__static_attributes__rx   r   r   r   r      sI   † ÙJò0ò
+3òòò"ô
+%ô+ğ* *.°qô ò_ô*ô õr   r   c                 óp   • / SQ/ SQ/ SQ/ SQ/ SQS.nX2    VVs/ s H  u  pEX-   X-   4PM     snn$ s  snnf )z5A small field of 5-6 mineral patches around (cx, cy).)©r   r   ©r*   r   ©r2   r   ©r   r*   ©r*   r*   ©r   r2   )r€   r   r‚   )rh   r   )é   r   )r€   rƒ   r…   )r   rh   )r   r†   )r€   r   r‚   rƒ   )r2   r*   )r€   r   rƒ   r„   )ÚLÚrowÚcolÚringÚclumprx   )r4   r5   ÚshapeÚshapesrJ   rI   s         r   Úmineral_patchr      sA   € ò >Ú7Ú7Ú8Ú1ñ€Fğ .4ª]Ô;ª]¡6 2ˆR‰Wb‘gÓ©]Ò;Ğ;ùÓ;s   š2c            	      óø  • [        SSS5      n [        S5       He  nU R                  U R                  R	                  SS5      U R                  R	                  SS5      U R                  R                  S	S
+5      S5        Mg     [        S5       He  nU R                  U R                  R	                  SS5      U R                  R	                  SS5      U R                  R                  SS5      S5        Mg     U R                  SS[        SS9  U R                  SS[        SS9  U R                  SS[        SS5      / S9  U R                  SSS5      U R                  SSS5      U R                  SSS5      4  U R                  SSS5        U R                  SSS 5      U R                  SS!S 5      4  U R                  S"SS#5      U R                  SSS#5      4  U R                  SSS$S%S&9  U R                  5         S'S(U 4$ ))zQOpen plains, two roads cross the centre; relays on the roads, gems in the middle.é0   é    é   é   r†   é,   rh   é   ç      ğ?gš™™™™™@ÚTr=   é   rN   é   çš™™™™™é?gš™™™™™ù?ÚW)r   é   )é/   é   ©rE   )é   r   )é   é   r*   )rq   é
+   r2   rk   r    rœ   é   rl   é   é   ÚR)r“   r†   é   r£   r   )rQ   Ú
+CrossroadszYOpen plains and two roads. Fast attacks; relays line the roads, gems sit at the crossing.)r   r   r:   r   rT   ÚuniformrK   r   rr   r   r"   re   rY   r_   )r!   r   s     r   Ú
+crossroadsr«      s   € äˆr2rÓ€AÜ2YˆØ	‰ˆqu‰u}‰}˜Q Ó# Q§U¡U§]¡]°1°bÓ%9¸1¿5¹5¿=¹=ÈÈcÓ;RĞTWÖXñ ä1XˆØ	‰ˆqu‰u}‰}˜Q Ó# Q§U¡U§]¡]°1°bÓ%9¸1¿5¹5¿=¹=ÈÈcÓ;RĞTWÖXñ à‡FFˆ7Hœd¨!€FÑ,Ø‡FFˆ7Hœd¨!€FÑ,Ø‡GGˆAˆq”-  1Ó%¨B€GÑ/Ø‡EEˆ"ˆaÓq—u‘u˜R  CÓ(¨!¯%©%°°A°sÓ*;Ñ;Ø‡GGˆBAÔØ‡EEˆ"ˆb#Ó˜Ÿ™˜b " cÓ*Ñ*Ø‡EEˆ"ˆb#Ó˜Ÿ™˜b ! SÓ)Ñ)Ø‡IIˆc1o¨q€IÑ1Ø‡HH„JØĞtĞvwĞwĞwr   c            	      ó¾  ^^^• [        SSS5      mTR                  SSSSSS	9  S
+ H&  u  pTR                  U S-
+  US-
+  U S-   US-   S5        M(     [        TR                  5       Hm  m[        TR
+                  5       HQ  mTR                  T   T   S:X  d  M  [        UUU4S jS 5       5      nU(       a  M;  [        TR                  T   T'   MS     Mo     [        S5       Hi  nTR                  TR                  R                  SS5      TR                  R                  SS5      TR                  R                  SS5      S[        1S9  Mk     TR                  SS[        SS5      5        TR                  SSS5        TR!                  SSS5      TR!                  SSS5      4  TR!                  SS S!5      TR!                  S"SS!5      4  TR#                  5         S#S$T4$ )%z=A river splits the map; three bridges are the only crossings.é8   rN   r    )r   é!   )é7   r=   Ú~r†   g      Ğ?©rE   rF   ))r“   r™   )r™   r¨   )rN   r¥   rh   Ú=c              3   óœ   >#   • U  HA  u  pTR                  TU-   TU-   5      =(       a    TR                  TU-      TU-      S :H  v •  MC     g7f)r°   Nr    )rP   rJ   rI   r!   r   r   s      €€€r   rR   Úriver_delta.<locals>.<genexpr>¬   sW   øé € ğ  Dò  aCÑV\ĞVX˜!Ÿ(™( 1 r¡6¨1¨r©6Ó2×Q°q·s±s¸1¸r¹6±{À1ÀrÁ6Ñ7JÈcÑ7QÔQò  aCùs   ƒA	A©r   )r>   r   rƒ   )r   r>   é   r2   é6   é&   r–   g       @r—   )r8   r*   rk   é   )r¦   r2   r¨   r˜   r   r“   rl   r™   r=   r¨   r§   é   zRiver DeltazXA wide river with three bridges. Hold the crossings; gunners can shoot across the water.)r   rK   r/   r   r   r
+   r   rU   r   r:   r   rT   rª   rr   r   rY   r"   r_   )rn   ro   Úwetr   r!   r   r   s       @@@r   Úriver_deltar¼   ¢   s   ú€ äˆr2rÓ€AØ‡FFˆ7G˜S¨°$€FÑ7Û0‰ˆØ	‰ˆrA‰vr˜A‘v˜r A™v r¨A¡v¨sÖ3ñ 1ô 1—3‘3ZˆÜq—s‘s–ˆAØs‰s1‰va‰y˜CÕÜö  Dñ  aCó  Dó  DßsÜ $A—C‘C˜‘F˜1“Ió	 ñ ô 2YˆØ	‰ˆqu‰u}‰}˜Q Ó# Q§U¡U§]¡]°1°bÓ%9¸1¿5¹5¿=¹=ÈÈcÓ;RĞTWÔ_cĞ^dˆÓeñ à‡GGˆAˆq”-  1Ó%Ô&Ø‡IIˆc1nÔ%Ø‡EEˆ"ˆb#Ó˜Ÿ™˜b " cÓ*Ñ*Ø‡EEˆ!ˆRÓq—u‘u˜R  CÓ(Ñ(Ø‡HH„JØĞtĞvwĞwĞwr   c            
+      óN  • [        SSS5      n [        S5       H>  nSUS-  -   nU R                  SU4SX R                  R	                  SS5      -   4S	S
+SS9  M@     [        S5       H^  nSUS-  -   n[        S
+5       HD  nU R                  R	                  SS5      nU R                  US-
+  US-
+  US-   US-   [        5        MF     M`     U R                  SS[        SSS5      SS/-   5        U R                  SSS5        U R                  SSSS[        5        S H  u  pRU R                  XRS5        M     U R                  SSS5      U R                  SSS5      U R                  SSS5      4  U R                  SSS5        U R                  SSS 5        U R                  5         S!S"U 4$ )#z?Rock ridges with narrow passes; rich gem plateau in the middle.r   é%   r¹   r˜   r   r   éıÿÿÿrh   r›   r2   ç333333Ã?r±   r†   é+   r*   rˆ   )r*   r2   )r2   r2   r    é   r   ))r¤   r¤   )r    r¤   )r¤   r    )é   rÃ   rl   r£   r¥   r§   rk   r=   )r2   r¦   r¨   r¨   r—   r¨   )r   r   r   r    Ú	Highlandsz]Rock ridges cut the map into bands joined by narrow passes. A gem plateau sits in the centre.)r   r   rK   r   rT   r/   r   rr   r   re   r"   rY   r_   )r!   Úir   r   Úgxr   s         r   Ú	highlandsrÇ   ¹   s‹  € äˆr2rÓ€AÜ1XˆØA‘‰IˆØ	‰1ˆv˜˜A§¡§¡¨b°!Ó 4Ñ4Ğ5°sÀ!ÈDˆÓQñ ô 1XˆØA‘‰IˆÜq–ˆAØ—‘—‘˜q "Ó%ˆBØF‰F2˜‘6˜1˜q™5 " q¡&¨!¨a©%´Ö6ó ñ ğ
+ ‡GGˆAˆq”-  1 eÓ,°¸Ğ/?Ñ?Ô@Ø‡GGˆBAÔØ‡FFˆ2ˆr2rœ4Ô Û8‰ˆØ	‰ˆaCÖñ 9à‡EEˆ"ˆb#Ó˜Ÿ™˜b " cÓ*¨A¯E©E°"°a¸Ó,=Ñ=Ø‡IIˆc1oÔ&Ø‡IIˆc2~Ô&Ø‡HH„JØĞwĞyzĞzĞzr   c            	      ó¶  • [        SSS5      n U R                  SSSSS5        / SQnU H  u  p#nU R                  X#U[        S	S
+9  M     / SQnU H  u  pgU R	                  XgSSS1S9  M     U R                  SS[        SSS5      5        U R                  SSS5      U R                  SSS5      4  U R                  SSS5        U R                  SSS5        U R                  SSS5      U R                  SSS5      U R                  SSS5      4  U R                  S S!S"5      U R                  S#SS"5      4  U R                  S$S%S&5        U R                  5         S'S(U 4$ ))z,Islands linked by bridges across open water.é<   rN   é3   r   é;   é'   r°   ))é   rÍ   r=   )r¡   r˜   ç      @)r¥   r¤   rÎ   )rº   r¨   g      @)é-   é	   r†   rÀ   )r7   ))©rÍ   rÍ   ©r¡   r˜   )rÑ   ©r¥   r¤   )rÒ   ©rº   r¨   )rÓ   rÔ   )rÒ   )rÏ   rĞ   r²   r2   )rE   r8   r=   rh   rˆ   r¦   rÍ   rk   r˜   r¹   )rÂ   r=   r™   r’   r†   )r£   é   r   rÃ   é   rÕ   rl   r¢   rº   r¤   rÏ   rĞ   r§   r¥   r—   r£   )r   r   rË   rÕ   ÚArchipelagozYIslands joined by narrow bridges. Expand island by island; the central island holds gems.)
+r   r/   r:   r   rK   rr   r   r"   rY   r_   )r!   Úislandsr   r   r6   ÚlinksÚaÚbs           r   ÚarchipelagorÜ   Ğ   sI  € äˆr2rÓ€AØ‡FFˆ1ˆaR˜ÔÚQ€GÛ‰ˆˆaØ	‰ˆqQœ TˆÓ*ñ âr€EÛ‰ˆØ	‰ˆqS ¨¨ˆÓ.ñ à‡GGˆAˆq”-  1 eÓ,Ô-Ø‡EEˆ"ˆaÓq—u‘u˜R  CÓ(Ñ(Ø‡IIˆc1oÔ&Ø‡IIˆc1Ğ&Ô'Ø‡EEˆ"ˆb#Ó˜Ÿ™˜b " cÓ*¨A¯E©E°"°b¸#Ó,>Ñ>Ø‡EEˆ"ˆaÓq—u‘u˜R  SÓ)Ñ)Ø‡IIˆc2~Ô&Ø‡HH„JØĞuĞwxĞxĞxr   c            	      óÈ  • [        SSS5      n U R                  SSSSS5        [        S5       Hi  nU R                  U R                  R                  S	S
+5      U R                  R                  SS5      U R                  R                  SS5      [        5        Mk     / SQnU H  u  p4U R                  X4[        SSS9  M     U R                  SS[        SS5      5        U R                  SSS5        U R                  SSS5      U R                  SSS5      4  U R                  SSS5      U R                  S	SS5      4  U R                  SSS5        U R                  5         SS U 4$ )!z=Dense forest with cleared paths; workers can chop new routes.é4   é$   é@   r   rÊ   é#   r—   rĞ   r=   é.   r†   r¢   g      @g      @))©r†   r†   ©rÃ   é   )rã   ©r¨   r†   )rã   ©r=   r•   )ræ   rä   )rç   rä   )ræ   )rÏ   r=   r2   rw   r±   r*   rÃ   rå   rh   rl   r   r¨   r§   r•   rk   r¹   )r   r2   r¡   r˜   zDeep ForestzOThick forest with a few winding trails. Workers can cut wood to open shortcuts.)r   r/   r   r:   r   rT   rª   r   rK   rr   r   re   r"   rY   r_   )r!   r   ÚpathsrÚ   rÛ   s        r   Údeep_forestré   å   s,  € äˆr2rÓ€AØ‡FFˆ1ˆaR˜ÔÜ1XˆØ	‰ˆqu‰u}‰}˜Q Ó# Q§U¡U§]¡]°1°bÓ%9¸1¿5¹5¿=¹=ÈÈcÓ;RÔTXÖYñ ò!€Eã‰ˆØ	‰ˆq”T ¨3ˆÓ/ñ à‡GGˆAˆq”-  1Ó%Ô&Ø‡GGˆBAÔØ‡EEˆ"ˆb#Ó˜Ÿ™˜b " cÓ*Ñ*Ø‡EEˆ"ˆaÓq—u‘u˜Q  CÓ(Ñ(Ø‡IIˆc1nÔ%Ø‡HH„JØĞkĞmnĞnĞnr   c                  ó0  • [        SSS5      n U R                  SSSSS5        U R                  SS	[        S
+SS9  S H<  nU R                  US-
+  SUS-   S[        5        U R                  US4US4[        SS9  M>     U R	                  SS/ SQ5        U R                  SSS5      U R                  SSS5      4  U R                  SSS5        U R                  SS
+S5        U R                  SSS5      U R                  SSS5      4  U R                  5         S S!U 4$ )"zELong narrow canyon: a single main corridor with side pockets of gems.rà   r¡   éM   r   é?   r    r›   )rh   r¦   )rÉ   r’   r=   gffffffÖ?r±   )r“   rº   râ   r2   rh   rĞ   r¦   rŸ   r†   r£   ))r*   rĞ   )r*   r£   )r*   r’   )r2   r¥   )rh   r“   r“   rl   r¥   rº   rk   )r£   rĞ   r¤   rœ   r¤   r§   râ   r¹   zDesert CanyonzbOne long canyon with side pockets. Gems sit in the pockets; the main road is the only way through.)r   r/   rK   r   rr   r"   rY   r_   )r!   r   s     r   Úcanyonrí   ø   s  € äˆr2rÓ€AØ‡FFˆ1ˆaR˜ÔØ‡FFˆ7Hœd¨!°D€FÑ9ÛˆØ	‰ˆq1‰ua˜˜Q™ ¤4Ô(Ø	‰1ˆv˜˜2w¤¨AˆÓ.ñ ğ ‡GGˆAˆrÒ?Ô@Ø‡EEˆ"ˆaÓq—u‘u˜R  CÓ(Ñ(Ø‡EEˆ"ˆaÔØ‡IIˆc1oÔ&Ø‡EEˆ"ˆb#Ó˜Ÿ™˜b ! SÓ)Ñ)Ø‡HH„JØğ  Ağ  CDğ  Dğ  Dr   c            	      óÒ  • [        SSS5      n [        S5       He  nU R                  U R                  R	                  SS5      U R                  R	                  SS5      U R                  R                  S	S
+5      S5        Mg     U R                  SSSS[        5        [        SS5       H  nU R                  USS5        M     [        SS5       H  nU R                  SUS5        M     U R                  SS[        5      U R                  SS[        5      U R                  SS[        5      U R                  SS[        5      4  U R                  SS[        SS5      / SQ-   5        U R                  SSS5        U R                  SSS5      U R                  SSS5      4  U R                  SSS5      U R                  SSS5      U R                  SSS5      4  U R                  5         SSU 4$ ) zCEach base sits in a walled fortress with two gates; relays outside.é2   é"   é[   r¦   r†   râ   rh   rº   rš   gÍÌÌÌÌÌü?r—   r   r“   rœ   r›   r¥   r¹   r=   rÍ   r*   ))r’   r*   )r¦   r*   )r¦   r2   rk   )r¶   r2   r   r˜   r¡   r   rl   rÃ   r¨   r§   zTwin FortresseszYBoth bases sit behind walls with two narrow gates. Towers at the gates hold off any rush.)r   r   r:   r   rT   rª   r/   r   r"   rr   r   rY   r_   )r!   r   r   r   s       r   Úfortressrò   	  sŠ  € äˆr2rÓ€AÜ2YˆØ	‰ˆqu‰u}‰}˜Q Ó# Q§U¡U§]¡]°1°bÓ%9¸1¿5¹5¿=¹=ÈÈcÓ;RĞTWÖXñ à‡FFˆ1ˆaRœÔÜ1b\ˆØ	‰ˆaSÖñ ä1b\ˆØ	‰ˆb!SÖñ à‡EEˆ"ˆa”Ó˜Ÿ™˜b !¤TÓ*¨A¯E©E°!°R¼Ó,>ÀÇÁÀaÈÌTÓ@RÑRØ‡GGˆAˆq”-  1Ó%Ò(CÑCÔDØ‡IIˆc1nÔ%Ø‡EEˆ"ˆb#Ó˜Ÿ™˜b " cÓ*Ñ*Ø‡EEˆ"ˆb#Ó˜Ÿ™˜a  SÓ)¨1¯5©5°°Q¸Ó+<Ñ<Ø‡HH„JØĞyĞ{|Ğ|Ğ|r   c                 ó‚  • [        U 5      [        U S   5      p2U1n[        U/5      nU(       a  UR                  5       u  pgS Ho  u  p‰Xh-   Xy-   pºSU
+s=::  a  U:  d  M  O  M  SUs=::  a  U:  d  M.  O  M2  X«4U;  d  M;  X   U
+   S   S;  d  MK  UR                  X«45        UR	                  X«45        Mq     U(       a  M  U$ )Nr   rµ   zW~TMGR)Úlenr   ÚpopleftÚaddÚappend)Úgridrr   r   r
+   ÚseenÚqr   r   rJ   rI   ÚnxÚnys               r   Ú	reachablerı     s®   € Üˆt‹9”c˜$˜q™'“l€qØˆ7€DÜˆuˆg‹€AŞ
+Øy‰y‹{‰ˆÛ8‰FˆBØ‘V˜Q™VØB{˜{‰{˜q B{¨Ÿ{™{°¨x¸tÕ/CÈÉĞQSÉĞUVÉĞ_gÕHgØ—‘˜"˜Ô"Ø—‘˜"˜Ö"ñ	 9÷ ˆ!ğ €Kr   c           	      óz  ^• [        U5       VVVVs0 s H  u  p#[        U5        H	  u  pEXB4U_M     M      nnnnnUR                  5        VVs/ s H  u  puUS:X  d  M  UPM     nnnUR                  5        VVs/ s H  u  puUS:X  d  M  UPM     n	nn[        U5      S:X  a  [        U	5      S:X  d
+   U  S35       e[        XS   5      mU4S jn
+U
+" U	S   5      (       d
+   U  S35       eUR                  5        H*  u  puUS;   d  M  U
+" U5      (       a  M   U  S	U S
+U S35       e   gs  snnnnf s  snnf s  snnf )zZBoth bases exist and every base, mineral, gem and relay is reachable from player 1's base.ri   ÚA2r*   z#: needs exactly one base per playerr   c                 ó2   >^ • [        U U4S jS 5       5      $ )Nc              3   óN   >#   • U  H  u  pTS    U-   TS   U-   4T;   v •  M     g7f)r   r*   Nrx   )rP   rJ   rI   Úprù   s      €€r   rR   Ú)validate.<locals>.near.<locals>.<genexpr>5  s/   øé € ĞcÒ@b±f°bAa‘D˜2‘I˜q ™t b™yĞ)¨TÖ1Ò@bùs   ƒ"%rµ   )rU   )r  rù   s   `€r   ÚnearÚvalidate.<locals>.near4  s   ù€ ÜÕcÑ@bÓcÓcĞcr   z : player 2's base is unreachable)rk   rl   r§   z: z at z is unreachableN)Ú	enumerateÚitemsrô   rı   )Únamerø   r   rˆ   r   r!   Úcellsr  Úb1Úb2r  rù   s              @r   Úvalidater  -  s  ø€ ä%.¨t¤_ÖP¢_™6˜1ÄÈ3Ç¹¸ˆaˆVQŠYÁ‰V¡_€EÓPØŸ™œÔ	3š‘¨¨d©!™€BÑ	3ØŸ™œÔ	3š‘¨¨d©!™€BÑ	3Üˆr‹7a‹<œC ›G q›LĞV¨T¨FĞ2UĞ*VÓVĞ(ÜT˜a™5Ó!€Dõdá1‘;‰;ĞA˜4˜&Ğ @ĞAÓAˆ;Ø—‘–‰ˆØÕÙ˜—7“7Ğ@˜t˜f B q c¨¨a¨S°Ğ@Ó@7ò ùõ QùÛ	3ùÛ	3s   ’%D)
+ÁD1ÁD1Á;D7ÂD7c                  óÒ   • / n [          HZ  nU" 5       u  p#nUR                  5       n[        X%5        US   S   nU[        :X  a  SOSU 3US   S'   U R	                  X#U45        M\     U $ )Nr>   Ú?z?/)ÚMAPSru   r  r   r÷   )ÚoutÚfnr  ÚblurbÚcanvasrø   Úcorners          r   Ú	build_allr  <  sr   € Ø
+€CßˆÙ ›dÑˆVØ{‰{‹}ˆÜÔğ b‘˜"‘ˆØ$¬›n‘s°B°v°h°-ˆˆR‰‰Ø
+‰
+D Ğ&Ö'ñ ğ €Jr   c                 ó:   ^• SR                  U4S jU  5       5      $ )NÚ
+c              3   óv   >#   • U  H.  nTS R                  S U 5       5      R                  5       -   v •  M0     g7f)Ú c              3   óB   #   • U  H  oR                  S 5      v •  M     g7f)r2   N)Úljust©rP   r!   s     r   rR   Ú'level_text.<locals>.<genexpr>.<genexpr>K  s   é € Ğ&?º3°a§w¡w¨q§z zº3ùó   ‚N)ÚjoinÚrstrip)rP   rˆ   Úindents     €r   rR   Úlevel_text.<locals>.<genexpr>K  s0   øé € ĞYÒTXÈSV˜cŸh™hÑ&?¹3Ó&?Ó?×FÑFÓHÖHÒTXùs   ƒ69)r  )rø   r!  s    `r   Ú
+level_textr#  J  s   ø€ Ø9‰9ÔYÑTXÓYÓYĞYr   Ú__main__r*   z== r  r   z  z   Ú c              #   óB   #   • U  H  o[         :w  a  US    OSv •  M     g7f)r   r   N)r   r  s     r   rR   rR   W  s   é € Ğ!JÂcÀ¬t«) ! A¢$¸Ô"<Âcùr  )r‡   )z      )"r}   r   Úcollectionsr   r   r"   ÚSOLIDr   r   r«   r¼   rÇ   rÜ   ré   rí   rò   r  rı   r  r  r#  ry   r  r  rø   Úcountsrˆ   r!   r&   Úprintrô   Úsortedr  r  )ÚkÚvs   00r   Ú<module>r.     sq  ğñó$ İ à
+€ÙˆE‹
+€÷bñ bôJ	<ò xò&xò.{ò.yò*oò&Dò"}ğ& 	K ¨K¸ÀfÈhĞW€òòAòôZğ ˆzÓÙ&[ÑˆˆeTØˆÛˆCÛØ%Ÿz™z¨!¨A©$°Ó2°QÑ6q˜‘t“ó ñ ñ 	D6˜™3˜t A™w›<˜.¨©#¨d«)¨°B°u°gĞ>Ô?Ùˆe¡v¨f¯l©l«nÔ'=ÔJÒ'=™t˜qÀÀcÁ“da’dÑ'=ÒJÔKÛˆCÙ%˜"Ÿ'™'Ñ!JÁcÓ!JÓJÑJÖKó ò )ğ ùó Ks   ÃD%Ã'D%ó
+    I*÷j<“  ã                   óæ  • S r SSKrSSKJr  Su  rrrr\S\S\S\S0rS	S
+S	SSSSSSSS.
+r	Sr
+SrSrSrSrSSSSSSSSSSS S!S".rS#S$S%S&S'S(S).r\R#                  5        V s/ s H  o S   PM	     sn rS*S+S,.rS-/ S.Q/ S/QS0S1.S2/ S3Q/ S4QSS1.S5.rSrS6rSS0SS7S
+S	SS6S8SS9S:.rSrS; rS< rS= rS>u  rrr " S? S@5      r " SA SB5      r  " SC SD5      r! " SE SF5      r"SJSG jr#SH r$\%SI:X  a  \$" 5         ggs  sn f )Ka„  Scripted AI player for GriddlyRTS-FoW ("Griddly RTS: Frontiers").
+
+The GDY holds all of the rules; this module only decides what to do. Every tick it reads the game
+state and issues at most one external action per unit (plus camera pans). The same logic is ported
+to TypeScript for the web UI (studio/griddly-demo/apps/web/src/rts/ai.ts), so keep the two in step.
+
+Plan, per player:
+    economy    train workers (up to 6); each worker mines the nearest free mineral / gem slot,
+               carries ONE load back to the nearest friendly base and deposits it; when nothing is
+               left to mine, workers chop forest next to the base for wood
+    expand     a scout (or idle soldier) walks to the nearest uncaptured relay and captures it
+    build      lab -> barracks -> towers near the base, facing the enemy
+    research   along the player's strategy (see STRATEGIES)
+    army       the barracks trains the strategy's units; medics follow and heal; the army gathers
+               at a rally point and attacks once it is big enough (or the economy runs dry)
+
+Fog of war: a policy only ever reads its own player's view of the game, ``game.get_player_state(pid)``
+(the engine filters it by Environment.Player.FogOfWar): its own objects, terrain it has explored, and
+enemy objects only while they are in sight. It remembers the enemy buildings it has seen, guesses the
+enemy base from the map's point symmetry until it finds it, and sends its scout to explore.
+
+`Match` runs two policies against each other on the engine's game clock: each records its actions
+from its own player state (``player.queue``), and every recorded action runs together on the tick.
+é    N)Údeque)é   é   é   é   )éÿÿÿÿr   )r   r   )r   r   )r   r   é   r   é   é   é   é
+   r   )
+ÚworkerÚscoutÚcombatÚmarineÚmedicÚtankÚbarracksÚlabÚtowerÚwall)r   r   r   r   r   r   )r   r   r   r   r   )r   r   r   )Úbaser   r   r   r   Úrelay_owned)NÚbridgeÚmap_sizeÚtrooperÚgunnerr   r   r   r   r   r   r   r   r   Úrelay)r   r   r   r   r   r   r   r   r   r   r   r   )Ú
+res_miningÚMiningé   N)Úres_weaponsÚWeaponsr   N)Ú	res_armorÚArmourr   N)Úres_gunneryÚGunneryr   r"   )Úres_vehiclesÚVehiclesr   r$   )Úres_fortifyÚFortifyr   r$   )r   r   r   r   r	   r
+   r&   r(   )r   r   ÚGUNLINE)r   r   r   r   ))r   r   )r   r   ©r   r   r   )ÚnameÚresearchÚarmyÚtowersÚARMOUR)r   r   r	   r
+   ))r   r   )r   r   r-   ©r   r   é   r   r!   é   )r   r   r   r   r   r   r   r   r   r   r   c                 ó|   • US   U S   -
+  US   U S   -
+  4n[         R                  5        H  u  p4XB:X  d  M  Us  $    g ©Nr   r   )ÚDIRSÚitems)ÚsrcÚdstÚdÚkÚvs        Úf/mnt/vast/home/bam4d/.vibe/worktrees/Griddly-c5a12f524638/fog-of-war/resources/games/RTS/fow_policy.pyÚdirection_tor@   E   sE   € Ø	ˆQ‰#a‘&‰˜#˜a™& 3 q¡6™/Ğ*€AÜ—
+‘
+–‰ˆØ6ØŠHñ ğ ó    c                 ó|   • [         R                  5        VVs/ s H  u  pU S   U-   U S   U-   4PM     snn$ s  snnf r7   )r8   Úvalues)ÚcÚdxÚdys      r?   Ú
+neighboursrG   M   s7   € Ü15·±´Ô?²¡v rˆQˆq‰TB‰Y˜˜!™˜r™	Ó"±Ò?Ğ?ùÓ?s   ˜8c                 óT   • [        U S   US   -
+  5      [        U S   US   -
+  5      -   $ r7   )Úabs)ÚaÚbs     r?   Ú	manhattanrL   Q   s/   € Üˆq‰ta˜‘d‰{Óœc ! A¡$¨¨1©¡+Ó.Ñ.Ğ.rA   )r   r   r   c                   óX   • \ rS rSrSrS rSS jrS rS rS r	S	 r
+S
+ rS rS rS rSrg)Ú	WorldViewéX   a  One player's view of the game for one tick: ``game.get_player_state(pid)``.
+
+``visibility`` is the player's fog (row major, UNSEEN / EXPLORED / VISIBLE); None without fog.
+Global variables come from the state, which only holds the viewing player's per-player values.
+c                 óN  • X#sU l         U l        US   U l        US   U l        UR	                  S5      U l        / U l        0 U l        US    H  nUS   u  pVUS:  d  US:  d	  US   S:X  a  M!  US   XV4US	   UR	                  S
+0 5      =(       d    0 S.nU R                  R                  U5        XV4U R                  ;  d  US   S:w  d  M  XpR                  XV4'   M     0 U l	        U R                   H1  nU R                  R                  US   / 5      R                  U5        M3     g )NÚ	GameTicksÚGlobalVariablesÚ
+VisibilityÚObjectsÚLocationr   ÚNamer   ÚPlayerIdÚ	Variables©r.   ÚposÚplayerÚvarsr.   r   )ÚwidthÚheightÚtickÚglobalsÚgetÚ
+visibilityÚobjectsÚatÚappendÚby_nameÚ
+setdefault)ÚselfÚstater]   r^   ÚoÚxÚyÚobjs           r?   Ú__init__ÚWorldView.__init___   s  € Ø"'ĞˆŒ
+D”KØ˜+Ñ&ˆŒ	ØĞ.Ñ/ˆŒØŸ)™) LÓ1ˆŒØˆŒØˆŒØyÔ!ˆAØZ‘=‰DˆAØ1‹u˜˜A›  6¡¨jÓ!8ÙØ˜V™9¨a¨V¸qÀ¹}ĞVW×V[ÑV[Ğ\gĞikÓVl×VrĞprÑsˆCØL‰L×Ñ Ô$àˆv˜TŸW™WÓ$¨¨F©°xÕ(?Ø"%—‘˜˜“ñ "ğ ˆŒØ—”ˆAØL‰L×#Ñ# A f¡I¨rÓ2×9Ñ9¸!Ö<ò rA   Nc                 ó€   • U R                   R                  U/ 5       Vs/ s H  o2b  US   U:X  d  M  UPM     sn$ s  snf )Nr[   )rf   ra   )rh   r.   r[   rj   s       r?   ÚofÚWorldView.ofs   s;   € ØŸ<™<×+Ñ+¨D°"Ô5ÓaÒ5a¹È1ÈXÉ;ĞZ`ÑK`—Ñ5ÑaĞaùÒas   Ÿ;²;c                 óv   • U R                   R                  U/ 5      nU[        U5      :  a  [        X2   5      $ S$ )Nr   )r`   ra   ÚlenÚint)rh   r.   r[   rC   s       r?   Úglobal_valueÚWorldView.global_valuev   s5   € Ø—‘×!Ñ! $¨Ó+ˆØ&,¬s°6«{Ó&:Œs6‘>Ó"ĞAÀĞArA   c                 ó&   • U R                  SU5      $ )NÚplayer_resources©rv   ©rh   r[   s     r?   Ú	resourcesÚWorldView.resourcesz   s   € Ø× Ñ Ğ!3°VÓ<Ğ<rA   c                 ó$   • U R                  X5      $ ©Nrz   )rh   Úvarr[   s      r?   ÚtechÚWorldView.tech}   s   € Ø× Ñ  Ó-Ğ-rA   c                 óJ   • U R                  SU5      U R                  SU5      4$ )NÚcam_xÚcam_yrz   r{   s     r?   ÚcameraÚWorldView.camera€   s'   € Ø× Ñ  ¨&Ó1°4×3DÑ3DÀWÈfÓ3UĞUĞUrA   c                 ó´   • U R                   SL =(       dD    U R                  U5      =(       a,    U R                   US   U R                  -  US   -      [        :H  $ )z-Does the viewing player see cell c right now?Nr   r   )rb   Úinsider]   ÚVISIBLE©rh   rD   s     r?   ÚvisibleÚWorldView.visibleƒ   sO   € à‰ $Ğ&×s¨4¯;©;°q«>×+r¸d¿o¹oÈaĞPQÉdĞUY×U_ÑU_ÑN_ĞbcĞdeÑbfÑNfÑ>gÔkrÑ>rĞsrA   c                 ó´   • U R                   S L=(       aD    U R                  U5      =(       a,    U R                   US   U R                  -  US   -      [        :H  $ )Nr   r   )rb   r‰   r]   ÚUNSEENr‹   s     r?   ÚunseenÚWorldView.unseen‡   sQ   € Ø‰ dĞ*×u¨t¯{©{¸1«~×uÀ$Ç/Á/ĞRSĞTUÑRVĞY]×YcÑYcÑRcĞfgĞhiÑfjÑRjÑBkÔouÑBuĞurA   c                 ó˜   • SUS   s=:*  =(       a    U R                   :  Os  =(       a"    SUS   s=:*  =(       a    U R                  :  $ s  $ r7   )r]   r^   r‹   s     r?   r‰   ÚWorldView.insideŠ   s=   € ØAa‘D×%Ó%˜4Ÿ:™:Ô%×A¨!¨q°©t×*AÓ*A°d·k±kÑ*AĞAÑ*AĞArA   c                 ó^   • U R                   R                  U5      nUS L=(       a    US   S;  $ )Nr.   )r   ©rd   ra   )rh   rD   rj   s      r?   ÚblockedÚWorldView.blocked   s+   € ØG‰GK‰K˜‹NˆØ˜ˆ}×=  6¡°+Ñ!=Ğ=rA   )rd   rf   r`   r^   rc   r_   rb   r]   r   )Ú__name__Ú
+__module__Ú__qualname__Ú__firstlineno__Ú__doc__rn   rq   rv   r|   r   r†   rŒ   r   r‰   r–   Ú__static_attributes__© rA   r?   rN   rN   X   s?   † ñò=ô(bòBò=ò.òVòtòvòBõ>rA   rN   c                   ó:   • \ rS rSrSrS rS rS rS rS
+S jr	Sr
+g	)ÚPlanneré’   zRPer-tick occupancy bookkeeping so a player's own units never plan into each other.c                 óª   • Xl         UR                   Vs1 s H  o!R                  U5      (       d  M  UiM     snU l        [        5       U l        g s  snf r   )Úworldrd   r–   ÚsetÚreserved)rh   r£   rD   s      r?   rn   ÚPlanner.__init__•   s9   € ØŒ
+Ø#(§8¢8Ó@¢8˜a¯}©}¸Q×/?Ÿ¡8Ñ@ˆŒÜ›ˆùò As
+   •A²Ac                 ób   • U R                   R                  U5      =(       a    XR                  ;  $ r   )r£   r‰   r–   r‹   s     r?   ÚfreeÚPlanner.freeš   s#   € Øz‰z× Ñ  Ó#×=¨·±Ñ(=Ğ=rA   c                 óp   • U R                   R                  U5        U R                   R                  U5        g r   )r–   ÚdiscardÚadd)rh   r:   r;   s      r?   ÚmoveÚPlanner.move   s&   € Ø‰×Ñ˜SÔ!Ø‰×Ñ˜ÕrA   c                 ó:   • U R                   R                  U5        g r   )r–   r¬   r‹   s     r?   ÚspawnÚPlanner.spawn¡   s   € Ø‰×Ñ˜ÕrA   c                 óJ  ^ ^^^• [        T5      mT(       d  gUT;   a  SSU4$ 1 SkmUUU U4S jnUS0n[        U/5      nU(       aİ  [        U5      U:  aÎ  UR                  5       nUT;   aK  U/n	XiS      U:w  a#  U	R	                  XiS      5        XiS      U:w  a  M#  [        XS   5      [        U	5      U4$ [        U5       HF  n
+X¦;  d  M
+  U" U
+5      (       d  U
+T;   d  M  U
+T R                  ;  d  M1  X†U
+'   UR	                  U
+5        MH     U(       a  [        U5      U:  a  MÎ  g)zXFirst step of a shortest path from start to any goal: (direction, length, goal) or None.Nr   >   r   r   ÚgemsÚrockr   r   r   ÚwaterÚforestr   Úmineralsr   c                 ó  >• TR                   R                  U 5      (       d  gT(       a8  TR                   R                  R                  U 5      nUS L =(       d    US   T;  $ U TR                  ;  =(       d    U T;   =(       a    S$ )NFr.   )r£   r‰   rd   ra   r–   )rD   rj   ÚgoalsÚignore_unitsrh   Ústatics     €€€€r?   ÚpassableÚPlanner.bfs.<locals>.passable®   sk   ø€ Ø—:‘:×$Ñ$ Q×'Ñ'ØŞØ—J‘J—M‘M×%Ñ% aÓ(Ø˜Dy×; A f¡I°VÑ$;Ğ;Ø˜DŸL™LÑ(×B¨Q°%©Z×-A¸EĞBrA   r   )r¤   r   rt   Úpopleftre   r@   rG   r–   )rh   Ústartr¹   rº   Úlimitr¼   ÚprevÚqÚcurÚpathÚnr»   s   ` ``       @r?   ÚbfsÚPlanner.bfs¤   s  û€ äE“
+ˆŞØØE‹>Ø˜˜E>Ğ!ò)ˆ÷	Cğ 	Cğ tˆ}ˆÜ5'‹NˆŞ”C˜“I Ó%Ø—)‘)“+ˆCØe‹|ØuØ ™8‘n¨Ó-Ø—K‘K ¨"¡X¡Ô/ğ  ™8‘n¨Õ-ä# E°©8Ó4´c¸$³iÀĞDĞDÜ –_Ø•=¡h¨q§k¡k°a¸5µjÀQÈdÏlÉlÕEZØ!˜‘GØ—H‘H˜Q–Kñ %ö ”C˜“I Õ%ğ rA   )r–   r¥   r£   N)Fi   )r˜   r™   rš   r›   rœ   rn   r¨   r­   r°   rÆ   r   r   rA   r?   r    r    ’   s   † Ù\òò
+>òò÷rA   r    c                   ó    • \ rS rSrSrSS jrS rSS jrS rS r	S r
+S	 rS
+ rS rSS jrS rS rS rS rSS jrS rS rS rS rS rSrg)Ú	RTSPolicyéÆ   zZOne player's strategy. ``act(world)`` returns ([(action, x, y, actionId)], caption_lines).c                 óÜ   • Xl         X l        [        R                  " US-  U-   5      U l        [
+        U   U l        SU l        0 U l        / U l	        0 U l
+        0 U l        0 U l        0 U l        g )Niè  F)ÚpidÚenemyÚrandomÚRandomÚrngÚ
+STRATEGIESÚstrategyÚ	offensiveÚcountsÚeventsÚ
+_last_techÚsitesÚknown_enemyÚexplore_goals)rh   Ú	player_idÚenemy_idÚseeds       r?   rn   ÚRTSPolicy.__init__É   sd   € ØŒØŒ
+Ü—=’= ¨¡¨yÑ!8Ó9ˆŒÜ" 9Ñ-ˆŒØˆŒØˆŒØˆŒØˆŒØˆŒ
+ØˆÔØˆÕrA   c                 ó   • UR                  X#S   US   U45        U R                  R                  US5      S-   U R                  U'   g r7   )re   rÔ   ra   )rh   Úactionsr.   rZ   Ú	action_idÚlabels         r?   Ú_emitÚRTSPolicy._emit×   s?   € Ø‰˜ !™f c¨!¡f¨iĞ8Ô9Ø!Ÿ[™[Ÿ_™_¨U°AÓ6¸Ñ:ˆ‰EÒrA   c           	      ó¬  • US   nUR                  Xt5      nUc  UR                  XtSS9nUb  US   c  gUS   n	US   [        U	   S   -   US   [        U	   S   -   4n
+UR                  U
+5      (       d´  [         Vs/ s H>  o±R                  US   [        U   S   -   US   [        U   S   -   45      (       d  M<  UPM@     nnU(       a  U R                  R	                  5       S:  a  gU R                  R                  U5      n	US   [        U	   S   -   US   [        U	   S   -   4n
+UR                  Xz5        U R                  USXyU5        X£S'   gs  snf )	zROne step towards any goal cell; sidestep randomly when the way is jammed by units.rZ   T)rº   r   Fr   g      à?r­   )rÆ   r8   r¨   rĞ   rÎ   Úchoicer­   râ   )rh   Úplanrß   Úunitr¹   rá   Ú
+allow_choprZ   Ústepr<   Únxtr=   Úoptionss                r?   Ú_walkÚRTSPolicy._walkÛ   sO  € à5‰kˆØx‰x˜Ó#ˆØ‰<Ø—8‘8˜C°T8Ğ:ˆDØ‰<˜4 ™7™?ØØ‰GˆØ1‰vœ˜Q™ ™
+Ñ" C¨¡F¬T°!©W°Q©ZÑ$7Ğ8ˆØy‰y˜~‰~İ"&Ó`¢$˜Q¯)©)°S¸±V¼dÀ1¹gÀa¹jÑ5HÈ#ÈaÉ&ÔSWĞXYÑSZĞ[\ÑS]ÑJ]Ğ4^×*_—q¡$ˆGĞ`Ş˜dŸh™hŸo™oÓ/°#Ó5ØØ—‘—‘ Ó(ˆAØq‘6œD ™G A™JÑ&¨¨A©´°a±¸±Ñ(;Ğ<ˆCØ	‰	#ÔØ
+‰
+7˜F C¨EÔ2ØˆU‰Øùò as   Á;;EÂ:Ec           	      ó¾  ^^^• Sn[        [        SUS   U-
+  5      [        TR                  US   U-   S-   5      5       GH  n	[        [        SUS   U-
+  5      [        TR                  US   U-   S-   5      5       HÌ  n
+X©4nU[        X³5      s=::  a  U::  a)  O  O&TR                  U5      (       a  UTR                  ;   a  MG  TR                  R                  U5      b  Me  [        UU4S j[        U5       5       5      (       a  M‹  [        U4S j[        U5       5       5      S:  a  M¯  [        X´5      X©4nUb
+  XÈS   :  d  MÉ  XË4nMÎ     GM     U(       a  US   $ S$ )zaA free tile dmin..dmax steps from `base`, not touching resources/buildings, closest to `towards`.Nr   r   c              3   ó–   >#   • U  H>  nTR                   R                  U5      S L=(       a    TR                   U   S   T;   v •  M@     g 7f©Nr.   r•   )Ú.0rÅ   Úavoidr£   s     €€r?   Ú	<genexpr>Ú"RTSPolicy._site.<locals>.<genexpr>ú   s?   øé € ĞkÒ]jĞXYu—x‘x—|‘| A“¨dĞ2×S°u·x±xÀ±{À6Ñ7JÈeÑ7SÔSÒ]jùs   ƒAA	c              3   óF   >#   • U  H  nTR                  U5      v •  M     g 7fr   )r¨   )rñ   rÅ   ræ   s     €r?   ró   rô   ü   s   øé € Ğ;ª]¨t—y‘y —||ª]ùs   ƒ!r   )ÚrangeÚmaxÚminr^   r]   rL   r¨   r¥   rd   ra   ÚanyrG   Úsum)rh   r£   ræ   r   ÚtowardsÚdminÚdmaxrò   Úbestrl   rk   rD   Úscores    ``    `     r?   Ú_siteÚRTSPolicy._siteğ   s3  ú€ àˆÜ”s˜1˜d 1™g¨™nÓ-¬s°5·<±<ÀÀaÁÈ4ÁĞRSÑASÓ/T×UˆAÜœ3˜q $ q¡'¨D¡.Ó1´3°u·{±{ÀDÈÁGÈdÁNĞUVÑDVÓ3WÖXØFØœy¨Ó1Õ9°TÖ9ÀÇÁÈ1ÇÁĞQRĞVZ×VcÑVcÓQcÙØ—8‘8—<‘< “?Ñ.ÙÜÕkÔ]gĞhiÔ]jÓk×kÑkÙÜÔ;¬Z¸¬]Ó;Ó;¸aÓ?ÙÜ" 1Ó.°Ğ5Ø‘< 5°©7¥?Ø!˜:’Dô Yñ Vö ˆtA‰wĞ( DĞ(rA   c           	      ó¢  ^• U Vs/ s H  oˆS   R                  S5      (       a  M  UPM!     n	nT(       a  U	(       d  SU4$ [        U	U4S jS9n
+[        U
+S   T5      nUb“  U[        U   :¼  ae  UR                  R                  T5      cI  U R                  USU 3U
+S   USUR                  5        35        UR                  T5        U[        U   -  nUR                  R                  U
+S   5        X§4$ [        T5       Vs/ s H$  oÂR                  U5      (       d
+  XÊS   :X  d  M"  UPM&     nnU R                  X#X­S	U S
+35        X§4$ s  snf s  snf )zTSend the nearest idle worker next to `site` and build there. Returns (builder, res).r\   ÚcarryingNc                 ó"   >• [        U S   T5      $ ©NrZ   ©rL   )ÚwÚsites    €r?   Ú<lambda>Ú&RTSPolicy._construct.<locals>.<lambda>  s   ø€ ´)¸A¸e¹HÀdÔ2KrA   ©ÚkeyrZ   Úbuild_zBUILD zwalk to z site)ra   rø   r@   ÚCOSTSrd   râ   Úupperr°   r¥   r¬   rG   r¨   rì   )rh   r£   ræ   rß   Úworkersr  ÚbuildingÚresr  Úfree_workersÚbuilderr<   rÅ   r¹   s        `        r?   Ú
+_constructÚRTSPolicy._construct  s<  ø€ á#*ÓL¢7˜a°F±)·-±-À
+×2KŸ¡7ˆĞLŞ<Ø˜9ĞÜlÔ(KÑLˆÜ˜ ™¨Ó.ˆØ‰=Ø”e˜H‘oÓ%¨%¯(©(¯,©,°tÓ*<Ñ*DØ—
+‘
+˜7 f¨X¨JĞ$7¸À¹ÈÈfĞU]×UcÑUcÓUeĞTfĞLgÔhØ—
+‘
+˜4Ô Ø”u˜X‘Ñ&ØM‰M×Ñ˜g e™nÔ-ğ ˆ|Ğô !+¨4Ô 0ÓXÒ 0˜1·I±I¸a·L±LÀAĞQVÉÑDW—QÑ 0ˆEĞXØJ‰Jt g¸ÀÀ
+È%Ğ6PÔQØˆ|Ğùò Mùò Ys   †E¦EÄ !EÄ%Ec                 óŒ   • U R                   S    H1  nUR                  [        U   S   U R                  5      S:w  d  M/  Us  $    g )Nr/   r   r   )rÒ   r   ÚTECHSrÌ   )rh   r£   Útids      r?   Ú_next_researchÚRTSPolicy._next_research  s>   € Ø—=‘= Ô,ˆCØz‰zœ% ™* Q™-¨¯©Ó2°aÕ7Ø’
+ñ -ğ rA   c                 óf  • 0 nU H   nUR                  US   S5      S-   X4S   '   M"     SnU R                  S    Hg  u  pg[        R                  U5      nU(       a!  UR                  X€R                  5      S:w  a  MB  UR                  US5      U-  n	Ub
+  X•S   :  d  Md  X–4nMi     U(       a  US   $ S$ )zQThe unit of the strategy's mix the army is most short of, among those researched.r.   r   r   Nr0   r   r   )ra   rÒ   Ú
+UNIT_NEEDSr   rÌ   )
+rh   r£   r0   rÔ   Úurş   rç   ÚshareÚneedsÚratios
+             r?   Ú_unit_choiceÚRTSPolicy._unit_choice  s¯   € àˆÛˆAØ &§
+¡
+¨1¨V©9°aÓ 8¸1Ñ <ˆFV‘9Óñ àˆØŸ=™=¨Ô0‰KˆDÜ—N‘N 4Ó(ˆEŞ˜Ÿ™ E¯8©8Ó4¸Ó9ÙØ—J‘J˜t QÓ'¨%Ñ/ˆEØ‰|˜u¨A¡wØ}’ñ 1ö ˆtA‰wĞ, HĞ,rA   c                 ó„  • UR                    H<  nUS   U R                  :X  d  M  US   [        ;   d  M'  US   U R                  US   '   M>     [	        U R                  5       H[  nUR
+                  R                  U5      nUR                  U5      (       d  M6  Ub  US   U R                  :w  d  MN  U R                  U	 M]     g)zPKeep the enemy buildings we have seen; forget them once we see their cell empty.r[   r.   rZ   N)rc   rÍ   Ú	BUILDINGSrØ   Úlistrd   ra   rŒ   )rh   r£   rj   rZ   s       r?   Ú	_rememberÚRTSPolicy._remember*  sœ   € à—”ˆAØ‰{˜dŸj™jÕ(¨Q¨v©Y¼)Õ-CØ-.¨v©Y× Ñ   5¡Ó*ñ ô ˜×(Ñ(Ö)ˆCØ—‘—‘˜SÓ!ˆAØ}‰}˜S×!Ó! q¡y°A°h±KÀ4Ç:Á:Õ4MØ×$Ñ$ SÒ)ò *rA   c                 ó<  • UR                  SU R                  5      nU(       a  US   S   $ U R                  R                  5        VVs/ s H  u  pEUS:X  d  M  UPM     nnnU(       a  US   $ UR                  S-
+  US   -
+  UR
+                  S-
+  US   -
+  4$ s  snnf )z`Where the enemy base is: seen, remembered, or the mirror of ours (the maps are point-symmetric).r   r   rZ   r   )rq   rÍ   rØ   r9   r]   r^   )rh   r£   r   ÚseenÚprÅ   Úknowns          r?   Ú_enemy_base_guessÚRTSPolicy._enemy_base_guess4  s”   € àx‰x˜ §
+¡
+Ó+ˆŞØ˜‘7˜5‘>Ğ!Ø#×/Ñ/×5Ñ5Ô7ÔGÒ7‘tq¸1À¹;—Ñ7ˆÑGŞØ˜‘8ˆOØ—‘˜a‘ $ q¡'Ñ)¨5¯<©<¸!Ñ+;¸dÀ1¹gÑ+EĞFĞFùó Hs   Á	BÁBc           	      ób  • U R                   R                  U5      nUbG  UR                  U5      (       a1  [        US   U5      S::  d  U R                  R                  5       S:  a¡  [        SUR                  S-
+  S5       VVs/ s H@  n[        SUR                  S-
+  S5        H  oR                  X‡45      (       d  M  X‡4PM      MB     n	nnU	(       a  UR                  US   U	SSS	9OSn
+U
+(       a  U
+S   OS=o`R                   U'   Ub   U R                  X#XF/[        U5      -   U5      $ g
+s  snnf )zKWalk towards the nearest reachable unexplored cell (sampled every 3 cells).NrZ   r   g{®Gáz”?r   r   Ti@  )rº   rÀ   F)rÙ   ra   r   rL   rĞ   rÎ   rö   r^   r]   rÆ   rì   rG   )rh   r£   ræ   rß   r  rá   Úgoalrl   rk   Úcellsré   s              r?   Ú_exploreÚRTSPolicy._explore>  s$  € à×!Ñ!×%Ñ% eÓ,ˆØ‰<˜uŸ|™|¨D×1Ñ1´Y¸qÀ¹xÈÓ5NĞRSÓ5SĞW[×W_ÑW_×WfÑWfÓWhĞkoÓWoÜ%*¨1¨e¯l©l¸QÑ.>ÀÔ%Bô  BÒ%B ÌEĞRSĞUZ×U`ÑU`ĞcdÑUdĞfg×LhÀq×lxÑlxĞz{Ğy÷  mA“Va“VÑLh‘VÑ%BˆEñ  BæOT4—8‘8˜A˜e™H e¸$Àd8ÑKĞZ^ˆDŞ:>¨t°AªwÀDĞHˆD×%Ñ% eÑ,ØÑØ—:‘:˜d¨Q°¼ÀDÓ9IÑ0IÈ5ÓQĞQØùó Bs   Â8D+Â?D+c                 ó  ^^8^9^:• 0 U l         [        T5      m9/ nU R                  m8TR                  T85      nTR	                  ST85      nU(       a  US   S   OS nU R                  T5        U(       a  U R                  TU5      OS nTR                   Vs/ s H  owS   T8:X  d  M  UPM     nnU Vs/ s H  owS   S:X  d  M  UPM     n	nU Vs/ s H  owS   [        ;   d  M  UPM     n
+nU Vs/ s H  owS   S:X  d  M  UPM     nnU Vs/ s H  owS   S:X  d  M  UPM     nnU Vs/ s H  owS   S	:X  d  M  UPM     nnTR                   Vs/ s H(  owS   U R                  :X  d  M  US   [        ;   d  M&  UPM*     nnU Vs1 s H  owS   iM	     nnU R                  R                  5        VVs/ s H+  u  nnUU;  d  M  U[        ;   d  M  UUU R                  0 S
+.PM-     nnnU Vs0 s H  owS   U_M
+     nnTR	                  S5      TR	                  S5      -   nTR                   Vs/ s H#  owS   S:X  d  US   S:X  d  M  US   T8:w  d  M!  UPM%     nnU R                  T5        U R                  T5      n[        U8U4S j[          5       5      nU Vs/ s H2  nUS   ["        ;   d  M  U(       d  M  [%        US   U5      S::  d  M0  UPM4     nnUc  X R'                  TSX9U
+5      4$ [)        U	5      [*        :  a®  U[,        S   :¼  a¡  [)        U	5      S:  d  U(       a‹  [.        [0        [2        [4        4 Hq  nUS   [6        U   S   -   US   [6        U   S   -   4nT9R9                  U5      (       d  M?  U R;                  USUUS5        T9R=                  U5        U[,        S   -  n  O   U=(       d    TR>                  S-  TR@                  S-  4m:1 Skn[C        5       nS nU(       dB  [)        U	5      S:¼  a3  SU RE                  TT9XUS   S-  T:S   -
+  US   S-  T:S   -
+  4SSU5      4nO‰U(       a0  U(       d)  [)        U	5      S:¼  a  SU RE                  TT9UT:SSU5      4nORU(       aK  [)        U5      U RF                  S   :  a/  U(       d  [)        U
+5      S:¼  a  S	U RE                  TT9UT:SSU5      4nU(       ao  US   nU RH                  RK                  U5      n U (       a  TRL                  RK                  U 5      OS n!U b  U!b!  U!S   ["        ;  a  US   =n U RH                  U'   UU 4nU(       a(  US   (       a  T9RN                  RQ                  US   5        U(       a]  US   (       aS  U[,        US      S-
+  :¼  a@  U RS                  TT9X)US   US   U5      u  n"nU"(       a  URQ                  [U        U"5      5        U(       ah  Ube  U(       d^  [V        U   u  n#n$n%n&UU%:¼  aJ  U&b  TRY                  U&T85      S:X  a1  U R;                  USUS   S   USU$R[                  5        35        UU%-  nU R]                  TU
+5      n'U(       a  SO"U(       a  U(       a  U(       d  [V        U   S   OSn(U GH  n)UU(-
+  [,        U'   :  a    GO[6        R                  5        V*V+s/ s H`  u  n*n+T9R9                  U)S   S   U+S   -   U)S   S   U+S   -   45      (       d  M8  [%        U)S   S   U+S   -   U)S   S   U+S   -   4T:5      U*4PMb     n,n*n+U,(       d  M¡  [_        U,5      S   nU R;                  USU' 3U)S   US[`        U'    35        T9R=                  U)S   S   [6        U   S   -   U)S   S   [6        U   S   -   45        U[,        U'   -  nGM     TRb                  S L=(       a8    TRb                  Re                  [f        5      [)        TRb                  5      S-  :„  n-U(       aß  [        S  U
+ 5       5      (       dÈ  U(       d  U-(       d  U(       d³  U[,        S!   U(-   :¼  a£  TRh                  S":  a“  US   S   n)[0        [.        [4        [2        4 Hq  nU)S   [6        U   S   -   U)S   [6        U   S   -   4nT9R9                  U5      (       d  M?  U R;                  US#U)US$5        T9R=                  U5        U[,        S!   -  n  O   U Rk                  TT9X)UUUUU5	        U
+ V.s/ s H  n.U.S   [l        ;   d  M  U.PM     n/n.U=(       a    [o        U94S% jU 5       5      n0U Rp                  (       dK  [)        U/5      [r        :¼  d1  U(       d  U/(       a  US:  d  U0(       d  U0(       a  [)        U/5      S:¼  a  S&U l8        U Rp                  (       a$  [)        U/5      S:  a  U(       a  U(       d  S'U l8        US   T:S   US   :„  S-  -   T:S   US   :  S-  -
+  US   T:S   US   :„  S-  -   T:S   US   :  S-  -
+  4n1[_        [u        U1S   S5      TR>                  S-
+  5      [_        [u        U1S   S5      TR@                  S-
+  5      4n1U Rw                  TUU15      n1[y        U
+U:4S( jS)9 H_  n.U.S   S!:X  a  U R{                  TT9UU.UU5        M$  U.S   S*:X  a  U R}                  TT9UU.U
+U15        ME  U R                  TT9UU.UUUU1UU5
+        Ma     U R                  XYU/U5      n2TRƒ                  T85      n3[…        [†        5       Hº  n4U2S   U3S   -
+  U2S   U3S   -
+  n6n5[‰        U55      S::  a  [‰        U65      S::  a    O…[‰        U55      [‰        U65      :¼  a  U5S:”  a  [0        O[4        OU6S:”  a  [.        O[2        nUR‹                  S+US   US   U45        U3S   S[6        U   S   -  -   U3S   S[6        U   S   -  -   4n3M¼     U Rp                  (       a  S,n7O U(       a  S-n7OU(       a  S.n7OU(       a  S/n7OS0n7X R'                  TU7TR                  T85      Xš5      4$ s  snf s  snf s  snf s  snf s  snf s  snf s  snf s  snf s  snnf s  snf s  snf s  snf s  sn+n*f s  sn.f )1Nr   r   rZ   r[   r.   r   r   r   r   rY   r·   r³   r   r   c              3   óN   >#   • U  H  nTR                  UT5      S :H  v •  M     g7f)r   N)r   )rñ   r>   rÌ   r£   s     €€r?   ró   Ú RTSPolicy.act.<locals>.<genexpr>f  s!   øé € ĞEº9°a˜%Ÿ*™* Q¨Ó,°Ö1º9ùs   ƒ"%r!   ÚDEFEATEDr   r   Úbuild_workerztrain workerr   >   r   r   r³   r   r   r·   r   r	   r1   r
+   r/   z	RESEARCH r  ztrain c              3   ó0   #   • U  H  oS    S:H  v •  M     g7f)r.   r   Nr   )rñ   r  s     r?   ró   r6  ¥  s   é € ĞCºd¸ &¡	¨WÖ 4ºdùs   ‚r   i„  Úbuild_scoutztrain scoutc              3   ó|   >#   • U  H1  n[        US    5        H  nTR                  U5      (       + v •  M     M3     g7f©rZ   N)rG   r¨   )rñ   rK   rÅ   ræ   s      €r?   ró   r6  ·  s6   øé € Ğ#eºh¸ÔPZĞ[\Ğ]bÑ[c×PdÈ1¨¯	©	°!«×$4Ñ$4ÑPdÑ$4ºhùs   ƒ9<TFc                 ó"   >• [        U S   T5      $ r  r  )r  Útowards    €r?   r	  ÚRTSPolicy.act.<locals>.<lambda>Á  s   ø€ ¬I°a¸±hÀÔ,GrA   r  r   Úmove_cameraÚATTACKÚDEFENDÚARMYÚTECHÚECONOMY)FrÔ   r    rÌ   r|   rq   r'  r-  rc   rC  rÍ   ÚTARGET_PRIORITYrØ   r9   Ú_track_researchr  rù   Ú	TECH_VARSÚUNITSrL   Ú_captionrt   ÚTARGET_WORKERSr  ÚDOWNÚRIGHTÚUPÚLEFTr8   r¨   râ   r°   r]   r^   r¤   r   rÒ   r×   ra   rd   r¥   r¬   r  Úidr  r   r  r"  rø   ÚDISPLAYrb   Úcountr   r_   Ú_workersÚFIGHTERSÚallrÓ   ÚATTACK_SIZEr÷   Ú_rally_pointÚsortedÚ_scoutÚ_medicÚ_fightÚ_camera_focusr†   rö   ÚCAMERA_PANS_PER_TICKrI   re   );rh   r£   rß   r  Úbasesr   Ú
+enemy_baserj   Úminer  r0   r   Úlabsr1   ÚenemiesÚseen_posr+  rÅ   Ú
+rememberedÚenemy_atr|   ÚrelaysÚ	next_techÚresearchingÚeÚthreatr<   rD   rò   ÚbuildersÚwantedÚkindr  Úoccupantr  r€   rá   Úcostr   rç   ÚkeeprK   r=   r>   ÚspotsÚ
+unexploredr  ÚfightersÚboxed_inÚrallyÚfocusÚcamÚ_rE   rF   ÚphaserÌ   ræ   r>  s;    `                                                      @@@r?   ÚactÚRTSPolicy.actK  s‰  û€ ØˆŒÜu‹~ˆØˆØh‰hˆØo‰o˜cÓ"ˆØ—‘˜ Ó%ˆŞ"'ˆuQ‰x˜Š¨TˆØ‰uÔæ<@T×+Ñ+¨E°4Ô8Àdˆ
+Ø Ÿ=š=Ó?š=a¨h©K¸3Ñ,>—™=ˆĞ?Ù"Ó<šd˜¨¡i°8Ñ&;—1™dˆĞ<ÙÓ5š4a V¡9´Ñ#4—™4ˆĞ5Ù#Ó?št˜!¨¡y°JÑ'>—A™tˆĞ?ÙÓ6š4a V¡9°Ñ#5—™4ˆĞ6Ù!Ó:šT˜ v¡Y°'Ñ%9—!™TˆĞ:Ø#ŸmšmÓjšm˜°©{¸d¿j¹jÑ/H“1ÈQÈvÉYÔZiÑMi—1™mˆĞjá&-Ó.¢g e”H¡gˆĞ.ØZ^×ZjÑZj×ZpÑZpÔZrô EÒZrÑRVĞRSĞUVØ (Ñ*ó NØ/0´OÑ/Có N˜q¨°d·j±jÈ"ÔMÑZrˆ
+ñ Eá)0Ó1ª Ae‘H˜a’K©ˆĞ1Ø—H‘H˜ZÓ(¨5¯8©8°FÓ+;Ñ;ˆ	Ø"Ÿ]š]Ózš]˜°©i¸7Ó.BÀqÈÁyĞTaÑGa“!ĞfgĞhpÑfqĞuxÑfx—!™]ˆĞzØ×Ñ˜UÔ#Ø×'Ñ'¨Ó.ˆ	ÜÕE½9ÓEÓEˆÙ$ÓgšW˜¨¨&©	´UÑ(:“!¼t“!Ì	ĞRSĞTYÑRZĞ\`ÓHaĞefÑHf—!™WˆĞgØ‰<ØŸM™M¨%°¸SÈ4ÓPĞPĞPô ˆw‹<œ.Ó(¨S´E¸(±OÓ-CÌÈWËĞXYÓIYÖ]aÜœE¤2¤tÓ,Ø˜!‘Wœt A™w q™zÑ)¨4°©7´T¸!±W¸Q±ZÑ+?Ğ@Ø—9‘9˜Q—<“<Ø—J‘J˜w¨¸¸aÀÔPØ—J‘J˜q”MØœ5 ™?Ñ*CÙñ -ğ ×D §¡¨qÑ 0°%·,±,À!Ñ2CĞDˆÚHˆÜ“5ˆØˆŞœ˜G›¨Ó)Ø˜TŸZ™Z¨¨t°TÀ¹GÀa¹KÈ&ĞQRÉ)Ñ<SĞUYĞZ[ÑU\Ğ_`ÑU`ĞciĞjkÑclÑUlĞ;mĞopĞrsĞuzÓ{Ğ|‰FŞ(¤s¨7£|°qÓ'8Ø  $§*¡*¨U°D¸$ÀÈÈ1ÈeÓ"TĞU‰FŞœ#˜f›+¨¯©°hÑ(?Ó?ÆVÌsĞSWËyĞ\]Ë~Ø˜tŸz™z¨%°°t¸VÀQÈÈ5ÓQĞRˆFŞØ˜!‘9ˆDØ—:‘:—>‘> $Ó'ˆDŞ-1u—x‘x—|‘| DÔ)°tˆHØ‰| Ñ 4¸À&Ñ9IÔQVÓ9VØ*0°©)Ğ3t—z‘z $Ñ'Ø˜D\ˆFŞf˜Q—iàM‰M×Ñ˜f Q™iÔ(Şf˜Q—i C¬5°¸±Ñ+;¸aÑ+?Ó$?ØŸ?™?¨5°$¸È&ĞQRÉ)ĞU[Ğ\]ÑU^Ğ`cÓd‰LˆGSŞØ—‘œR ›[Ô)ö IÑ)¶+Ü&+¨IÑ&6Ñ#ˆC˜˜eØd‹{ ¡°·±¸EÀ3Ó1GÈ1Ó1LØ—
+‘
+˜7 J°°Q±¸±À	ÈYĞW\×WbÑWbÓWdĞVeĞKfÔgØt‘ğ × Ñ  ¨Ó-ˆŞ‰q¾	ÆdÖS^¤ yÑ!1°!Ò!4ĞdeˆÜˆAØT‰zœE $™KÓ'ÚÜbf×blÑblÔbnô MÒbnÑZ^ĞZ[Ğ]^ØŸ	™	 1 U¡8¨A¡;°°1±Ñ#5°q¸±xÀ±{ÀQÀqÁTÑ7IĞ"J×Kó V”i  5¡¨!¡¨q°©tÑ!3°Q°u±X¸a±[À1ÀQÁ4Ñ5GĞ HÈ&ÓQĞSTÓUÑbnˆEñ MçˆuÜ˜“J˜q‘MØ—
+‘
+˜7 f¨T¨F O°Q°u±X¸qÀFÌ7ĞSWÉ=È/ĞBZÔ[Ø—
+‘
+˜A˜e™H Q™K¬$¨q©'°!©*Ñ4°a¸±h¸q±kÄDÈÁGÈAÁJÑ6NĞOÔPØ”u˜T‘{Ñ"“ñ ğ ×%Ñ%¨TĞ1×q°e×6FÑ6F×6LÑ6LÌVÓ6TÔWZĞ[`×[kÑ[kÓWlĞpqÑWqÑ6qˆ
+ŞœCÑC¹dÓC×CÑCÎÖS]ÖenØœ5 ™>¨DÑ0Ó0°U·Z±ZÀ#Ó5EØ˜‘˜EÑ"ˆAÜœT¤4¬Ó,Øq‘TœD ™G A™JÑ&¨¨!©¬t°A©w°q©zÑ(9Ğ:Ø—9‘9˜Q—<“<Ø—J‘J˜w¨°q¸!¸]ÔKØ—J‘J˜q”MØœ5 ™>Ñ)CÙñ -ğ 	‰e˜T 7°X¸tÀYĞPXĞZ`Ôañ  $Ó=št˜! q¨¡y´HÑ'<—A™tˆĞ=ğ ×e¤Ô#e¹hÓ#eÓ eˆØ~~¤3 x£=´KÓ#?Î	ÖV^ĞdgĞjkÓdkÖowŞ'/´C¸³MÀQÓ4FØ!ˆDŒNØ>>œc (›m¨aÓ/¶JÆvØ"ˆDŒNØa‘˜F 1™I¨¨Q©Ñ/°1Ñ4Ñ4¸¸q¹	ÀDÈÁGÑ8KÈqÑ7PÑPØa‘˜F 1™I¨¨Q©Ñ/°1Ñ4Ñ4¸¸q¹	ÀDÈÁGÑ8KÈqÑ7PÑPğRˆä”S˜˜q™ 1Ó% u§{¡{°Q¡Ó7¼¼SÀÀqÁÈ1Ó=MÈuÏ|É|Ğ^_ÑO_Ó9`ĞaˆØ×!Ñ! %¨¨uÓ5ˆÜ˜Ô"GÔHˆAØ‰y˜GÓ#Ø—‘˜E 4¨°!°V¸XÖFØ6‘˜gÓ%Ø—‘˜E 4¨°!°T¸5ÖAà—‘˜E 4¨°!°W¸hÈ
+ĞTYĞ[aĞcmÖnñ Iğ ×"Ñ" 4°(¸JÓGˆØl‰l˜3ÓˆÜÔ+Ö,ˆAØ˜1‘X  A¡Ñ&¨¨a©°3°q±6Ñ(9ˆBÜ2‹w˜!‹|¤ B£¨1£ÙÜ/2°2«w¼#¸b»'Ó/A˜"˜q›&•¥dĞPRĞUVÓPVÍÔ\^ˆAØN‰N˜M¨4°©7°D¸±G¸QĞ?Ô@Øq‘6˜A¤ Q¡¨¡
+™NÑ*¨C°©F°Q¼¸a¹À¹±^Ñ,CĞDŠCñ -ğ >>Ø‰EŞØ‰EŞØ‰EŞØ‰EàˆEØŸ™ e¨U°E·O±OÀCÓ4HÈ'ÓXĞXĞXùòQ @ùÚ<ùÚ5ùÚ?ùÚ6ùÚ:ùÚjùâ.ùóEùâ1ùâzùò hùójMùò0 >sº   Âo?Â#o?Â/pÂ?pÃp	Ãp	Ã+pÃ;pÄpÄpÄ#pÄ3pÅ	pÅ#pÅ2pÅ>p"Æ+p'Æ<p'Çp'Ç$p-È&p2È?p2É
+p2Êp7Ê'p7Ê0p7Ëp7Ú7p<Û,p<ãqã)qc
+                 ó°
+  ^^• U V
+s0 s H  oªS   U
+_M
+     nn
+U R                  X5      nU Vs1 s H$  oÜb  [        XÖ5      [        XÜ5      S-   ::  d  M"  UiM&     nnU=(       d    [        U5      m[        U5       Vs/ s H  oÿPM     nn[	        UU4S jS9nU GH  n[        U5      U;   a  M  US   n[        U5       Vs/ s H  oÿT;   d  M
+  UPM     nnU(       a/  [        UU4S jS9nU R                  USU[        UU5      S5        Mr  US   R                  S	5      (       aF  [        UU5      S
+:X  a   U R                  USU[        UU5      S5        OU R                  X#UUS5        MÑ  [        U5       Vs/ s H¨  oñR                  R                  U5      (       d  M$  UR                  U   S   U R                  :X  d  MF  UR                  U   S   S;   d  M^  UR                  U   S   R                  SS5      UR                  U   S   R                  SS5      :  d  M¦  UPMª     nnU(       a,  U	(       a%  U R                  USU[        UUS   5      S5        GMÂ  [        U5       Vs/ s H  oÿT;   d  M
+  UPM     nnU(       ah  U Vs/ s H  oûU   S   S:X  d  M  UPM     nnUR                  R                  U5        U R                  USU[        UU=(       d    US   5      S5        GMS  T VVs1 s H@  n[        U5        H-  oòR                  U5      (       d  M  XòR                  ;  d  M+  UiM/     MB     nnnU(       a  UR!                  UU5      OS nUb9  UR                  R                  US   5        U R                  X#UUS   /S5        GMù  [        U5       Vs/ s H>  oñR                  R                  U5      (       d  M$  UR                  U   S   S:X  d  M<  UPM@     nnU(       a%  U R                  USU[        UUS   5      S5        GMy  UR#                  S5       Vs/ s H  n[        US   U5      S::  d  M  US   PM     nnU VVs1 s H@  n[        U5        H-  oòR                  U5      (       d  M  XòR                  ;  d  M+  UiM/     MB     nnnU(       a  UR!                  UU5      OS nUb9  UR                  R                  US   5        U R                  X#UUS   /S5        GMX  U(       a  GMb  UUS   L d  GMm  U R%                  XUUS5        GM„     g s  sn
+f s  snf s  snf s  snf s  snf s  snf s  snf s  snnf s  snf s  snf s  snnf )NrZ   r   c                 óh   >^ • T S   R                  S5      (       a  SOS[        U 4S jT 5       SS94$ )Nr\   r  r   r   c              3   óB   >#   • U  H  n[        TS    U5      v •  M     g7fr<  r  )rñ   r+  r  s     €r?   ró   Ú7RTSPolicy._workers.<locals>.<lambda>.<locals>.<genexpr>é  s!   øé € Ğ3\ÒT[Èq´I¸aÀ¹hÈ×4JĞ4JÒT[ùs   ƒ)Údefault)ra   rø   )r  Útargetss   `€r?   r	  Ú$RTSPolicy._workers.<locals>.<lambda>è  s2   ù€ °A°f±I·M±MÀ*×4MÑ4M©qĞSTÜ/2Ô3\ÑT[Ó3\ĞfgÑ/hñ/jrA   r  c                 ó"   >• [         TU    S      $ rğ   ©rF  )rD   re  s    €r?   r	  r‚  ğ  s   ø€ ´ÀÈÁÈFÑ@SÒ0TrA   Úattackzworker defendsr\   r  r   ÚgatherÚdepositÚcarryr[   r.   )r   r   r   r   r   Úhealthr   Ú
+max_healthÚrepairr³   r`  r   zto mineralsr¶   z	chop woodr   z	to forestzworker explores)r-  rL   r¤   rG   rX  rP  rø   râ   r@   ra   rì   rd   rÌ   r¥   r¬   r¨   rÆ   rq   r2  )rh   r£   ræ   rß   r  rk  r   r|   re  rj  ÚrÚ	res_cellsÚebr+  ÚoursrÅ   ÚdropÚorderr  rZ   ÚadjacentÚtÚdamagedÚnearÚgemÚslotsré   Útreesrj   r¶   r  s           `                     @r?   rS  ÚRTSPolicy._workersá  sš  ù€ Ù*3Ó4ª) Qu‘X˜q’[©)ˆ	Ğ4à×#Ñ# EÓ0ˆÙ$Óaš9a©
+´iÀÓ6HÌIĞVWÓL\Ğ_`ÑL`Ñ6`—™9ˆĞaØ×(œ#˜i›.ˆÜ% dÔ+Ó,Ò+a’Ñ+ˆĞ,Üwô %jñ kˆäˆAÜ!‹u˜Ó ÙØE‘(ˆCÜ#-¨c¤?ÓD¢?˜a¸8±mŸ¡?ˆHĞDŞÜ˜Ô&TÑUØ—
+‘
+˜7 H¨c´<ÀÀQÓ3GĞIYÔZÙØ‰y}‰}˜Z×(Ñ(Ü˜S $Ó'¨1Ó,Ø—J‘J˜w¨°#´|ÀCÈÓ7NĞPYÕZà—J‘J˜t¨a°°wÔ?Ùä",¨S¤/ó l¢/˜Q·X±X·\±\À!·_“qÈÏÉĞRSÉĞU]ÑI^Ğbf×bjÑbjÑIj“qØ Ÿ8™8 A™; vÑ.Ğ2^Ñ^ó à Ÿ8™8 A™; vÑ.×2Ñ2°8¸QÓ?À%Ç(Á(È1Á+ÈfÑBU×BYÑBYĞZfĞhiÓBjÑj÷ ¡/ˆGğ lö 6Ø—
+‘
+˜7 H¨c´<ÀÀWÈQÁZÓ3PĞRZÔ[ÚÜ)¨#œÓ?š˜!°w±,—A™ˆDĞ?ŞÙ"&ÓI¢$˜Q°A©,°vÑ*>À&Ñ*H—q¡$ĞIØ—‘×!Ñ! #Ô&Ø—
+‘
+˜7 H¨c´<ÀÀcÇkÈTĞSTÑEUÓ3VĞX^Ô_ÚÙ 'Ôj¢˜1´¸A·¨AÇ)Á)ÈAÇ,“QĞST×\iÑ\iÑSi—Q±‘Q¡ˆEÑjŞ+04—8‘8˜C Ô'°dˆDØÑØ—‘×!Ñ! $ q¡'Ô*Ø—
+‘
+˜4¨!¨d°1©g¨Y¸ÔFÚä *¨3¤Óg¢˜1·8±8·<±<À·?“QÀuÇxÁxĞPQÁ{ĞSYÑGZĞ^fÑGf—Q¡ˆEĞgŞØ—
+‘
+˜7 H¨c´<ÀÀUÈ1ÁXÓ3NĞP[Ô\ÚØ(-¯©°Ô(:Ó^Ò(: 1¼iÈÈ%ÉĞRVÓ>WĞ[]Ñ>]“ha˜”hÑ(:ˆFĞ^Ù &Ôi¢˜1´
+¸1·¨1ÇÁÈ1Ç“QĞRS×[hÑ[hÑRh—Q±‘Q¡ˆEÑiŞ+04—8‘8˜C Ô'°dˆDØÑØ—‘×!Ñ! $ q¡'Ô*Ø—
+‘
+˜4¨!¨d°1©g¨Y¸×Dß‘Y 1¨¨a©¥=à—‘˜e¨7°AĞ7H×Iò_ ùò 5ùò bùâ,ùò Eùòlùò @ùâIùó kùò hùò _ùÛis›   ‡T­!T$ÁT$Á;T)Â?	T.ÃT.Å6#T3ÆT3Æ?T3ÇAT3ÈT3É'	T8É4T8ÊT=ÊT=Ë0(UÌUÌ-
+UÎ#UÏUÏUĞ$UĞ?	UÑ(UÑ;UÒ
+Uc                 óò  ^• US   mU(       da  [        U4S jU 5       5      (       d  U R                  XX4S5      (       a  g U R                  XX4[        UR	                  5       5      US T/ 5	      $ [        UU4S jS9n[        US   T5      S:X  aH  UR                  R                  T5        U R                  R                  SS5      S-   U R                  S'   g U R                  X#U[        US   5      S	5        g )
+NrZ   c              3   ó>   >#   • U  H  o[        T5      ;   v •  M     g 7fr   )rG   )rñ   rÅ   rZ   s     €r?   ró   Ú#RTSPolicy._scout.<locals>.<genexpr>  s   øé € Ğ>²X°œJ s›OÖ+²Xùs   ƒzscout exploresc                 ó"   >• [        U S   T5      $ r  r  )rŒ  rZ   s    €r?   r	  Ú"RTSPolicy._scout.<locals>.<lambda>"  ó   ø€ ¬9°Q°u±X¸sÔ+CrA   r  r   zcapture relayr   zto relay)rù   r2  r[  r&  rC   rø   rL   r¥   r¬   rÔ   ra   rì   rG   )	rh   r£   ræ   rß   r  rf  re  ÚtargetrZ   s	           @r?   rY  ÚRTSPolicy._scout  sÖ   ø€ Ø‰hˆŞäÔ>±XÓ>×>Ñ>À4Ç=Á=ĞQVĞ^eĞjz×C{ÑC{ØØ—;‘;˜u¨G¼¸X¿_¹_Ó=NÓ8OĞQYĞ[_ĞadĞfhÓiĞiÜVÔ!CÑDˆÜV˜E‘] CÓ(¨AÓ-ØM‰M×Ñ˜cÔ"Ø+/¯;©;¯?©?¸?ÈAÓ+NĞQRÑ+RˆDK‰K˜Ñ(ØØ
+‰
+4 !¤Z°°u±Ó%>À
+ÕKrA   c           
+      ó  ^• US   m[        T5       Vs/ s H¬  oqR                  R                  U5      (       d  M$  UR                  U   S   U R                  :X  d  MF  UR                  U   S   [        ;   d  Mb  UR                  U   S   R                  SS5      UR                  U   S   R                  SS5      :  d  Mª  UPM®     nnU(       a#  U R                  UST[        TUS   5      S5        g U V	s/ s H9  o™ULd  M	  U	S   R                  SS5      U	S   R                  SS5      :  d  M7  U	PM;     n
+n	U
+=(       d(    U V	s/ s H  o™ULd  M	  U	S   [        ;   d  M  U	PM     sn	nU(       aC  [        UU4S	 jS
+9n[        US   T5      S:”  a!  U R                  X#U[        US   5      S5        g g [        TU5      S:”  a!  U R                  X#XF/[        U5      -   S5        g U R                  XX45        g s  snf s  sn	f s  sn	f )NrZ   r[   r.   r\   r‰  r   rŠ  Úhealc                 ó"   >• [        U S   T5      $ r  r  )rJ   rZ   s    €r?   r	  Ú"RTSPolicy._medic.<locals>.<lambda>3  rŸ  rA   r  r   zfollow armyr   ru  )rG   rd   ra   rÌ   rI  râ   r@   rT  rø   rL   rì   Ú
+_make_room)rh   r£   ræ   rß   r  r0   ru  rÅ   ÚhurtrJ   ÚwoundedÚfriendsÚfrZ   s                @r?   rZ  ÚRTSPolicy._medic)  sæ  ø€ Ø‰hˆÜ% cœ?ó Fš?a¯h©h¯l©l¸1¯o“À%Ç(Á(È1Á+ÈhÑBWĞ[_×[cÑ[cÑBc“Ø—H‘H˜Q‘K Ñ'¬5Ñ0ó Ø5:·X±X¸a±[ÀÑ5H×5LÑ5LÈXĞWXÓ5YĞ\a×\dÑ\dĞefÑ\gĞhnÑ\o×\sÑ\sğ  uAğ  CDó  ]Eñ  6E÷ ™?ˆğ FæØJ‰Jw ¨¬\¸#¸tÀA¹wÓ-GÈÔPØÙ"Óqšd˜¨q j“1°Q°v±Y·]±]À8ÈQÓ5OĞRSĞTZÑR[×R_ÑR_Ğ`lĞnoÓRpÑ5p—1™dˆĞqØ×V©ÓVª A¸!°›aÀÀ&Á	ÌXÑ@UŸa©ÑVˆŞÜGÔ!CÑDˆAÜ˜˜5™ 3Ó'¨!Ó+Ø—
+‘
+˜4¨!¬Z¸¸%¹Ó-AÀ=ÕQğ ,äs˜EÓ" QÓ&ØJ‰Jt a¨´:¸eÓ3DÑ)DÀgÕNàO‰O˜E¨Õ4ùòFùò
+ rùÚVsA   ”#G8»G8ÁG8Á9AG8ÃG8Ã7G=Ä*G=Ä1G=ÅHÅHÅ!Hc                 ó€  ^^• US   US   smnUS:X  aš  US   R                  S5      S:X  a‚  [        T5       Vs/ s H  oÌT;   d  M
+  UPM     nnU(       a=  [        UU4S jS9nU R                  US	T[	        TU5      S
+[
+        TU   S       35        UR                  R                  T5        g US:X  a¬  [        R                  5        VVs/ s H#  u  nnTS   SUS   -  -   TS   SUS   -  -   U4PM%     nnnU VVVs/ s H  u  nnnUU4T;   d  M  UUU4PM     nnnnU(       a:  [        UU4S jS9u  nnnU R                  USTUS[
+        TUU4   S       35        g [        T5       Vs/ s H  oÌT;   d  M
+  UPM     nnU(       a>  [        UU4S jS9nU R                  US	T[	        TU5      S
+[
+        TU   S       35        g U Vs/ s H)  nUS   [        ;   d  M  [        US   T5      S::  d  M'  UPM+     nnU	(       a  U R                  (       d  U=(       d    U	nU R                  (       d  U(       Ga  U(       a  [        UU4S jS9nSnOÇ[        U5      [        U
+5      -   nU Vs/ s H  nUS   S:X  d  M  UPM     nnU Vs/ s H  n[        US   T5      S::  d  M  UPM     nnU Vs/ s H  nUS   S:X  d  M  UPM     nnU=(       d    U=(       d    UnU(       d$  Ub   U R                  X#XG/[        U5      -   S5        g [        UU4S jS9nSnUS:X  aˆ  [        R                  5        Vs/ s H%  nUS   S   SUS   -  -   US   S   SUS   -  -   4PM'     nnU Vs/ s H  nUR!                  U5      (       d  M  UPM     nnU R                  X#UUU5      (       a  g U R                  X#U[        US   5      U5        g [        TU5      S:”  a!  U R                  X#XH/[        U5      -   S5        g U R#                  XX45        g s  snf s  snnf s  snnnf s  snf s  snf s  snf s  snf s  snf s  snf s  snf )NrZ   r.   r   r\   Úcooldownr   c                 ó"   >• [         TU    S      $ rğ   r„  ©rÂ   re  s    €r?   r	  Ú"RTSPolicy._fight.<locals>.<lambda>@  s   ø€ ¬?¸8ÀA¹;ÀvÑ;NÒ+OrA   r  r…  zattack r   r   r   c                 ó2   >• [         TU S   U S   4   S      $ )Nr   r   r.   r„  )r“  re  s    €r?   r	  r°  H  s$   ø€ ´?À8ÈQÈqÉTĞSTĞUVÑSWÈLÑCYĞZ`ÑCaÒ3brA   Úshootzshoot c                 ó"   >• [         TU    S      $ rğ   r„  r¯  s    €r?   r	  r°  M  s   ø€ ¤°xÀ±{À6Ñ7JÒ'KrA   r	   c                 ó:   >• [        U S   T5      [        U S      4$ )NrZ   r.   )rL   rF  ©ri  rZ   s    €r?   r	  r°  U  s!   ø€ ´	¸!¸E¹(ÀCÓ0HÌ/ĞZ[Ğ\bÑZcÑJdÑ/erA   Úengager   r
+   r   Úsearchc                 ó"   >• [        U S   T5      $ r  r  rµ  s    €r?   r	  r°  b  s   ø€ ¬i¸¸%¹À#Ô.FrA   Úmarchru  )ra   rG   rø   râ   r@   rQ  r¥   r¬   r8   r9   rI  rL   rÓ   r&  rì   rC   r‰   r¦  ) rh   r£   ræ   rß   r  rb  re  r_  ru  rj  rd  rm  rÅ   Úadjr“  r=   r>   Úshotsrk   rl   ri  ÚcloseÚtgtrá   r,  r1   Ú
+near_towerr^  Úpoolr¹   ÚgrZ   s          `                        @r?   r[  ÚRTSPolicy._fight;  s
+  ù€ Øe‘H˜a ™iˆ	ˆˆTØ6‹>˜a ™iŸm™m¨JÓ7¸1Ó<Ü(¨œoÓ?šo˜°h±—1™oˆCĞ?ŞÜ˜Ô!OÑPØ—
+‘
+˜7 H¨c´<ÀÀQÓ3GÈ7ÔSZĞ[cĞdeÑ[fĞgmÑ[nÑSoĞRpĞIqÔrØM‰M×Ñ˜cÔ"ØØ8ÓÜKOÏ:É:Ì<ÔXÊ<Á4À1Àac˜!‘f˜q 1 Q¡4™xÑ'¨¨Q©°!°a¸±d±(Ñ):¸AÓ>É<ˆEÑXÙ.3ÕJªe¡7 1 a¨¸¸1°vÀÑ7I“Ya˜˜A“Y©eˆEÒJŞÜ˜eÔ)bÑc‘1aØ—
+‘
+˜7 G¨S°!°v¼gÀhĞPQĞSTÈvÑFVĞW]ÑF^Ñ>_Ğ=`Ğ5aÔbØÜ$ Sœ/Ó;š/Q°(©]q™/ˆĞ;ŞÜCÔKÑLˆAØJ‰Jw ¨#¬|¸CÀÓ/CÀwÌwĞW_Ğ`aÑWbĞciÑWjÑOkĞNlĞEmÔnØÙ#Ó\šGq q¨¡y´EÑ'9“¼iÈÈ%ÉĞRUÓ>VĞZ[Ñ>[—™GˆĞ\Ş˜$Ÿ.Ÿ.Ø—O˜VˆEØ>>ŸUŞÜ˜%Ô%eÑfØ ‘ä˜W›¬¨ZÓ(8Ñ8Ù%*ÓC¢U ¨a°©i¸7Ñ.BŸ!¡UĞCÙ)/ÓQª A´9¸Q¸u¹XÀsÓ3KÈqÑ3PŸa©
+ĞQÙ$)ÓA¢E˜q¨Q¨v©Y¸&Ñ-@Ÿ¡EĞAØ!×3 U×3¨eŞà!Ñ-ØŸ
+™
+ 4°!°\ÄJÈzÓDZÑ5ZĞ\dÔeØÜ˜$Ô$FÑGØØxÓÜW[×WbÑWbÔWdÓeÒWdĞRS˜#˜e™* Q™-¨!¨a°©d©(Ñ2°C¸±J¸q±MÀAÈÈ!ÉÁHÑ4LÓMÑWdĞeÙ$)Ó=¢E˜q¨U¯\©\¸!¯_Ÿ¡EĞ=Ø—:‘:˜d¨Q°°u×=Ñ=ØØJ‰Jt a¬°C¸±JÓ)?ÀÕGÜs˜EÓ" QÓ&ØJ‰Jt a¨´:¸eÓ3DÑ)DÀgÕNàO‰O˜E¨Õ4ùò_ @ùó YùÜJùò
+ <ùò
+ ]ùò DùÚQùÚAùò fùÚ=sq   ¹	PÁPÃ*PÃ>PÄ	PÅ-	PÅ:PÇP"Ç P"Ç5P"É,P'É=P'Ê	P,Ê$P,Ê0P1ËP1Ì4,P6Í&P;ÎP;c                 óş   ^ ^• U U4S jnUS   nU" U5      (       a]  [        U5       Vs/ s H+  orR                  U5      (       d  M  U" U5      (       a  M)  UPM-     nnU(       a  T R                  X#XHS5        gggs  snf )zDIdle units step off the cells next to friendly production buildings.c                 óB   >• [        UU4S j[        U 5       5       5      $ )Nc              3   óâ   >#   • U  Hd  nTR                   R                  U5      S L=(       a;    TR                   U   S   TR                  :H  =(       a    TR                   U   S   S;   v •  Mf     g 7f)Nr[   r.   )r   r   )rd   ra   rÌ   )rñ   rÅ   rh   r£   s     €€r?   ró   Ú7RTSPolicy._make_room.<locals>.crowds.<locals>.<genexpr>r  sm   øé € ğ _ÚP]È1ğ —x‘x—|‘| A“¨dĞ2÷ G°u·x±xÀ±{À8Ñ7LĞPT×PXÑPXÑ7X÷ GØ Ÿ8™8 A™; vÑ.Ğ2FÑFôGÚP]ùs   ƒA,A/)rù   rG   )rD   rh   r£   s    €€r?   ÚcrowdsÚ$RTSPolicy._make_room.<locals>.crowdsq  s'   ø€ Üõ _ÜPZĞ[\ÔP]ó_ó _ğ _rA   rZ   z	make roomN)rG   r¨   rì   )	rh   r£   ræ   rß   r  rÆ  rZ   rÅ   Úaways	   ``       r?   r¦  ÚRTSPolicy._make_roomo  se   ù€ ö	_ğ ‰hˆÙ#;‰;Ü)¨#œÓQš˜!·)±)¸A·,“AÁvÈaÇy—A™ˆDĞQŞØ—
+‘
+˜4¨!°;Õ?ğ ğ ùÚQs   ©A:ÁA:ÁA:c                 ó‚  • [        U SS5      (       a"  U R                  S   U:X  a  U R                  S   $ 1 SknU1n[        U/5      n[        X#5      U4nU(       aÕ  [	        U5      S:  aÆ  UR                  5       n[        U5       H  n	UR                  R                  U	5      n
+X•;   d"  UR                  U	5      (       a  U
+b  U
+S   U;   a  MG  UR                  U	5        UR                  U	5        U
+b  Mn  [        X“5      US   :  d  M‚  [        X“5      U	4nM‘     U(       a  [	        U5      S:  a  MÆ  X7S   4U l        US   $ )zPThe open cell reachable from the base that is closest to `want` (computed once).Ú_rallyNr   r   >   r³   r´   r   rµ   r¶   r·   ip  r.   )ÚgetattrrË  r   rL   rt   r¾   rG   rd   ra   r‰   r¬   re   )rh   r£   r   Úwantr»   r*  rÂ   rş   rÃ   rÅ   rj   s              r?   rW  ÚRTSPolicy._rally_pointz  s  € ä4˜ 4×(Ñ(¨T¯[©[¸©^¸tÓ-CØ—;‘;˜q‘>Ğ!ÚIˆØˆvˆÜ4&‹MˆÜ˜$Ó% tĞ,ˆŞ”C˜“I Ó$Ø—)‘)“+ˆCÜ –_Ø—H‘H—L‘L “OØ“9 E§L¡L°§O¡O¸¹È!ÈFÉ)ĞW]ÓJ]ÙØ—‘˜”Ø—‘˜”Ø“9¤¨1Ó!3°d¸1±gÕ!=Ü% aÓ.°Ğ2’Dñ %ö ”C˜“I Õ$ğ  !™WoˆŒØA‰wˆrA   c                 ó   ^• U R                   (       a!  U(       a  T(       a  [        UU4S jS9nUS   $ U=(       d    UnU(       d  U$ U Vs/ s H
+  owS   S   PM     snUS   /-   nU Vs/ s H
+  owS   S   PM     snUS   /-   n	[        [        U5      [	        U5      -  5      [        [        U	5      [	        U	5      -  5      4$ s  snf s  snf )Nc                 ó"   >• [        U S   T5      $ r  r  )r  r_  s    €r?   r	  Ú)RTSPolicy._camera_focus.<locals>.<lambda>’  s   ø€ ¬y¸¸5¹À:Ô/NrA   r  rZ   r   r   )rÓ   rø   Úroundrú   rt   )
+rh   r   r  rs  r_  ÚleadÚunitsr  ÚxsÚyss
+       `     r?   r\  ÚRTSPolicy._camera_focus  s¸   ø€ Ø>>h®:ÜxÔ%NÑOˆDØ˜‘;ĞØ×#˜GˆŞØˆKÙ#(Ó)¢5˜a‰hqŒk¡5Ñ)¨T°!©W¨IÑ5ˆÙ#(Ó)¢5˜a‰hqŒk¡5Ñ)¨T°!©W¨IÑ5ˆÜ”S˜“Wœs 2›wÑ&Ó'¬¬s°2«w¼¸R»Ñ/@Ó)AĞAĞAùò *ùÚ)s   ÁCÁ+Cc                 óÒ  • [         R                  5        H‘  u  nu  p4  nUR                  X0R                  5      nU R                  R                  US5      U:w  a>  US:X  a8  U R                  R                  UR                  UR                  5        S345        X`R                  U'   M“     U R                   Vs/ s H  oqR                  US   -
+  S:  d  M  UPM     snU l        g s  snf )Nr   r   z DONEr
+   )
+r  r9   r   rÌ   rÖ   ra   rÕ   re   r_   r  )rh   r£   r  r€   rá   rx  ri   ri  s           r?   rG  ÚRTSPolicy._track_research›  s´   € Ü',§{¡{¦}Ñ#ˆCÑ##˜a Ø—J‘J˜s§H¡HÓ-ˆEØ‰×"Ñ" 3¨Ó*¨eÓ3¸À»
+Ø—‘×"Ñ" E§J¡J°5·;±;³=°/ÀĞ0GĞ#HÔIØ#(O‰O˜CÓ ñ	 (5ğ
+ #'§+¢+ÓG¢+˜Q·±¸aÀ¹dÑ1BÀQÑ1F—q¡+ÑGˆùÒGs   Â8C$ÃC$c                 ó:  ^ ^• T R                    Vs/ s H  ofS   PM	     nn[        T R                  U 4S jS9nXx V	s/ s H,  n	T R                  U	   S:”  a  U	 ST R                  U	    3OU	PM.     sn	-  n0 n
+U H/  nU
+R                  [        US      S5      S-   U
+[        US      '   M1     SR                  S [        U
+R                  5       5       5       5      =(       d    S	n[        TR                  S
+T R                  5       Vs/ s H  oİPM     sn5      nSR                  U U4S jT R                  S    5       5      nT R                  S    SU SU SU 3S[        U5       SU 3SU 3U(       a  SR                  US S 5      /$ S/$ s  snf s  sn	f s  snf )Nr   c                 óN   >• U R                  5       (       + TR                  U    * 4$ r   )ÚisupperrÔ   )r=   rh   s    €r?   r	  Ú$RTSPolicy._caption.<locals>.<lambda>¥  s   ø€ °q·y±y³{´?ÀTÇ[Á[ĞQRÁ^ÀOÑ2TrA   r  z xr.   r   Ú c              3   ó4   #   • U  H  u  pU S U 3v •  M     g7f)rŞ  Nr   )rñ   r=   rÅ   s      r?   ró   Ú%RTSPolicy._caption.<locals>.<genexpr>ª  s   é € ĞJÒ3I©4¨1˜q˜c  1 #JÒ3Iùs   ‚Únoner   c              3   óò   >#   • U  Hl  n[         U   S    TR                  [         U   S   TR                  5      S:X  a  SO-TR                  [         U   S   TR                  5      S :X  a  SOS-   v •  Mn     g7f)r   r   r   Ú+z...Ú N)r  r   rÌ   )rñ   r“  rh   r£   s     €€r?   ró   rà  ¬  sp   øé € ğ <â!:˜Aô ˜a™ ™¨e¯j©j¼¸q¹À!¹ÀdÇhÁhÓ.OĞSTÓ.T¡sØ*/¯*©*´U¸1±X¸a±[À$Ç(Á(Ó*KÈqÓ*Pñ [`ØVXöZâ!:ùs   ƒA4A7r/   z  res=z relays=zworkers=z army: ztech: ú, r   z	(waiting))rÕ   rX  rÔ   ra   rQ  Újoinr9   rt   rq   rÌ   rÒ   )rh   r£   ry  r  r  r0   ri  Úpartsr‘  r=   rÔ   r  Úarmy_txtrj   rf  r   s   ``              r?   rJ  ÚRTSPolicy._caption£  s¡  ù€ Ø#Ÿ{š{Ó+š{˜!1”™{ˆĞ+Üt—{‘{Ô(TÑUˆØĞQVÓWÒQVÈA¨d¯k©k¸!©n¸qÓ.@QCr˜$Ÿ+™+ a™.Ğ)Ñ*ÀaÒGÑQVÑWÑWˆØˆÛˆAØ)/¯©´G¸A¸f¹IÑ4FÈÓ)JÈQÑ)NˆF”7˜1˜V™9Ñ%Ó&ñ à—8‘8ÑJ´6¸&¿,¹,».Ô3IÓJÓJ×TÈfˆÜ §¡¨-¸¿¹Ô!BÓCÒ!B˜A’aÑ!BÑCÓDˆØx‰xõ <à!%§¡¨zÒ!:ó<ó <ˆğ —=‘= Ñ(Ğ)¨¨5¨'°¸°u¸HÀVÀHĞMØœ3˜w›<˜.¨°¨zĞ:Ø˜˜Ş(-—	‘	˜%  ˜)Ó$ğ@ğ 	@ğ 4?ğ@ğ 	@ùò ,ùâWùò
+ Ds   ‘F½3FÄF)rÖ   rË  rÔ   rÍ   rÕ   rÙ   rØ   rÓ   rÌ   rĞ   r×   rÒ   N©r   )F)Úexplore)r   )r˜   r™   rš   r›   rœ   rn   râ   rì   r   r  r  r"  r'  r-  r2  rz  rS  rY  rZ  r[  r¦  rW  r\  rG  rJ  r   r   rA   r?   rÉ   rÉ   Æ   su   † Ùdô ò;ôò*)ò&ò$ò-ò*òGô
+òSYòl8JòtLò5ô$25òh	@òò,	BòHõ@rA   rÉ   c                   ó.   • \ rS rSrSrSS jrS rS rSrg)	ÚMatchiµ  zPRuns two RTSPolicy players against each other on a Griddly game, simultaneously.c                 óÆ   • Xl         X#S.U l        [        SSU5      [        SSU5      S.U l        UR	                  5       UR                  5       sU l        U l        SU l        g )Nr3   r   r   F)	ÚgameÚplayersrÉ   ÚpoliciesÚ	get_widthÚ
+get_heightr]   r^   Ú
+terminated)rh   rï  Úp1Úp2rÜ   s        r?   rn   ÚMatch.__init__¸  sS   € ØŒ	Ø‘~ˆŒÜ% a¨¨DÓ1´iÀÀ1ÀdÓ6KÑLˆŒØ"&§.¡.Ó"2°D·O±OÓ4EĞˆŒ
+D”KØˆrA   c                 óv   • [        U R                  R                  U5      U R                  U R                  5      $ )zIWhat player `pid` knows: the engine's fog-filtered state for that player.)rN   rï  Úget_player_stater]   r^   )rh   rÌ   s     r?   r£   ÚMatch.world¿  s(   € ä˜Ÿ™×3Ñ3°CÓ8¸$¿*¹*ÀdÇkÁkÓRĞRrA   c           	      óĞ  • S Vs0 s H0  oU R                   U   R                  U R                  U5      5      _M2     nnS H4  nX!   S    H&  u  p4pVU R                  U   R	                  X4XV/5        M(     M6     U R
+                  R                  5       nUS   nUS   (       a  SU l        S Vs0 s H
+  oX!   S   _M     snS Vs0 s H
+  oX!   S   _M     snU4$ s  snf s  snf s  snf )a  One game tick on the engine's clock: each policy records its actions from its own player
+state (``player.queue``), then the engine runs every recorded action together and advances
+time once (``game.tick()``; a real-time loop would call ``game.advance_time(dt)`` instead).r3   r   ÚInfoÚ
+TerminatedTr   )rñ  rz  r£   rğ  Úqueuerï  r_   rô  )	rh   rÌ   Úplansr.   rk   rl   r<   ÚresultÚinfos	            r?   ré   Ú
+Match.stepÃ  së   € ñ JPÓPÊÀ#d—m‘m CÑ(×,Ñ,¨T¯Z©Z¸«_Ó=Ò=ÉˆĞPÛˆCØ!&¡¨A¤‘˜Ø—‘˜SÑ!×'Ñ'¨°!¨iÖ8ó "/ñ ğ —‘—‘Ó!ˆØf‰~ˆØ,×Ø"ˆDŒOÙ.4Ó5ªf sU‘Z ‘]Ò"©fÑ5ÑV\Ó7]ÒV\Ès¸U¹ZÈ¹]Ò8JÑV\Ñ7]Ğ_cĞcĞcùò Qùò 6ùÒ7]s   …7CÂ,CÃC#)rï  r^   rğ  rñ  rô  r]   Nrê  )	r˜   r™   rš   r›   rœ   rn   r£   ré   r   r   rA   r?   rí  rí  µ  s   † ÙZô òSõdrA   rí  c                 ó<  • U R                  U5        U R                  5         [        XX$5      n0 n[        U5       Hl  n	UR	                  5       u  p«nU(       a<  U	S-  S:X  a3  [        U	SSR                  U
+S   5      SSR                  U
+S   5      5        UR                  (       d  Ml    O   [        U R                  5       UR                  UR                  5      nUR                  S0 5      nS	 VVs0 s H‰  nU[        UR                  S
+U5      5      [        UR                   Vs/ s H  oÿS   U:X  d  M  US   [         ;   d  M  UPM      sn5      [        UR                  SU5      5      UR#                  U5      S._M‹     nnnUR$                  UU4$ s  snf s  snnf )Né2   r   Ú|z / r   z||r   ÚPlayerResultsr3   r   r[   r.   r   )r  r0   rf  r  )Ú
+load_levelÚresetrí  rö   ré   Úprintræ  rô  rN   Ú	get_stater]   r^   ra   rt   rq   rc   rC  r|   r_   )rï  rõ  rö  ÚlevelrÜ   Ú	max_ticksÚverboseÚmatchr  r“  Úcaptionsrx  r£   ÚwinnerrÌ   rj   Úsummarys                    r?   Ú	run_matchr  Ò  s“  € Ø‡OOEÔØ‡JJ„LÜ$˜BÓ%€EØ€DÜ9ÖˆØ!ŸJ™J›LÑˆTŞq˜2‘v “{Ü!S˜%Ÿ*™* X¨a¡[Ó1°4¸¿¹ÀHÈQÁKÓ9PÔQØ××ÑÙñ ô d—n‘nÓ&¨¯©°U·\±\ÓB€EØX‰Xo rÓ*€FájpôrÚjpĞcfğ ¤ E§H¡H¨X°sÓ$;Ó <ÄcĞV[×VcÒVcó  KQÒVcĞQRĞiqÑgrĞvyÑgyË1Ğ~ğ  AGñ  Hô  LPñ  PÏ1ÑVcñ  KQó  GRÜ" 5§8¡8¨M¸3Ó#?Ó@ÈÏÉĞY\ÓI]ñ_ò _Ùjpğ ñ rà:‰:v˜wĞ&Ğ&ùò KQùó rs$   Ã14FÄ%FÄ5FÅFÅ
+7FÆFc                  óÖ  • SS K n SS KnU R                  R                  SS5        SSKJn  U R                  R                  U R                  R                  [        5      5      nU" 5       R                  U R                  R                  US5      5      nUR                  S5      nUR                  SS5      nUR                  SS5      nUR                  S	5        UR                  S
+S   Vs/ s H  n[!        U5      PM     sn=(       d    [#        UR%                  5       5      n	U	 H=  n
+['        XVXz[)        U	5      S
+:H  S9u  p¼n[+        SU
+ SU SU=(       d    S SU 35        M?     g s  snf )Nr   ÚGRIDDLY_SDL_WINDOWÚ1)ÚGriddlyLoaderzGriddlyRTS-FoW.yamlÚVectorzPlayer 1zPlayer 2Fr   )r  zlevel z: z ticks, result z
+time limitrå  )ÚosÚsysÚenvironrg   Úgriddlyr  rÄ   ÚdirnameÚrealpathÚ__file__Úloadræ  Úcreate_gameÚregister_playerÚinitÚargvru   rö   Úget_level_countr  rt   r	  )r  r  r  ÚhereÚgdyrï  rõ  rö  rJ   Úlevelsr  Úticksr  r  s                 r?   Ú	_headlessr)  å  s*  € ÛÛØ‡JJ×ÑĞ.°Ô4İ%à7‰7?‰?˜2Ÿ7™7×+Ñ+¬HÓ5Ó6€DÙ
+‹/×
+Ñ
+˜rŸw™wŸ|™|¨DĞ2GÓHÓ
+I€CØ?‰?˜8Ó$€DØ	×	Ñ	˜j¨(Ó	3€BØ	×	Ñ	˜j¨(Ó	3€BØ‡IIˆeÔØ!Ÿh™h q r™lÓ+šl˜Œc!f™lÑ+×K¬u°S×5HÑ5HÓ5JÓ/K€FÛˆÜ!*¨4°RÌÈFËĞWXÑHXÑ!YÑˆwÜug˜R ˜w o°f×6LÀĞ5MÈRĞPWÈyĞYÖZò ùò ,s   Ã*E&Ú__main__)r   iÜ  F)&rœ   rÎ   Úcollectionsr   rO  rN  rM  rL  r8   r  rI  rC  rT  r%  ÚWALKABLErQ  r  rC   rH  r  rÑ   rK  rV  rF  r]  r@   rG   rL   r   ÚEXPLOREDrŠ   rN   r    rÉ   rí  r  r)  r˜   )r>   s   0r?   Ú<module>r.     s¤  ğñó0 İ à"Ñ €€bˆ%Øˆgr˜7 E¨6°4¸Ğ@€à˜q¨A¸ÀQĞPRØ ¨R¸ñ	<€à@€Ø5€Ø'€ØG€	Ø'€Ø¨(¸FÈhĞahØ V¸ÈEĞ\cØ¨'ñ3€ğ )Ø+Ø(Ø4Ø4Ø2ñ	€ğ !Ÿ<™<œ>Ó*š>aˆqŒT™>Ñ*€	Ø%¨~Ñ>€
+ğ ¢|Ò=iØñà¢lÒ<fØññ€
+ğ €Ø€Ø¨°aÀÈQĞZ[Ø¨1°QÀÈBñP€àĞ òò@ò/ğ $Ñ €ˆ'÷7>ñ 7>÷t1ñ 1÷hl@ñ l@÷^dñ dô:'ò&[ğ$ ˆzÓÙ…Kğ ùòI +s   ÁC."""Rules check for GriddlyRTS-FoW (units, buildings, research, towers, relays, ...) on compact test levels.
 
     GRIDDLY_SDL_WINDOW=1 python check_fow_rules.py
 """
@@ -4022,8 +4852,13 @@ Plan, per player:
     army       the barracks trains the strategy's units; medics follow and heal; the army gathers
                at a rally point and attacks once it is big enough (or the economy runs dry)
 
-`Match` runs two policies against each other: both decide from the same state, then every action
-of both players is submitted for the same tick.
+Fog of war: a policy only ever reads its own player's view of the game, ``game.get_player_state(pid)``
+(the engine filters it by Environment.Player.FogOfWar): its own objects, terrain it has explored, and
+enemy objects only while they are in sight. It remembers the enemy buildings it has seen, guesses the
+enemy base from the map's point symmetry until it finds it, and sends its scout to explore.
+
+`Match` runs two policies against each other on the engine's game clock: each records its actions
+from its own player state (``player.queue``), and every recorded action runs together on the tick.
 """
 import random
 from collections import deque
@@ -4085,13 +4920,21 @@ def manhattan(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-class WorldView:
-    """Snapshot of the game state (``game.get_state()`` + globals) for one tick."""
+UNSEEN, EXPLORED, VISIBLE = 0, 1, 2
 
-    def __init__(self, state, globals_, width, height):
+
+class WorldView:
+    """One player's view of the game for one tick: ``game.get_player_state(pid)``.
+
+    ``visibility`` is the player's fog (row major, UNSEEN / EXPLORED / VISIBLE); None without fog.
+    Global variables come from the state, which only holds the viewing player's per-player values.
+    """
+
+    def __init__(self, state, width, height):
         self.width, self.height = width, height
         self.tick = state["GameTicks"]
-        self.globals = globals_
+        self.globals = state["GlobalVariables"]
+        self.visibility = state.get("Visibility")
         self.objects = []
         self.at = {}
         for o in state["Objects"]:
@@ -4110,14 +4953,25 @@ class WorldView:
     def of(self, name, player=None):
         return [o for o in self.by_name.get(name, []) if player is None or o["player"] == player]
 
+    def global_value(self, name, player):
+        values = self.globals.get(name, [])
+        return int(values[player]) if player < len(values) else 0
+
     def resources(self, player):
-        return int(self.globals["player_resources"].get(player, 0))
+        return self.global_value("player_resources", player)
 
     def tech(self, var, player):
-        return int(self.globals[var].get(player, 0))
+        return self.global_value(var, player)
 
     def camera(self, player):
-        return int(self.globals["cam_x"].get(player, 0)), int(self.globals["cam_y"].get(player, 0))
+        return self.global_value("cam_x", player), self.global_value("cam_y", player)
+
+    def visible(self, c):
+        """Does the viewing player see cell c right now?"""
+        return self.visibility is None or (self.inside(c) and self.visibility[c[1] * self.width + c[0]] == VISIBLE)
+
+    def unseen(self, c):
+        return self.visibility is not None and self.inside(c) and self.visibility[c[1] * self.width + c[0]] == UNSEEN
 
     def inside(self, c):
         return 0 <= c[0] < self.width and 0 <= c[1] < self.height
@@ -4192,6 +5046,8 @@ class RTSPolicy:
         self.events = []
         self._last_tech = {}
         self.sites = {}  # building -> chosen site, kept until built or blocked by terrain/buildings
+        self.known_enemy = {}  # pos -> name of enemy buildings seen, until seen gone
+        self.explore_goals = {}  # unit position-independent: one goal per role label
 
     # ------------------------------------------------------------------ helpers
     def _emit(self, actions, name, pos, action_id, label):
@@ -4277,6 +5133,38 @@ class RTSPolicy:
                 best = (ratio, unit)
         return best[1] if best else "combat"
 
+    def _remember(self, world):
+        """Keep the enemy buildings we have seen; forget them once we see their cell empty."""
+        for o in world.objects:
+            if o["player"] == self.enemy and o["name"] in BUILDINGS:
+                self.known_enemy[o["pos"]] = o["name"]
+        for pos in list(self.known_enemy):
+            o = world.at.get(pos)
+            if world.visible(pos) and (o is None or o["player"] != self.enemy):
+                del self.known_enemy[pos]
+
+    def _enemy_base_guess(self, world, base):
+        """Where the enemy base is: seen, remembered, or the mirror of ours (the maps are point-symmetric)."""
+        seen = world.of("base", self.enemy)
+        if seen:
+            return seen[0]["pos"]
+        known = [p for p, n in self.known_enemy.items() if n == "base"]
+        if known:
+            return known[0]
+        return (world.width - 1 - base[0], world.height - 1 - base[1])
+
+    def _explore(self, world, plan, actions, u, label="explore"):
+        """Walk towards the nearest reachable unexplored cell (sampled every 3 cells)."""
+        goal = self.explore_goals.get(label)
+        if goal is None or not world.unseen(goal) or manhattan(u["pos"], goal) <= 2 or self.rng.random() < 0.02:
+            cells = [(x, y) for y in range(1, world.height - 1, 3) for x in range(1, world.width - 1, 3) if world.unseen((x, y))]
+            # unseen cells may be water or rock: walk to the nearest one a path reaches
+            step = plan.bfs(u["pos"], cells, ignore_units=True, limit=8000) if cells else None
+            goal = self.explore_goals[label] = step[2] if step else None
+        if goal is not None:
+            return self._walk(plan, actions, u, [goal] + neighbours(goal), label)
+        return False
+
     # --------------------------------------------------------------------- policy
     def act(self, world):
         self.counts = {}
@@ -4286,8 +5174,9 @@ class RTSPolicy:
         res = world.resources(pid)
         bases = world.of("base", pid)
         base = bases[0]["pos"] if bases else None
-        enemy_bases = world.of("base", self.enemy)
-        enemy_base = enemy_bases[0]["pos"] if enemy_bases else None
+        self._remember(world)
+        # the enemy base as far as we know: seen, remembered, or guessed from the map's symmetry
+        enemy_base = self._enemy_base_guess(world, base) if base else None
         mine = [o for o in world.objects if o["player"] == pid]
         workers = [o for o in mine if o["name"] == "worker"]
         army = [o for o in mine if o["name"] in ARMY]
@@ -4295,6 +5184,10 @@ class RTSPolicy:
         labs = [o for o in mine if o["name"] == "lab"]
         towers = [o for o in mine if o["name"] == "tower"]
         enemies = [o for o in world.objects if o["player"] == self.enemy and o["name"] in TARGET_PRIORITY]
+        # remembered buildings that are out of sight right now are still worth marching to
+        seen_pos = {o["pos"] for o in enemies}
+        remembered = [{"name": n, "pos": p, "player": self.enemy, "vars": {}} for p, n in self.known_enemy.items()
+                      if p not in seen_pos and n in TARGET_PRIORITY]
         enemy_at = {o["pos"]: o for o in enemies}
         resources = world.of("minerals") + world.of("gems")
         relays = [o for o in world.objects if o["name"] == "relay" or (o["name"] == "relay_owned" and o["player"] != pid)]
@@ -4361,9 +5254,10 @@ class RTSPolicy:
                 self._emit(actions, f"build_{unit}", b["pos"], d, f"train {DISPLAY[unit]}")
                 plan.spawn((b["pos"][0] + DIRS[d][0], b["pos"][1] + DIRS[d][1]))
                 res -= COSTS[unit]
-        # an early scout grabs relays
-        if barracks and not any(u["name"] == "scout" for u in army) and relays and res >= COSTS["scout"] + keep \
-                and world.tick < 400:
+        # a scout grabs relays and explores the fog (relays and minerals out of sight are unknown)
+        unexplored = world.visibility is not None and world.visibility.count(UNSEEN) > len(world.visibility) // 3
+        if barracks and not any(u["name"] == "scout" for u in army) and (relays or unexplored or not resources) \
+                and res >= COSTS["scout"] + keep and world.tick < 900:
             b = barracks[0]["pos"]
             for d in (RIGHT, DOWN, LEFT, UP):
                 c = (b[0] + DIRS[d][0], b[1] + DIRS[d][1])
@@ -4378,7 +5272,11 @@ class RTSPolicy:
 
         # --------------------------------------------------------------------- army
         fighters = [u for u in army if u["name"] in FIGHTERS]
-        if not self.offensive and (len(fighters) >= ATTACK_SIZE or (not resources and fighters and res < 5)):
+        # attack with a full army, or with whatever we have once there is nothing known left to mine
+        # (and no money to spend), or when the barracks is boxed in by idle units
+        boxed_in = barracks and all(not plan.free(n) for b in barracks for n in neighbours(b["pos"]))
+        if not self.offensive and (len(fighters) >= ATTACK_SIZE or (not resources and fighters and (res < 5 or boxed_in))
+                                   or (boxed_in and len(fighters) >= 3)):
             self.offensive = True
         if self.offensive and len(fighters) < 2 and enemy_base and not threat:
             self.offensive = False  # regroup
@@ -4392,7 +5290,7 @@ class RTSPolicy:
             elif u["name"] == "medic":
                 self._medic(world, plan, actions, u, army, rally)
             else:
-                self._fight(world, plan, actions, u, enemies, enemy_at, enemy_base, rally, threat)
+                self._fight(world, plan, actions, u, enemies, enemy_at, enemy_base, rally, threat, remembered)
 
         # -------------------------------------------------------------------- camera
         focus = self._camera_focus(base, workers, fighters, enemy_base)
@@ -4421,8 +5319,7 @@ class RTSPolicy:
     def _workers(self, world, plan, actions, workers, builders, base, resources, enemy_at, threat):
         res_cells = {r["pos"]: r for r in resources}
         # mine what is closer to us than to the enemy (or anything once ours is gone)
-        enemy_bases = world.of("base", self.enemy)
-        eb = enemy_bases[0]["pos"] if enemy_bases else None
+        eb = self._enemy_base_guess(world, base)
         ours = {p for p in res_cells if eb is None or manhattan(p, base) <= manhattan(p, eb) + 4}
         targets = ours or set(res_cells)
         drop = [n for n in neighbours(base)]
@@ -4473,10 +5370,16 @@ class RTSPolicy:
             if step is not None:
                 plan.reserved.add(step[2])
                 self._walk(plan, actions, w, [step[2]], "to forest")
+            elif not resources and w is order[0]:
+                # nothing known to mine: one worker looks for more (fog hides the rest of the map)
+                self._explore(world, plan, actions, w, "worker explores")
 
     def _scout(self, world, plan, actions, u, relays, enemy_at):
         pos = u["pos"]
         if not relays:
+            # no relay known: find more of the map (and the enemy)
+            if not any(n in neighbours(pos) for n in enemy_at) and self._explore(world, plan, actions, u, "scout explores"):
+                return
             return self._fight(world, plan, actions, u, list(enemy_at.values()), enemy_at, None, pos, [])
         target = min(relays, key=lambda r: manhattan(r["pos"], pos))
         if manhattan(target["pos"], pos) == 1:
@@ -4503,7 +5406,7 @@ class RTSPolicy:
         else:
             self._make_room(world, plan, actions, u)
 
-    def _fight(self, world, plan, actions, u, enemies, enemy_at, enemy_base, rally, threat):
+    def _fight(self, world, plan, actions, u, enemies, enemy_at, enemy_base, rally, threat, remembered=()):
         pos, kind = u["pos"], u["name"]
         if kind == "tank" and u["vars"].get("cooldown") == 1:
             adj = [n for n in neighbours(pos) if n in enemy_at]
@@ -4532,10 +5435,15 @@ class RTSPolicy:
                 tgt = min(close, key=lambda e: (manhattan(e["pos"], pos), TARGET_PRIORITY[e["name"]]))
                 label = "engage"
             else:
-                towers = [e for e in enemies if e["name"] == "tower"]
+                known = list(enemies) + list(remembered)
+                towers = [e for e in known if e["name"] == "tower"]
                 near_tower = [t for t in towers if manhattan(t["pos"], pos) <= 6]
-                pool = near_tower or ([enemy_at[enemy_base]] if enemy_base in enemy_at else enemies)
+                bases = [e for e in known if e["name"] == "base"]
+                pool = near_tower or bases or known
                 if not pool:
+                    # nothing known: head for where the enemy base should be
+                    if enemy_base is not None:
+                        self._walk(plan, actions, u, [enemy_base] + neighbours(enemy_base), "search")
                     return
                 tgt = min(pool, key=lambda e: manhattan(e["pos"], pos))
                 label = "march"
@@ -4630,23 +5538,22 @@ class Match:
         self.width, self.height = game.get_width(), game.get_height()
         self.terminated = False
 
-    def world(self):
-        g = self.game.get_global_variable(["player_resources", "cam_x", "cam_y"] + TECH_VARS)
-        return WorldView(self.game.get_state(), g, self.width, self.height)
+    def world(self, pid):
+        """What player `pid` knows: the engine's fog-filtered state for that player."""
+        return WorldView(self.game.get_player_state(pid), self.width, self.height)
 
     def step(self):
-        """Both policies decide from the same state; all actions land in the same tick."""
-        world = self.world()
-        plans = {pid: self.policies[pid].act(world) for pid in (1, 2)}
-        order = (1, 2) if world.tick % 2 == 0 else (2, 1)
-        queue = [(self.players[pid], a) for pid in order for a in plans[pid][0]]
-        if not queue:
-            queue = [(self.players[1], ("move", 0, 0, 0))]
-        info = {}
-        for i, (player, (name, x, y, d)) in enumerate(queue):
-            terminated, info = player.step(name, [x, y, d], i == len(queue) - 1)
-            if terminated:
-                self.terminated = True
+        """One game tick on the engine's clock: each policy records its actions from its own player
+        state (``player.queue``), then the engine runs every recorded action together and advances
+        time once (``game.tick()``; a real-time loop would call ``game.advance_time(dt)`` instead)."""
+        plans = {pid: self.policies[pid].act(self.world(pid)) for pid in (1, 2)}
+        for pid in (1, 2):
+            for name, x, y, d in plans[pid][0]:
+                self.players[pid].queue(name, [x, y, d])
+        result = self.game.tick()
+        info = result["Info"]
+        if result["Terminated"]:
+            self.terminated = True
         return {pid: plans[pid][1] for pid in (1, 2)}, {pid: plans[pid][0] for pid in (1, 2)}, info
 
 
@@ -4661,7 +5568,8 @@ def run_match(game, p1, p2, level, seed=0, max_ticks=1500, verbose=False):
             print(t, "|", " / ".join(captions[1]), "||", " / ".join(captions[2]))
         if match.terminated:
             break
-    world = match.world()
+    # the full state, for the summary only (no policy reads it)
+    world = WorldView(game.get_state(), match.width, match.height)
     winner = info.get("PlayerResults", {})
     summary = {pid: {"workers": len(world.of("worker", pid)), "army": len([o for o in world.objects if o["player"] == pid and o["name"] in ARMY]),
                      "relays": len(world.of("relay_owned", pid)), "res": world.resources(pid)} for pid in (1, 2)}
@@ -4708,6 +5616,18 @@ Units       worker, scout (fast, cheap, weak), trooper (melee), gunner (shoots 2
 Research    Mining, Weapons (+1 damage), Armour (-1 damage taken), Gunnery (unlocks gunners),
             Vehicles (unlocks tanks), Fortify (towers hit harder and reload faster).
 Camera      each player's camera is the (cam_x, cam_y) global pair, moved with move_camera.
+Clock       Environment.TickRate (4 ticks/s): players queue actions between ticks and the engine's
+            clock runs them all together on each tick (the UI and AIs never step time themselves).
+Views       rendered by the engine from the observer config below, never drawn over by a client:
+              PlayerView  a VIEW_W x VIEW_H window on the player's camera, fog of war, health bars
+              CameraView  the same window without fog
+              MiniMap     the whole map from one player's side: fog of war + its camera outline
+              Overview    the whole map, no fog (spectators, videos)
+              GlobalMap   Block2D whole map with both players' camera outlines (spectators)
+            Fog of war (Environment.Player.FogOfWar): each owned object reveals the cells within its
+            `sight` variable. Cells seen before stay explored: terrain shown, no enemy units. The
+            engine enforces it for players, not just in pictures: get_player_state(id) returns only
+            what that player knows, and the AI / human UI read nothing else.
 Victory     destroy the enemy base.
 """
 import os
@@ -4720,6 +5640,12 @@ from fow_maps import build_all, level_text  # noqa: E402
 OUT = os.path.join(HERE, "GriddlyRTS-FoW.yaml")
 # the Studio demo's playable /rts page bundles its own copy (deploys only upload studio/griddly-demo)
 STUDIO_OUT = os.path.join(HERE, "..", "..", "..", "studio", "griddly-demo", "apps", "web", "src", "rts", "GriddlyRTS-FoW.yaml")
+
+# per-player camera window, in cells (PlayerView and the camera outlines on the mini-maps)
+VIEW_W, VIEW_H = 24, 15
+# sight radius (cells) of each owned object type, for fog of war
+SIGHT = {"worker": 4, "scout": 7, "combat": 4, "marine": 5, "medic": 4, "tank": 5,
+         "base": 6, "barracks": 4, "lab": 3, "tower": 6, "wall": 1, "relay_owned": 4}
 
 MON = "oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_"
 WF = "oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/"
@@ -4819,20 +5745,33 @@ def build_action(name, desc, key, src, obj, cost, requires=None):
 """
 
 
-def owned_object(name, char, variables, sprite, shape, scale, initial=""):
+def owned_object(name, char, variables, sprite, shape, scale, initial="", tiles=None):
+    """An object owned by a player. `tiles` are extra Sprite2D render tiles (set_tile 1, 2, ...)."""
+    variables = list(variables) + [("sight", SIGHT[name])]
     vs = "".join(f"      - Name: {k}\n        InitialValue: {v}\n" for k, v in variables)
     var_block = f"    Variables:\n{vs}" if vs else ""
+    sprites = [sprite] + list(tiles or [])
+    sp = "".join(f"        - Image: {s}\n" for s in sprites)
+    bl = "".join(f"        - Shape: {shape}\n          Color: PLAYER\n          Scale: {scale}\n" for _ in sprites)
     return f"""  - Name: {name}
     MapCharacter: {char}
     Z: 1
 {var_block}{initial}    Observers:
-      Sprite2D:
-        - Image: {sprite}
-      Block2D:
-        - Shape: {shape}
-          Color: PLAYER
-          Scale: {scale}
-"""
+{observer_blocks(sp, bl)}"""
+
+
+# every Sprite2D-style observer uses the same sprites, every Block2D-style one the same shapes
+SPRITE_OBSERVERS = ["Sprite2D", "PlayerView", "CameraView", "Overview"]
+BLOCK_OBSERVERS = ["Block2D", "MiniMap", "GlobalMap"]
+
+
+def observer_blocks(sprites, blocks):
+    out = ""
+    for name in SPRITE_OBSERVERS:
+        out += f"      {name}:\n{sprites}"
+    for name in BLOCK_OBSERVERS:
+        out += f"      {name}:\n{blocks}"
+    return out
 
 
 def scenery(name, char, sprite, color, z=0, shape="square", scale=1.0, variables=(), tiles=None):
@@ -4845,9 +5784,7 @@ def scenery(name, char, sprite, color, z=0, shape="square", scale=1.0, variables
     MapCharacter: "{char}"
     Z: {z}
 {var_block}    Observers:
-      Sprite2D:
-{sp}      Block2D:
-{bl}"""
+{observer_blocks(sp, bl)}"""
 
 
 def generate():
@@ -4873,6 +5810,7 @@ def generate():
             - sub: [ player_resources, {cost} ]
             - set: [ {var}, 1 ]
             - set: [ src.busy, {i} ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: {ticks}
@@ -4897,8 +5835,11 @@ def generate():
                      {"barracks": "b", "lab": "l", "tower": "o", "wall": "x"}[b], "worker", b, cost) + "\n"
         for b, (char, hp, cost, sprite, shape) in BUILDING_DEFS.items() if cost is not None)
 
+    # workers show their load (render tiles: 1 mineral, 2 wood, 3 gems), set by the gather action
+    unit_tiles = {"worker": [MON + "jelly_d2.png", MON + "jelly_l1.png", MON + "jelly_r1.png"]}
     unit_objects = "".join(
-        owned_object(u, char, [("health", hp), ("max_health", hp), ("damage", dmg)] + extra, sprite, shape, scale)
+        owned_object(u, char, [("health", hp), ("max_health", hp), ("damage", dmg)] + extra, sprite, shape, scale,
+                     tiles=unit_tiles.get(u))
         for u, (char, hp, dmg, cost, src, req, extra, sprite, shape, scale) in UNIT_DEFS.items())
     building_objects = ""
     for b, (char, hp, cost, sprite, shape) in BUILDING_DEFS.items():
@@ -4910,7 +5851,9 @@ def generate():
             variables.append(("busy", 0))
         if b == "tower":
             variables.append(("loaded", 1))
-        building_objects += owned_object(b, char, variables, sprite, shape, 1.0, initial)
+        # a lab shows a blue beaker while it researches (render tile 1)
+        tiles = [ITEMS + "beaker_blue.png"] if b == "lab" else None
+        building_objects += owned_object(b, char, variables, sprite, shape, 1.0, initial, tiles=tiles)
 
     gdy = f'''Version: "0.1"
 Environment:
@@ -4933,18 +5876,73 @@ Environment:
     Research  Mining, Weapons, Armour, Gunnery (needs Weapons), Vehicles (needs Armour),
               Fortify (needs Armour): stronger towers.
     Victory   destroy the enemy base.
+  # Game clock: real-time play runs this many ticks per second. Players record their actions
+  # between ticks (queue_actions / queueActions); each tick runs every player's recorded actions
+  # together, then time advances once.
+  TickRate: 4
+  # Every view is rendered by the engine. Colours are egocentric in a player's views (their objects
+  # use Colors[0], green; the enemy Colors[1], red); the global views use player 1 / player 2.
   Observers:
     Block2D:
       TileSize: 6
       BackgroundColor: [ 0.12, 0.13, 0.11 ]
     Sprite2D:
       TileSize: 16
-      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
-      # a soft player-coloured shadow under every owned object. Colours are egocentric:
-      # in a player's own view their objects use Colors[0] (green), the enemy Colors[1].
+      BackgroundTile: {TW}floor_regolith_a.png
       HighlightPlayers: true
       HighlightStyle: SHADOW
       HighlightScale: 1.6
+      HealthBars: true
+    # a player's main view: a {VIEW_W}x{VIEW_H} cell window on their camera (cam_x, cam_y), under fog of war
+    PlayerView:
+      Type: SPRITE_2D
+      TileSize: 16
+      Width: {VIEW_W}
+      Height: {VIEW_H}
+      BackgroundTile: {TW}floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+      Camera: {{ X: cam_x, Y: cam_y }}
+      FogOfWar:
+        SightVariable: sight
+        ExploredOpacity: 0.55
+    # the same camera window without fog (spectating, or playing with fog off)
+    CameraView:
+      Type: SPRITE_2D
+      TileSize: 16
+      Width: {VIEW_W}
+      Height: {VIEW_H}
+      BackgroundTile: {TW}floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+      Camera: {{ X: cam_x, Y: cam_y }}
+    # a player's mini-map: the whole map under their fog of war, with their camera window outlined
+    MiniMap:
+      Type: BLOCK_2D
+      TileSize: 4
+      BackgroundColor: [ 0.12, 0.13, 0.11 ]
+      FogOfWar:
+        SightVariable: sight
+        ExploredOpacity: 0.5
+      CameraFrame: {{ X: cam_x, Y: cam_y, Width: {VIEW_W}, Height: {VIEW_H} }}
+    # spectators: the whole map without fog
+    Overview:
+      Type: SPRITE_2D
+      TileSize: 16
+      BackgroundTile: {TW}floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+    GlobalMap:
+      Type: BLOCK_2D
+      TileSize: 6
+      BackgroundColor: [ 0.12, 0.13, 0.11 ]
+      CameraFrame: {{ X: cam_x, Y: cam_y, Width: {VIEW_W}, Height: {VIEW_H} }}
     Vector:
       IncludePlayerId: true
       IncludeVariables: true
@@ -4966,6 +5964,10 @@ Environment:
     # research state per player: 0 = not researched, 1 = in progress, 2 = done
 {tech_vars}  Player:
     Count: 2
+    # each player only knows what their objects can see: the engine filters every player's state
+    # query (get_player_state / getPlayerState) and their fog-of-war views with this
+    FogOfWar:
+      SightVariable: sight
     # egocentric player colours: each player sees itself as the first colour (green) and the
     # enemy as the second. The global mini-map uses player 1 / player 2 directly.
     Colors:
@@ -5067,6 +6069,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 1 ]
+            - set_tile: 1
         Dst:
           ObjectRules: minerals
           Commands:
@@ -5080,6 +6083,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 3 ]
+            - set_tile: 3
         Dst:
           ObjectRules: gems
           Commands:
@@ -5091,6 +6095,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 2 ]
+            - set_tile: 2
         Dst:
           ObjectRules: forest
           Commands:
@@ -5109,6 +6114,7 @@ Actions:
             - eq: {{ Arguments: [ src.carrying, 2 ], Commands: [ {{ incr: player_resources }} ] }}
             - eq: {{ Arguments: [ src.carrying, 3 ], Commands: [ {{ add: [ player_resources, 3 ] }} ] }}
             - set: [ src.carrying, 0 ]
+            - set_tile: 0
             - reward: 1
         Dst:
           ObjectRules: base
@@ -5197,6 +6203,7 @@ Actions:
           ObjectRules: lab
           Commands:
 {done_cmds}            - set: [ src.busy, 0 ]
+            - set_tile: 0
         Dst:
           ObjectRules: lab
 
@@ -5329,14 +6336,8 @@ Objects:
       - Action: init_map
         ActionId: 1
     Observers:
-      Sprite2D:
-        - Image: {TW}floor_regolith_a.png
-      Block2D:
-        - Shape: square
-          Color: [ 0.12, 0.13, 0.11 ]
-          Scale: 0.0
-{unit_objects}{building_objects}'''
-    # minerals use 3 render tiles (full / half / nearly gone)
+{observer_blocks(f"        - Image: {TW}floor_regolith_a.png" + chr(10), "        - Shape: square" + chr(10) + "          Color: [ 0.12, 0.13, 0.11 ]" + chr(10) + "          Scale: 0.0" + chr(10))}{unit_objects}{building_objects}'''
+    # minerals use 3 render tiles (full / half / nearly gone), in every sprite observer
     gdy = gdy.replace(
         f"        - Image: {ITEMS}crystal_green.png\n        - Image: {ITEMS}crystal_green.png\n        - Image: {ITEMS}crystal_green.png\n",
         f"        - Image: {ITEMS}crystal_green.png\n          Scale: 1.0\n        - Image: {ITEMS}crystal_green.png\n          Scale: 0.75\n        - Image: {ITEMS}crystal_green.png\n          Scale: 0.5\n")
@@ -5363,20 +6364,19 @@ base until one base is destroyed.
 
 Layout per frame (centered on a dark padded canvas):
     +------------------------------------------------------+
-    |   P1 camera view            P2 camera view           |
-    |   P1 caption (big)          P2 caption (big)         |
+    |   P1 PlayerView             P2 PlayerView            |
+    |   P1 mini-map + caption     P2 mini-map + caption    |
     |                                                      |
-    |            global Block2D mini-map                   |
+    |            GlobalMap (both cameras outlined)         |
     |            tick / winner line                        |
     +------------------------------------------------------+
 
-Ownership is shown by a small glow behind each unit / building, drawn by the engine
-(HighlightPlayers). Colours are egocentric: in each player's own view their units glow
-green and the enemy's glow red. The global mini-map shows player 1 green, player 2 red.
-
-Each player's view is a 20x14 tile window cropped from that player's Sprite2D render,
-centered on the player's camera (the per-player cam_x / cam_y globals that the
-policy pans with the move_camera action).
+Every picture is rendered by the engine from the GDY's observers and pasted as-is (only scaled):
+    PlayerView  each player's camera window (cam_x / cam_y globals, panned with move_camera),
+                under that player's fog of war, with health bars and ownership shadows
+                (egocentric: your units green, the enemy red)
+    MiniMap     the whole map under that player's fog of war, with their camera outlined
+    GlobalMap   the whole map without fog, both players' cameras outlined (P1 green, P2 red)
 
 Output: GriddlyRTS-FoW-demo.mp4 next to GriddlyRTS-FoW.yaml.
 
@@ -5399,13 +6399,13 @@ from fow_policy import Match  # noqa: E402
 
 OUT = os.path.join(HERE, "GriddlyRTS-FoW-demo.mp4")
 FPS = 8
-FONT_SIZE = 26
+FONT_SIZE = 20
 PAD = 30
 BG = (14, 14, 18)
 TEXT = (235, 235, 220)
 TILE = 16          # Sprite2D tile size
-VIEW = (20, 14)    # camera window in tiles (width, height)
-SCALE = 2          # upscale factor for the camera views
+SCALE = 2          # upscale factor for the camera views (PlayerView is 24x15 tiles of 16px)
+MINI_SCALE = 2     # upscale factor for the per-player mini-maps
 MAX_TICKS = 900
 HOLD_FRAMES = 3 * FPS
 
@@ -5428,17 +6428,6 @@ def to_img(obs):
     if a.ndim == 3 and a.shape[2] == 4:
         a = a[..., :3]
     return np.ascontiguousarray(a)
-
-
-def crop_around_camera(full_img, cam_xy, view=VIEW, tile=TILE):
-    """Crop a view[0] x view[1] tile window centered on the camera (clamped to the map)."""
-    h, w = full_img.shape[:2]
-    vw, vh = view[0] * tile, view[1] * tile
-    x0 = cam_xy[0] * tile - (view[0] // 2) * tile
-    y0 = cam_xy[1] * tile - (view[1] // 2) * tile
-    x0 = max(0, min(x0, w - vw))
-    y0 = max(0, min(y0, h - vh))
-    return full_img[y0:y0 + vh, x0:x0 + vw]
 
 
 def upscale(im, scale):
@@ -5473,30 +6462,34 @@ def text_block(width, lines, n_lines, fill):
 CAPTION_LINES = 4
 
 
-def compose(p1_view, p2_view, g_img, cap1, cap2, status):
+def compose(p1_view, p2_view, p1_mini, p2_mini, g_img, cap1, cap2, status):
     p1s, p2s = upscale(p1_view, SCALE), upscale(p2_view, SCALE)
-    # the mini-map is scaled to roughly the width of one camera view
-    gs = upscale(g_img, max(1, round(VIEW[0] * TILE * SCALE / g_img.shape[1])))
+    m1, m2 = upscale(p1_mini, MINI_SCALE), upscale(p2_mini, MINI_SCALE)
     pw = p1s.shape[1]
+    # the global map is scaled to roughly the width of one player view
+    gs = upscale(g_img, max(1, round(pw / g_img.shape[1])))
     gap = 60
     top_w = 2 * pw + gap
-    c1 = text_block(pw, cap1, CAPTION_LINES, TEXT)
-    c2 = text_block(pw, cap2, CAPTION_LINES, TEXT)
+    # under each view: the player's mini-map on the left, the caption beside it
+    cap_w = pw - m1.shape[1] - 10
+    c1 = text_block(cap_w, cap1, CAPTION_LINES, TEXT)
+    c2 = text_block(cap_w, cap2, CAPTION_LINES, TEXT)
     st = text_block(max(gs.shape[1], top_w), [status], 1, (220, 220, 220))
-    row_h = p1s.shape[0] + c1.shape[0]
+    under_h = max(m1.shape[0], c1.shape[0])
+    row_h = p1s.shape[0] + 10 + under_h
     width = max(top_w, gs.shape[1]) + 2 * PAD
     height = PAD + row_h + PAD + gs.shape[0] + st.shape[0] + PAD
     height += height % 2
     canvas = np.zeros((height, width, 3), dtype=np.uint8)
     canvas[:] = BG
-    # player 1 on the left, player 2 on the right, captions underneath each
+    # player 1 on the left, player 2 on the right
     x0 = (width - top_w) // 2
-    x1 = x0 + pw + gap
-    canvas[PAD:PAD + p1s.shape[0], x0:x0 + pw] = p1s
-    canvas[PAD + p1s.shape[0]:PAD + row_h, x0:x0 + pw] = c1
-    canvas[PAD:PAD + p2s.shape[0], x1:x1 + pw] = p2s
-    canvas[PAD + p2s.shape[0]:PAD + row_h, x1:x1 + pw] = c2
-    # global mini-map below, centered, with the status line under it
+    for x, view, mini, cap in ((x0, p1s, m1, c1), (x0 + pw + gap, p2s, m2, c2)):
+        canvas[PAD:PAD + view.shape[0], x:x + pw] = view
+        y = PAD + view.shape[0] + 10
+        canvas[y:y + mini.shape[0], x:x + mini.shape[1]] = mini
+        canvas[y:y + cap.shape[0], x + mini.shape[1] + 10:x + mini.shape[1] + 10 + cap.shape[1]] = cap
+    # global map below, centered, with the status line under it
     y = PAD + row_h + PAD
     gx = (width - gs.shape[1]) // 2
     canvas[y:y + gs.shape[0], gx:gx + gs.shape[1]] = gs
@@ -5520,9 +6513,9 @@ def main():
     path = os.path.join(HERE, "GriddlyRTS-FoW.yaml")
     name = (level_names(path) + [f"level {level}"] * (level + 1))[level]
     gdy = GriddlyLoader().load(path)
-    game = gdy.create_game("Block2D")                  # global observer -> mini-map
-    p1 = game.register_player("Player 1", "Sprite2D")  # full renders, cropped around the camera
-    p2 = game.register_player("Player 2", "Sprite2D")
+    game = gdy.create_game("GlobalMap")                  # global observer: whole map, both cameras
+    p1 = game.register_player("Player 1", "PlayerView")  # camera window + fog of war, per player
+    p2 = game.register_player("Player 2", "PlayerView")
     game.init(False)
     game.load_level(level)
     game.reset()
@@ -5531,25 +6524,24 @@ def main():
     frames = []
 
     def record(cap1, cap2, status):
-        world = match.world()
-        v1 = crop_around_camera(to_img(p1.observe()), world.camera(1))
-        v2 = crop_around_camera(to_img(p2.observe()), world.camera(2))
-        frames.append(compose(v1, v2, to_img(game.observe()), cap1, cap2, status))
+        frames.append(compose(to_img(p1.observe()), to_img(p2.observe()),
+                              to_img(game.observe_player(1, "MiniMap")), to_img(game.observe_player(2, "MiniMap")),
+                              to_img(game.observe()), cap1, cap2, status))
 
-    world = match.world()
+    world = match.world(1)
     start = ["START", f"res={world.resources(1)}", "camera on own base"]
     record(["P1 " + start[0]] + start[1:], ["P2 " + start[0]] + start[1:],
-           f"{name}  tick 0   map: P1 green, P2 red   views: self green, enemy red")
+           f"{name}  tick 0   map: P1 green, P2 red   views: self green, enemy red, fog of war")
 
     info = {}
     for _ in range(MAX_TICKS):
         captions, _, info = match.step()
         if match.terminated:
             break
-        tick = match.world().tick
+        tick = match.world(1).tick
         record(["P1 " + captions[1][0]] + captions[1][1:],
                ["P2 " + captions[2][0]] + captions[2][1:],
-               f"{name}  tick {tick}   map: P1 green, P2 red   views: self green, enemy red")
+               f"{name}  tick {tick}   map: P1 green, P2 red   views: self green, enemy red, fog of war")
 
     if match.terminated:
         # the game process is now terminal; render the last state before it is reset
@@ -24761,6 +25753,14 @@ Objects:
       "required": ["Name"],
       "additionalProperties": false,
       "properties": {
+        "TickRate": {
+          "$id": "#/properties/Environment/properties/TickRate",
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "title": "Tick Rate",
+          "description": "Game clock for real-time play, in ticks per second (0 = no clock). Players record actions between ticks (queue / queueActions) and every recorded action runs together on each tick (advance_time / advanceTime, or tick() to step manually). Changeable at run time with set_tick_rate / setTickRate."
+        },
         "Name": {
           "$id": "#/properties/Environment/properties/Name",
           "type": "string",
@@ -25012,6 +26012,135 @@ Objects:
                   "enum": ["OUTLINE", "GLOW", "SHADOW"],
                   "default": "OUTLINE"
                 },
+                "FogOfWar": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/FogOfWar",
+                  "title": "Fog Of War",
+                  "description": "Sprite2D / Block2D player observers only show cells within the sight radius of the player's own objects. Cells seen before stay dimmed (terrain and neutral objects shown, other players' objects hidden); never-seen cells are covered. true, or a map of options.",
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "SightVariable": {
+                          "type": "string",
+                          "description": "Object variable holding each object's sight radius in cells.",
+                          "default": "sight"
+                        },
+                        "DefaultSight": {
+                          "type": "integer",
+                          "description": "Sight radius of owned objects without the variable.",
+                          "default": 0
+                        },
+                        "Color": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 3,
+                          "maxItems": 3,
+                          "description": "RGB fog colour (0-1).",
+                          "default": [
+                            0,
+                            0,
+                            0
+                          ]
+                        },
+                        "ExploredOpacity": {
+                          "type": "number",
+                          "description": "Fog opacity over explored cells.",
+                          "default": 0.55
+                        },
+                        "UnexploredOpacity": {
+                          "type": "number",
+                          "description": "Fog opacity over never-seen cells.",
+                          "default": 1.0
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "Camera": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Camera",
+                  "type": "object",
+                  "title": "Camera",
+                  "description": "A movable camera for Sprite2D / Block2D observers: the Width x Height view is centred on the cell held in two global variables (per-player variables are read for the observing player) and clamped to the map.",
+                  "properties": {
+                    "X": {
+                      "type": "string",
+                      "description": "Global variable with the camera centre's x cell."
+                    },
+                    "Y": {
+                      "type": "string",
+                      "description": "Global variable with the camera centre's y cell."
+                    }
+                  },
+                  "required": [
+                    "X",
+                    "Y"
+                  ],
+                  "additionalProperties": false
+                },
+                "CameraFrame": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/CameraFrame",
+                  "type": "object",
+                  "title": "Camera Frame",
+                  "description": "Outline each player's camera window (Width x Height cells centred on two global variables) in the player's colour, e.g. on a mini-map. A player observer only outlines its own camera.",
+                  "properties": {
+                    "X": {
+                      "type": "string"
+                    },
+                    "Y": {
+                      "type": "string"
+                    },
+                    "Width": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "Height": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  },
+                  "required": [
+                    "X",
+                    "Y",
+                    "Width",
+                    "Height"
+                  ],
+                  "additionalProperties": false
+                },
+                "HealthBars": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/HealthBars",
+                  "title": "Health Bars",
+                  "description": "Draw a health bar over damaged objects that have the health and max health variables. true, or a map of options.",
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "Health": {
+                          "type": "string",
+                          "default": "health"
+                        },
+                        "MaxHealth": {
+                          "type": "string",
+                          "default": "max_health"
+                        },
+                        "Always": {
+                          "type": "boolean",
+                          "description": "Also draw bars at full health.",
+                          "default": false
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
                 "HighlightScale": {
                   "$id": "#/properties/Environment/properties/Observers/properties/HighlightScale",
                   "type": "number",
@@ -25077,6 +26206,32 @@ Objects:
           "description": "Defines how players (algorithms, agents, humans) interact with the environment.",
           "additionalProperties": false,
           "properties": {
+            "FogOfWar": {
+              "$id": "#/properties/Environment/properties/Player/properties/FogOfWar",
+              "title": "Fog Of War",
+              "description": "Each player only knows what their objects can see: cells within each owned object's sight radius. Cells seen before stay explored (terrain and neutral objects known, other players' objects not). The engine enforces it for player state queries (get_player_state / getPlayerState) and for FogOfWar observers. true, or a map of options.",
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "SightVariable": {
+                      "type": "string",
+                      "default": "sight",
+                      "description": "Object variable holding each object's sight radius in cells."
+                    },
+                    "DefaultSight": {
+                      "type": "integer",
+                      "default": 0,
+                      "description": "Sight radius of owned objects without the variable."
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
             "Count": {
               "$id": "#/properties/Environment/properties/Player/properties/Count",
               "type": "integer",

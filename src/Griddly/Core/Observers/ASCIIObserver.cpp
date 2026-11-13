@@ -55,9 +55,16 @@ void ASCIIObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputL
   }
 
   char mapCharacter;
-  if (grid_->getObjectsAt(objectLocation).size() > 0) {
-    auto objectIt = grid_->getObjectsAt(objectLocation).begin();
-    auto object = objectIt->second;
+  // fog of war: the top-most object this player may see (hidden objects are left out)
+  std::shared_ptr<ObjectRules> visibleObject = nullptr;
+  for (const auto& entry : grid_->getObjectsAt(objectLocation)) {
+    if (playerCanSee(entry.second)) {
+      visibleObject = entry.second;
+      break;
+    }
+  }
+  if (visibleObject != nullptr) {
+    auto object = visibleObject;
     auto objectName = object->getObjectName();
     mapCharacter = object->getMapCharacter();
 
@@ -160,6 +167,13 @@ uint8_t& ASCIIObserver::update() {
           outy++;
         }
         outx++;
+      }
+    }
+  } else if (grid_->getVisibility().enabled() && config_.playerId != 0) {
+    // fog of war changes which objects a cell shows without the cell itself changing: redraw all
+    for (uint32_t outy = 0; outy < gridHeight_; outy++) {
+      for (uint32_t outx = 0; outx < gridWidth_; outx++) {
+        renderLocation({static_cast<int32_t>(outx) + config_.gridXOffset, static_cast<int32_t>(outy) + config_.gridYOffset}, {outx, outy}, true);
       }
     }
   } else {

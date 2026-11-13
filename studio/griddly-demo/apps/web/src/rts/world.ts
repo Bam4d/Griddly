@@ -145,14 +145,25 @@ export type Obj = {
   vars: Record<string, number>;
 };
 
-/** Raw engine state, as returned by `Griddly.getState()`. */
+/**
+ * One player's state from the engine, `Griddly.getPlayerState(playerId)`: filtered by the GDY's
+ * Environment.Player.FogOfWar (own objects, explored terrain, enemies only while in sight, only that
+ * player's per-player global variables), plus the player's fog cells.
+ */
 export type RawState = {
   gameTicks: number;
   objects: { id: number; name: string; location: [number, number]; playerId: number; variables?: Record<string, number> }[];
+  /** variable name -> values indexed by player id (index 0 for shared variables) */
+  globalVariables?: Record<string, number[]>;
+  /** fog of war per cell, row major: 0 never seen, 1 explored, 2 visible; null without fog */
+  visibility?: Uint8Array | null;
 };
-export type RawGlobals = Record<string, Record<string, number> | number | undefined>;
 
-/** Snapshot of the game state for one tick. */
+export const UNSEEN = 0;
+export const EXPLORED = 1;
+export const VISIBLE = 2;
+
+/** What one player knows for one tick (never more than the engine's player state). */
 export class WorldView {
   readonly tick: number;
   readonly objects: Obj[] = [];
@@ -160,13 +171,17 @@ export class WorldView {
   readonly byName = new Map<string, Obj[]>();
   readonly byId = new Map<number, Obj>();
 
+  readonly globals: Record<string, number[]>;
+  readonly visibility: Uint8Array | null;
+
   constructor(
     state: RawState,
-    readonly globals: RawGlobals,
     readonly width: number,
     readonly height: number
   ) {
     this.tick = state.gameTicks;
+    this.globals = state.globalVariables ?? {};
+    this.visibility = state.visibility ?? null;
     for (const o of state.objects) {
       const [x, y] = o.location;
       if (x < 0 || y < 0 || o.name === "map_size") continue;
@@ -197,9 +212,23 @@ export class WorldView {
   }
 
   global(name: string, player = 0): number {
-    const v = this.globals[name];
-    if (typeof v === "number") return v;
-    return Number(v?.[String(player)] ?? 0);
+    return Number(this.globals[name]?.[player] ?? 0);
+  }
+
+  /** Does the viewing player see cell c right now? */
+  visible(c: Cell): boolean {
+    return !this.visibility || (this.inside(c) && this.visibility[this.key(c)] === VISIBLE);
+  }
+
+  unseen(c: Cell): boolean {
+    return !!this.visibility && this.inside(c) && this.visibility[this.key(c)] === UNSEEN;
+  }
+
+  unseenCount(): number {
+    if (!this.visibility) return 0;
+    let n = 0;
+    for (const v of this.visibility) if (v === UNSEEN) n++;
+    return n;
   }
 
   resources(player: number): number {

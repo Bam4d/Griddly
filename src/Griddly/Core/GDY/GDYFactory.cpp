@@ -69,6 +69,11 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
     spdlog::debug("Setting environment name: {0}", name_);
   }
 
+  tickRate_ = environment["TickRate"].as<double>(0.0);
+  if (tickRate_ < 0.0) {
+    throwParserError("Environment.TickRate must be >= 0 (ticks per second, 0 = no game clock)");
+  }
+
   parsePlayerDefinition(environment["Player"]);
 
   auto observerConfigNode = environment["Observers"];
@@ -332,6 +337,7 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
     throwParserError(fmt::format("Unknown HighlightStyle {0}, must be OUTLINE, GLOW or SHADOW", highlightStyle));
   }
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
+  parseNamedObserverOverlayConfig(config, observerConfigNode);
 
   auto backgroundTileNode = observerConfigNode["BackgroundTile"];
 
@@ -388,7 +394,8 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
   config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
 
-  auto backgroundColorNode = observerConfigNode["BackgroundColor"];
+  parseNamedObserverOverlayConfig(config, observerConfigNode);
+
   config.backgroundColor = parseColorNode(observerConfigNode["BackgroundColor"]);
 
   if (objectNames_.size() == 0) {
@@ -541,6 +548,62 @@ glm::uvec2 GDYFactory::parseTileSize(YAML::Node observerConfigNode) {
 }
 
 
+void GDYFactory::parseNamedObserverOverlayConfig(SDLObserverConfig& config, YAML::Node observerConfigNode) {
+  auto requireGlobalVariable = [&](const std::string& section, const std::string& name) {
+    if (name.empty()) {
+      throwParserError(fmt::format("{0} needs both X and Y global variable names.", section));
+    }
+    if (globalVariableDefinitions_.find(name) == globalVariableDefinitions_.end()) {
+      throwParserError(fmt::format("{0} uses global variable {1}, which is not defined in Environment.Variables.", section, name));
+    }
+  };
+
+  auto fogNode = observerConfigNode["FogOfWar"];
+  if (fogNode.IsDefined() && !(fogNode.IsScalar() && !fogNode.as<bool>())) {
+    config.fogOfWar.enabled = true;
+    if (fogNode.IsMap()) {
+      config.fogOfWar.sightVariable = fogNode["SightVariable"].as<std::string>(config.fogOfWar.sightVariable);
+      config.fogOfWar.defaultSight = fogNode["DefaultSight"].as<int32_t>(config.fogOfWar.defaultSight);
+      if (fogNode["Color"].IsDefined()) config.fogOfWar.color = parseColorNode(fogNode["Color"]);
+      config.fogOfWar.exploredOpacity = fogNode["ExploredOpacity"].as<float>(config.fogOfWar.exploredOpacity);
+      config.fogOfWar.unexploredOpacity = fogNode["UnexploredOpacity"].as<float>(config.fogOfWar.unexploredOpacity);
+    }
+  }
+
+  auto cameraNode = observerConfigNode["Camera"];
+  if (cameraNode.IsDefined()) {
+    config.camera.enabled = true;
+    config.camera.xVariable = cameraNode["X"].as<std::string>("");
+    config.camera.yVariable = cameraNode["Y"].as<std::string>("");
+    requireGlobalVariable("Camera", config.camera.xVariable);
+    requireGlobalVariable("Camera", config.camera.yVariable);
+  }
+
+  auto cameraFrameNode = observerConfigNode["CameraFrame"];
+  if (cameraFrameNode.IsDefined()) {
+    config.cameraFrame.enabled = true;
+    config.cameraFrame.xVariable = cameraFrameNode["X"].as<std::string>("");
+    config.cameraFrame.yVariable = cameraFrameNode["Y"].as<std::string>("");
+    config.cameraFrame.width = cameraFrameNode["Width"].as<uint32_t>(0);
+    config.cameraFrame.height = cameraFrameNode["Height"].as<uint32_t>(0);
+    requireGlobalVariable("CameraFrame", config.cameraFrame.xVariable);
+    requireGlobalVariable("CameraFrame", config.cameraFrame.yVariable);
+    if (config.cameraFrame.width == 0 || config.cameraFrame.height == 0) {
+      throwParserError("CameraFrame needs a Width and Height (the camera window size in cells).");
+    }
+  }
+
+  auto healthNode = observerConfigNode["HealthBars"];
+  if (healthNode.IsDefined() && !(healthNode.IsScalar() && !healthNode.as<bool>())) {
+    config.healthBars.enabled = true;
+    if (healthNode.IsMap()) {
+      config.healthBars.healthVariable = healthNode["Health"].as<std::string>(config.healthBars.healthVariable);
+      config.healthBars.maxHealthVariable = healthNode["MaxHealth"].as<std::string>(config.healthBars.maxHealthVariable);
+      config.healthBars.always = healthNode["Always"].as<bool>(config.healthBars.always);
+    }
+  }
+}
+
 void GDYFactory::parseCommonObserverConfig(ObserverConfig& observerConfig, YAML::Node observerConfigNode, bool isGlobalObserver) {
   spdlog::debug("Parsing common observer config...");
   observerConfig.overrideGridWidth = resolveObserverConfigValue<int32_t>("Width", observerConfigNode, observerConfig.overrideGridWidth, !isGlobalObserver);
@@ -563,6 +626,16 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     playerCount_ = playerCountNode.as<uint32_t>();
   } else {
     playerCount_ = 1;
+  }
+
+  // Fog of war for players: limits what each player's state queries (and FogOfWar observers) see
+  auto fogNode = playerNode["FogOfWar"];
+  if (fogNode.IsDefined() && !(fogNode.IsScalar() && !fogNode.as<bool>())) {
+    playerVisibilityConfig_.enabled = true;
+    if (fogNode.IsMap()) {
+      playerVisibilityConfig_.sightVariable = fogNode["SightVariable"].as<std::string>(playerVisibilityConfig_.sightVariable);
+      playerVisibilityConfig_.defaultSight = fogNode["DefaultSight"].as<int32_t>(playerVisibilityConfig_.defaultSight);
+    }
   }
 
   defaultObserverConfig_.playerCount = playerCount_;

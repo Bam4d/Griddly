@@ -10,6 +10,10 @@
  * research   along the strategy's path
  * army       the barracks trains the strategy's units; medics follow and heal; the army gathers at
  *            a rally point and attacks once it is big enough
+ *
+ * Fog of war: the AI only reads its own player state (`getPlayerState`, filtered by the engine): its
+ * own objects, terrain it has explored and enemy objects in sight. It remembers enemy buildings it
+ * has seen, guesses the enemy base from the map's point symmetry, and explores with a scout.
  */
 import {
   ARMY,
@@ -26,6 +30,7 @@ import {
   TECHS,
   TECH_VARS,
   UNITS,
+  BUILDINGS,
   UNIT_NEEDS,
   UP,
   directionTo,
@@ -61,6 +66,9 @@ export class RTSPolicy {
   private lastTech = new Map<string, number>();
   private sites = new Map<string, Cell | null>();
   private rally: [Cell, Cell] | null = null;
+  /** enemy buildings seen (cell key -> [cell, name]), until their cell is seen without them */
+  private knownEnemy = new Map<number, [Cell, string]>();
+  private exploreGoals = new Map<string, Cell | null>();
   private random: () => number;
 
   constructor(
@@ -156,6 +164,37 @@ export class RTSPolicy {
     return best ? best[1] : "combat";
   }
 
+  private remember(world: WorldView) {
+    for (const o of world.objects) {
+      if (o.player === this.enemy && BUILDINGS.includes(o.name)) this.knownEnemy.set(world.key(o.pos), [o.pos, o.name]);
+    }
+    for (const [k, [pos]] of this.knownEnemy) {
+      const o = world.get(pos);
+      if (world.visible(pos) && (!o || o.player !== this.enemy)) this.knownEnemy.delete(k);
+    }
+  }
+
+  /** The enemy base: seen, remembered, or the mirror of ours (the maps are point-symmetric). */
+  private enemyBaseGuess(world: WorldView, base: Cell): Cell {
+    const seen = world.of("base", this.enemy)[0];
+    if (seen) return seen.pos;
+    for (const [pos, name] of this.knownEnemy.values()) if (name === "base") return pos;
+    return [world.width - 1 - base[0], world.height - 1 - base[1]];
+  }
+
+  /** Walk towards the nearest reachable unexplored cell (sampled every 3 cells). */
+  private explore(world: WorldView, plan: Planner, actions: PlannedAction[], u: Obj, label: string): boolean {
+    let goal = this.exploreGoals.get(label) ?? null;
+    if (goal === null || !world.unseen(goal) || manhattan(u.pos, goal) <= 2 || this.random() < 0.02) {
+      const cells: Cell[] = [];
+      for (let y = 1; y < world.height - 1; y += 3) for (let x = 1; x < world.width - 1; x += 3) if (world.unseen([x, y])) cells.push([x, y]);
+      const s = cells.length ? plan.bfs(u.pos, cells, true, 8000) : null;
+      goal = s ? s.goal : null;
+      this.exploreGoals.set(label, goal);
+    }
+    return goal !== null && this.walk(plan, actions, u, [goal, ...neighbours(goal)], label);
+  }
+
   // ----------------------------------------------------------------- policy
   /** The actions for this tick and a short caption of what the AI is doing. */
   act(world: WorldView): { actions: PlannedAction[]; caption: string[] } {
@@ -165,7 +204,9 @@ export class RTSPolicy {
     const pid = this.pid;
     let res = world.resources(pid);
     const base = world.of("base", pid)[0]?.pos ?? null;
-    const enemyBase = world.of("base", this.enemy)[0]?.pos ?? null;
+    this.remember(world);
+    // the enemy base as far as we know: seen, remembered, or guessed
+    const enemyBase = base ? this.enemyBaseGuess(world, base) : null;
     // positions are mutated as units are planned, so work on copies
     const mine = world.objects.filter((o) => o.player === pid).map((o) => ({ ...o }));
     const workers = mine.filter((o) => o.name === "worker");
@@ -175,6 +216,10 @@ export class RTSPolicy {
     const towers = mine.filter((o) => o.name === "tower");
     const enemies = world.objects.filter((o) => o.player === this.enemy && o.name in TARGET_PRIORITY);
     const enemyAt = new Map<number, Obj>(enemies.map((o) => [world.key(o.pos), o]));
+    // remembered buildings out of sight right now are still worth marching to
+    const remembered: Obj[] = [...this.knownEnemy.entries()]
+      .filter(([k, [, name]]) => !enemyAt.has(k) && name in TARGET_PRIORITY)
+      .map(([k, [pos, name]]) => ({ id: -1 - k, name, pos, player: this.enemy, vars: {} }));
     const resources = [...world.of("minerals"), ...world.of("gems")];
     const relays = world.objects.filter((o) => o.name === "relay" || (o.name === "relay_owned" && o.player !== pid));
     this.trackResearch(world);
@@ -250,8 +295,9 @@ export class RTSPolicy {
         res -= COSTS[unit]!;
       }
     }
-    // an early scout grabs relays
-    if (barracks.length > 0 && !army.some((u) => u.name === "scout") && relays.length > 0 && res >= COSTS.scout! + keep && world.tick < 400) {
+    // a scout grabs relays and explores the fog (relays and minerals out of sight are unknown)
+    const unexplored = world.visibility !== null && world.unseenCount() > world.visibility.length / 3;
+    if (barracks.length > 0 && !army.some((u) => u.name === "scout") && (relays.length > 0 || unexplored || resources.length === 0) && res >= COSTS.scout! + keep && world.tick < 900) {
       const b = barracks[0]!.pos;
       for (const d of [RIGHT, DOWN, LEFT, UP]) {
         const c = step(b, d);
@@ -269,7 +315,10 @@ export class RTSPolicy {
 
     // ----------------------------------------------------------------- army
     const fighters = army.filter((u) => FIGHTERS.includes(u.name));
-    if (!this.offensive && (fighters.length >= this.attackSize || (resources.length === 0 && fighters.length > 0 && res < 5))) {
+    // attack with a full army, with whatever we have once nothing known is left to mine, or when
+    // the barracks is boxed in by idle units
+    const boxedIn = barracks.length > 0 && barracks.every((b) => neighbours(b.pos).every((n) => !plan.free(n)));
+    if (!this.offensive && (fighters.length >= this.attackSize || (resources.length === 0 && fighters.length > 0 && (res < 5 || boxedIn)) || (boxedIn && fighters.length >= 3))) {
       this.offensive = true;
     }
     if (this.offensive && fighters.length < 2 && enemyBase && threat.length === 0) this.offensive = false;
@@ -281,7 +330,7 @@ export class RTSPolicy {
     for (const u of sorted) {
       if (u.name === "scout") this.scout(world, plan, actions, u, relays, enemyAt);
       else if (u.name === "medic") this.medic(world, plan, actions, u, army, rally);
-      else this.fight(world, plan, actions, u, enemies, enemyAt, enemyBase, rally, threat);
+      else this.fight(world, plan, actions, u, enemies, enemyAt, enemyBase, rally, threat, remembered);
     }
 
     // --------------------------------------------------------------- camera
@@ -303,7 +352,7 @@ export class RTSPolicy {
   // ------------------------------------------------------------------ roles
   private workers(world: WorldView, plan: Planner, actions: PlannedAction[], workers: Obj[], builders: Set<number>, base: Cell, resources: Obj[], enemyAt: Map<number, Obj>, threat: Obj[]) {
     const resAt = new Map<number, Obj>(resources.map((r) => [world.key(r.pos), r]));
-    const eb = world.of("base", this.enemy)[0]?.pos ?? null;
+    const eb = this.enemyBaseGuess(world, base);
     // mine what is closer to us than to the enemy (or anything once ours is gone)
     let targets = resources.filter((r) => eb === null || manhattan(r.pos, base) <= manhattan(r.pos, eb) + 4).map((r) => r.pos);
     if (targets.length === 0) targets = resources.map((r) => r.pos);
@@ -360,6 +409,9 @@ export class RTSPolicy {
       if (f !== null) {
         plan.reserve(f.goal);
         this.walk(plan, actions, w, [f.goal], "to forest");
+      } else if (resources.length === 0 && w === order[0]) {
+        // nothing known to mine: one worker looks for more
+        this.explore(world, plan, actions, w, "worker explores");
       }
     }
   }
@@ -367,6 +419,9 @@ export class RTSPolicy {
   private scout(world: WorldView, plan: Planner, actions: PlannedAction[], u: Obj, relays: Obj[], enemyAt: Map<number, Obj>) {
     const pos = u.pos;
     if (relays.length === 0) {
+      // no relay known: explore the fog (and find the enemy)
+      const enemyAdjacent = neighbours(pos).some((n) => world.inside(n) && enemyAt.has(world.key(n)));
+      if (!enemyAdjacent && this.explore(world, plan, actions, u, "scout explores")) return;
       this.fight(world, plan, actions, u, [...enemyAt.values()], enemyAt, null, pos, []);
       return;
     }
@@ -402,7 +457,7 @@ export class RTSPolicy {
     }
   }
 
-  private fight(world: WorldView, plan: Planner, actions: PlannedAction[], u: Obj, enemies: Obj[], enemyAt: Map<number, Obj>, enemyBase: Cell | null, rally: Cell, threat: Obj[]) {
+  private fight(world: WorldView, plan: Planner, actions: PlannedAction[], u: Obj, enemies: Obj[], enemyAt: Map<number, Obj>, enemyBase: Cell | null, rally: Cell, threat: Obj[], remembered: Obj[] = []) {
     const pos = u.pos;
     const kind = u.name;
     const enemyOn = (c: Cell) => (world.inside(c) ? enemyAt.get(world.key(c)) : undefined);
@@ -439,10 +494,15 @@ export class RTSPolicy {
         tgt = minBy(close, (e) => [manhattan(e.pos, pos), TARGET_PRIORITY[e.name]!])!;
         label = "engage";
       } else {
-        const nearTower = enemies.filter((e) => e.name === "tower" && manhattan(e.pos, pos) <= 6);
-        const baseObj = enemyBase ? enemyOn(enemyBase) : undefined;
-        const pool = nearTower.length ? nearTower : baseObj ? [baseObj] : enemies;
-        if (pool.length === 0) return;
+        const known = [...enemies, ...remembered];
+        const nearTower = known.filter((e) => e.name === "tower" && manhattan(e.pos, pos) <= 6);
+        const bases = known.filter((e) => e.name === "base");
+        const pool = nearTower.length ? nearTower : bases.length ? bases : known;
+        if (pool.length === 0) {
+          // nothing known: head for where the enemy base should be
+          if (enemyBase) this.walk(plan, actions, u, [enemyBase, ...neighbours(enemyBase)], "search");
+          return;
+        }
         tgt = minBy(pool, (e) => manhattan(e.pos, pos))!;
         label = "march";
       }

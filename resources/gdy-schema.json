@@ -22,6 +22,14 @@
       "required": ["Name"],
       "additionalProperties": false,
       "properties": {
+        "TickRate": {
+          "$id": "#/properties/Environment/properties/TickRate",
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "title": "Tick Rate",
+          "description": "Game clock for real-time play, in ticks per second (0 = no clock). Players record actions between ticks (queue / queueActions) and every recorded action runs together on each tick (advance_time / advanceTime, or tick() to step manually). Changeable at run time with set_tick_rate / setTickRate."
+        },
         "Name": {
           "$id": "#/properties/Environment/properties/Name",
           "type": "string",
@@ -273,6 +281,135 @@
                   "enum": ["OUTLINE", "GLOW", "SHADOW"],
                   "default": "OUTLINE"
                 },
+                "FogOfWar": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/FogOfWar",
+                  "title": "Fog Of War",
+                  "description": "Sprite2D / Block2D player observers only show cells within the sight radius of the player's own objects. Cells seen before stay dimmed (terrain and neutral objects shown, other players' objects hidden); never-seen cells are covered. true, or a map of options.",
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "SightVariable": {
+                          "type": "string",
+                          "description": "Object variable holding each object's sight radius in cells.",
+                          "default": "sight"
+                        },
+                        "DefaultSight": {
+                          "type": "integer",
+                          "description": "Sight radius of owned objects without the variable.",
+                          "default": 0
+                        },
+                        "Color": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 3,
+                          "maxItems": 3,
+                          "description": "RGB fog colour (0-1).",
+                          "default": [
+                            0,
+                            0,
+                            0
+                          ]
+                        },
+                        "ExploredOpacity": {
+                          "type": "number",
+                          "description": "Fog opacity over explored cells.",
+                          "default": 0.55
+                        },
+                        "UnexploredOpacity": {
+                          "type": "number",
+                          "description": "Fog opacity over never-seen cells.",
+                          "default": 1.0
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "Camera": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Camera",
+                  "type": "object",
+                  "title": "Camera",
+                  "description": "A movable camera for Sprite2D / Block2D observers: the Width x Height view is centred on the cell held in two global variables (per-player variables are read for the observing player) and clamped to the map.",
+                  "properties": {
+                    "X": {
+                      "type": "string",
+                      "description": "Global variable with the camera centre's x cell."
+                    },
+                    "Y": {
+                      "type": "string",
+                      "description": "Global variable with the camera centre's y cell."
+                    }
+                  },
+                  "required": [
+                    "X",
+                    "Y"
+                  ],
+                  "additionalProperties": false
+                },
+                "CameraFrame": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/CameraFrame",
+                  "type": "object",
+                  "title": "Camera Frame",
+                  "description": "Outline each player's camera window (Width x Height cells centred on two global variables) in the player's colour, e.g. on a mini-map. A player observer only outlines its own camera.",
+                  "properties": {
+                    "X": {
+                      "type": "string"
+                    },
+                    "Y": {
+                      "type": "string"
+                    },
+                    "Width": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "Height": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  },
+                  "required": [
+                    "X",
+                    "Y",
+                    "Width",
+                    "Height"
+                  ],
+                  "additionalProperties": false
+                },
+                "HealthBars": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/HealthBars",
+                  "title": "Health Bars",
+                  "description": "Draw a health bar over damaged objects that have the health and max health variables. true, or a map of options.",
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "Health": {
+                          "type": "string",
+                          "default": "health"
+                        },
+                        "MaxHealth": {
+                          "type": "string",
+                          "default": "max_health"
+                        },
+                        "Always": {
+                          "type": "boolean",
+                          "description": "Also draw bars at full health.",
+                          "default": false
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
                 "HighlightScale": {
                   "$id": "#/properties/Environment/properties/Observers/properties/HighlightScale",
                   "type": "number",
@@ -338,6 +475,32 @@
           "description": "Defines how players (algorithms, agents, humans) interact with the environment.",
           "additionalProperties": false,
           "properties": {
+            "FogOfWar": {
+              "$id": "#/properties/Environment/properties/Player/properties/FogOfWar",
+              "title": "Fog Of War",
+              "description": "Each player only knows what their objects can see: cells within each owned object's sight radius. Cells seen before stay explored (terrain and neutral objects known, other players' objects not). The engine enforces it for player state queries (get_player_state / getPlayerState) and for FogOfWar observers. true, or a map of options.",
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "SightVariable": {
+                      "type": "string",
+                      "default": "sight",
+                      "description": "Object variable holding each object's sight radius in cells."
+                    },
+                    "DefaultSight": {
+                      "type": "integer",
+                      "default": 0,
+                      "description": "Sight radius of owned objects without the variable."
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
             "Count": {
               "$id": "#/properties/Environment/properties/Player/properties/Count",
               "type": "integer",

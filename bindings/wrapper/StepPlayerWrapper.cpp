@@ -136,6 +136,46 @@ class Py_StepPlayerWrapper {
     return player_->performActions({}, updateTicks);
   }
 
+  // Record actions for the next game-clock tick: same array format as step_multi (rows of
+  // [x, y, actionTypeIdx, actionId] / [actionTypeIdx, actionId] ...). Nothing runs until the clock ticks.
+  void queueActions(py::ndarray<int32_t, py::ndim<2>> stepArray) {
+    auto externalActionNames = gdyFactory_->getExternalActionNames();
+    auto actionStride = stepArray.stride(0);
+    auto actionArrayStride = stepArray.stride(1);
+    std::vector<std::shared_ptr<Action>> actions;
+    for (size_t a = 0; a < stepArray.shape(0); a++) {
+      auto pStr = (int32_t*)stepArray.data() + a * actionStride;
+      std::string actionName;
+      std::vector<int32_t> actionArray;
+      switch (stepArray.shape(1)) {
+        case 2:
+          actionName = externalActionNames.at(*(pStr + 0 * actionArrayStride));
+          actionArray = {*(pStr + 1 * actionArrayStride)};
+          break;
+        case 4:
+          actionName = externalActionNames.at(*(pStr + 2 * actionArrayStride));
+          actionArray = {*(pStr + 0 * actionArrayStride), *(pStr + 1 * actionArrayStride), *(pStr + 3 * actionArrayStride)};
+          break;
+        default:
+          throw std::invalid_argument(fmt::format("Invalid action size {0}, expected [x, y, actionTypeIdx, actionId] or [actionTypeIdx, actionId]", stepArray.shape(1)));
+      }
+      auto action = buildAction(actionName, actionArray);
+      if (action != nullptr) actions.push_back(action);
+    }
+    py::gil_scoped_release release;
+    std::lock_guard<std::recursive_mutex> lock(*mutex_);
+    gameProcess_->queueActions(player_->getId(), actions);
+  }
+
+  // Record one named action ([x, y, actionId] or [actionId]) for the next tick
+  void queueAction(std::string actionName, std::vector<int32_t> actionArray) {
+    auto action = buildAction(actionName, actionArray);
+    if (action == nullptr) return;
+    py::gil_scoped_release release;
+    std::lock_guard<std::recursive_mutex> lock(*mutex_);
+    gameProcess_->queueActions(player_->getId(), {action});
+  }
+
   py::tuple stepSingle(std::string actionName, std::vector<int32_t> actionArray, bool updateTicks) {
     if (gameProcess_ != nullptr && !gameProcess_->isInitialized()) {
       throw std::invalid_argument("Cannot send player commands when game has not been initialized.");

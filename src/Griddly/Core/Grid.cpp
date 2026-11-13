@@ -565,7 +565,17 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
 
   tickDirtyLocations_.clear();
 
+  updateVisibility();
+
   return rewards;
+}
+
+void Grid::configureVisibility(const PlayerVisibilityConfig& config) {
+  visibility_ = PlayerVisibility(config, playerCount_, width_, height_);
+}
+
+void Grid::updateVisibility() {
+  visibility_.update(objects_);
 }
 
 const DelayedActionQueue& Grid::getDelayedActions() {

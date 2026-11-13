@@ -11,8 +11,8 @@ import { Match } from "../rts/match";
 import type { Outcome } from "../rts/match";
 import { describeOrder, formation } from "../rts/orders";
 import type { Order } from "../rts/orders";
-import { cellAt, drawBoard, drawMinimap, seen, updateFog, viewport } from "../rts/view";
-import type { Fog, Marks, Viewport } from "../rts/view";
+import { OBSERVERS, blit, cellAt, drawBoard, drawMinimap, isVisible, viewport } from "../rts/view";
+import type { Marks, Viewport } from "../rts/view";
 import { ARMY, COSTS, DISPLAY, TECHS, UNITS, manhattan } from "../rts/world";
 import type { Cell, Dir, Obj, WorldView } from "../rts/world";
 
@@ -20,8 +20,10 @@ import type { Cell, Dir, Obj, WorldView } from "../rts/world";
  * Griddly RTS: Frontiers, playable. Player 1 is you (mouse + keyboard), player 2 the scripted AI
  * (src/rts/ai.ts, a port of resources/games/RTS/fow_policy.py). Every rule lives in the GDY; the
  * page only turns clicks into the GDY's external actions (one per unit per tick), reads the engine's
- * available actions for whatever you select, and draws the engine's renders: player 1's Sprite2D
- * observer (cropped around the GDY camera, cam_x / cam_y) and the global Block2D mini-map.
+ * available actions for whatever you select, and shows the engine's renders as they are: player 1's
+ * PlayerView observer (the GDY camera window, cam_x / cam_y, with the engine's fog of war, health bars
+ * and ownership shadows) and player 1's MiniMap (fog + camera outline). With fog off they are
+ * CameraView and GlobalMap. The page draws only pointer marks on top (selection, hover, orders).
  */
 
 type Setup = { level: number; enemy: string; spectate: boolean; fog: boolean; speed: number; key: number };
@@ -56,7 +58,6 @@ const ICONS: Record<string, string> = {
   build_tank: "🛡",
   research: "🔬",
 };
-const ZOOMS = [16, 20, 24, 32, 40, 48, 64];
 const SPEEDS = [1, 2, 4, 6, 8, 12];
 const ARROWS: Record<number, string> = { 1: "←", 2: "↑", 3: "→", 4: "↓" };
 
@@ -183,9 +184,10 @@ const Menu = ({ initial, onStart }: { initial: Setup; onStart: (s: Setup) => voi
             <label className="flex items-center gap-2">
               <input type="radio" checked={s.spectate} onChange={() => setS({ ...s, spectate: true, fog: false })} data-testid="spectate" /> Watch AI vs AI
             </label>
-            <label className="mt-2 flex items-center gap-2">
-              <input type="checkbox" checked={s.fog} onChange={(e) => setS({ ...s, fog: e.target.checked })} /> Fog of war
-            </label>
+            <p className="mt-2 text-xs leading-relaxed text-stone-500">
+              Fog of war is part of the rules: you and the AI each only know what your own units can see. Spectators can lift
+              the fog in their view.
+            </p>
           </div>
         </div>
         <div className="flex flex-col justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
@@ -206,16 +208,8 @@ const Menu = ({ initial, onStart }: { initial: Setup; onStart: (s: Setup) => voi
 // ------------------------------------------------------------------------------------------ game
 
 type Images = { board: HTMLCanvasElement | null; mini: HTMLCanvasElement | null };
-
-function blit(target: HTMLCanvasElement | null, img: { pixels: Uint8Array; width: number; height: number }): HTMLCanvasElement {
-  const c = target ?? document.createElement("canvas");
-  if (c.width !== img.width || c.height !== img.height) {
-    c.width = img.width;
-    c.height = img.height;
-  }
-  c.getContext("2d")!.putImageData(new ImageData(new Uint8ClampedArray(img.pixels.slice(0, img.width * img.height * 4)), img.width, img.height), 0, 0);
-  return c;
-}
+/** What the engine showed player 1 in the last render: camera origin, view size, fog of war. */
+type ViewState = { origin: Cell; cells: [number, number]; fog: Uint8Array | null };
 
 const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => void; onRestart: () => void }) => {
   const matchRef = useRef<Match | null>(null);
@@ -224,19 +218,17 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
   const boardRef = useRef<HTMLCanvasElement>(null);
   const miniRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const busyRef = useRef(false);
-  const fogRef = useRef<Fog | null>(setup.fog ? { visible: new Set(), explored: new Set() } : null);
-  const marksRef = useRef<Marks>({ selected: new Set(), hover: null, targeting: null, box: null, orders: new Map(), pings: [], fog: fogRef.current });
+  const viewRef = useRef<ViewState | null>(null);
+  const marksRef = useRef<Marks>({ selected: new Set(), hover: null, targeting: null, box: null, orders: new Map(), pings: [] });
   const dragRef = useRef<{ x: number; y: number } | null>(null);
   const vpRef = useRef<Viewport | null>(null);
-  const prevRef = useRef<{ ids: Map<number, string>; enemy: Map<number, string>; tech: Record<string, number>; baseHp: number; alarm: number } | null>(null);
+  const prevRef = useRef<Snap | null>(null);
 
   const [status, setStatus] = useState<"loading" | "error" | "ready">("loading");
   const [error, setError] = useState("");
   const [outcome, setOutcome] = useState<Outcome>("playing");
   const [paused, setPaused] = useState(false);
   const [speed, setSpeed] = useState(setup.speed);
-  const [zoom, setZoom] = useState(32);
   const [fogOn, setFogOn] = useState(setup.fog);
   const [autopilot, setAutopilot] = useState(setup.spectate);
   const [selected, setSelected] = useState<number[]>([]);
@@ -250,14 +242,17 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
   const level = RTS_LEVELS[setup.level];
 
   // ------------------------------------------------------------------ engine setup / teardown
-  const render = useCallback(async () => {
+  const fogRef = useRef(setup.fog);
+  const render = useCallback(() => {
     const g = engineRef.current;
-    const m = matchRef.current;
-    if (!g || !m) return;
-    const [board, mini] = await Promise.all([g.observePlayerImage(0), g.observeImage()]);
-    if (engineRef.current !== g) return;
+    if (!g || !matchRef.current) return;
+    // both pictures are the engine's: the fog, camera window and mini-map frame are GDY observer config
+    const viewName = fogRef.current ? OBSERVERS.view : OBSERVERS.viewNoFog;
+    const board = g.observePlayerObserver(1, viewName);
+    const mini = g.observePlayerObserver(1, fogRef.current ? OBSERVERS.minimap : OBSERVERS.minimapNoFog);
+    const state = g.getPlayerObserverState(1, viewName);
+    viewRef.current = { origin: state.origin, cells: state.cells, fog: state.fog };
     imagesRef.current = { board: blit(imagesRef.current.board, board), mini: blit(imagesRef.current.mini, mini) };
-    if (fogRef.current) updateFog(m.world, 1, fogRef.current);
   }, []);
 
   useEffect(() => {
@@ -265,18 +260,22 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
     withGriddly(async (g) => {
       if (cancelled) return;
       loadGdy(g, RTS_GDY);
-      // global observer = Block2D mini-map; each player's observer = the Sprite2D board (egocentric shadows)
-      g.createGame("Block2D", "Sprite2D");
+      // every view is a GDY observer: the players' camera windows with fog of war, plus the
+      // per-player mini-maps requested in render() (getPlayerObserver creates them on demand)
+      g.createGame("GlobalMap", "PlayerView");
       const m = new Match(g, {
         level: setup.level,
         seed: setup.key,
         enemy: STRATEGIES[setup.enemy],
         autopilot: setup.spectate ? STRATEGIES.GUNLINE : null,
       });
+      // the game clock is the engine's: Environment.TickRate (the speed menu changes it)
+      m.setTickRate(setup.speed);
+      m.plan();
       engineRef.current = g;
       matchRef.current = m;
       prevRef.current = snapshot(m.world, null);
-      await render();
+      render();
       if (cancelled) return;
       setStatus("ready");
       bump();
@@ -298,43 +297,59 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
     if (lines.length) setLog((l) => [...lines.reverse(), ...l].slice(0, 40));
   }, []);
 
-  const tickOnce = useCallback(async () => {
+  /** After the engine's clock ran a tick: refresh the page from the new player state. */
+  const afterTick = useCallback(() => {
     const m = matchRef.current;
-    if (!m || busyRef.current || m.outcome !== "playing") return;
-    busyRef.current = true;
-    try {
-      m.tick();
+    if (!m) return;
+    {
       const prev = prevRef.current;
       const next = snapshot(m.world, prev);
       pushLog(events(m.world, prev, next));
       prevRef.current = next;
-      await render();
+      render();
       setSelected((sel) => {
         const alive = sel.filter((id) => m.world.byId.has(id));
         return alive.length === sel.length ? sel : alive;
       });
       if (m.outcome !== "playing") setOutcome(m.outcome);
       bump();
-    } finally {
-      busyRef.current = false;
     }
   }, [render, bump, pushLog]);
 
+  // The engine's game clock runs the ticks: every animation frame tells it how much time passed,
+  // and it runs a tick (with both players' recorded actions) whenever one is due at its tick rate.
   useEffect(() => {
-    if (status !== "ready" || paused || outcome !== "playing") return;
-    const id = setInterval(() => void tickOnce(), 1000 / speed);
-    return () => clearInterval(id);
-  }, [status, paused, outcome, speed, tickOnce]);
+    if (status !== "ready" || outcome !== "playing") return;
+    let raf = 0;
+    let last = performance.now();
+    const frame = (now: number) => {
+      raf = requestAnimationFrame(frame);
+      const m = matchRef.current;
+      const dt = Math.min(0.25, (now - last) / 1000);
+      last = now;
+      if (m && m.advance(dt) > 0) afterTick();
+    };
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+  }, [status, outcome, afterTick]);
+
+  useEffect(() => {
+    matchRef.current?.setPaused(paused);
+  }, [paused, status]);
+
+  useEffect(() => {
+    matchRef.current?.setTickRate(speed);
+  }, [speed, status]);
 
   useEffect(() => {
     matchRef.current?.setAutopilot(autopilot ? STRATEGIES.GUNLINE! : null);
   }, [autopilot, status]);
 
   useEffect(() => {
-    fogRef.current = fogOn ? (fogRef.current ?? { visible: new Set(), explored: new Set() }) : null;
-    if (fogRef.current && matchRef.current) updateFog(matchRef.current.world, 1, fogRef.current);
-    marksRef.current.fog = fogRef.current;
-  }, [fogOn]);
+    fogRef.current = fogOn;
+    render();
+    bump();
+  }, [fogOn, render, bump]);
 
   // ------------------------------------------------------------------ drawing (every animation frame)
   useEffect(() => {
@@ -357,7 +372,9 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const v = viewport(m.world.camera(1), m.world.width, m.world.height, w, h, zoomRef.current);
+      const view = viewRef.current;
+      if (!view) return;
+      const v = viewport(view.origin, view.cells[0], view.cells[1], w, h);
       vpRef.current = v;
       const marks = marksRef.current;
       marks.orders = m.orders.queues;
@@ -366,16 +383,11 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
       drawBoard(ctx, imagesRef.current.board, m.world, v, marks, now);
       const mini = miniRef.current;
       const mctx = mini?.getContext("2d");
-      if (mini && mctx) {
-        const units = [...marks.selected].map((id) => m.world.byId.get(id)).filter((o): o is Obj => !!o);
-        drawMinimap(mctx, imagesRef.current.mini, m.world, v, units, fogRef.current);
-      }
+      if (mini && mctx) drawMinimap(mctx, imagesRef.current.mini);
     };
     raf = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(raf);
   }, []);
-  const zoomRef = useRef(zoom);
-  zoomRef.current = zoom;
   useEffect(() => {
     marksRef.current.selected = new Set(selected);
   }, [selected]);
@@ -516,7 +528,8 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
     if (!m) return;
     const o = m.world.get(cell);
     if (!o || o.player !== 1) {
-      setInspect(o && (o.player !== 2 || seen(m.world, fogRef.current, o.pos)) ? o.id : null);
+      // what the engine's fog hides cannot be inspected
+      setInspect(o && (o.player !== 2 || isVisible(m.world, viewRef.current?.fog ?? null, o.pos)) ? o.id : null);
       if (!add) setSelected([]);
       return;
     }
@@ -587,11 +600,6 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
     }
     issueSmart(cell, e.shiftKey);
   };
-  const onWheel = (e: React.WheelEvent) => {
-    const i = ZOOMS.indexOf(zoom);
-    const next = ZOOMS[Math.max(0, Math.min(ZOOMS.length - 1, i + (e.deltaY < 0 ? 1 : -1)))]!;
-    if (next !== zoom) setZoom(next);
-  };
   const onMinimap = (e: React.MouseEvent) => {
     if (!m) return;
     const c = miniRef.current!;
@@ -604,6 +612,7 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
     }
     if (e.type === "mousedown" ? e.button !== 0 : !(e.buttons & 1)) return;
     m.panCameraTo(cell);
+    render();
     bump();
   };
 
@@ -616,6 +625,7 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
       if (cam !== null) {
         e.preventDefault();
         mm.panCamera([cam as Dir]);
+        render();
         bump();
         return;
       }
@@ -637,6 +647,7 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
         e.preventDefault();
         const focus = primary ?? mm.world.of("base", 1)[0];
         if (focus) mm.panCameraTo(focus.pos);
+        render();
         bump();
         return;
       }
@@ -671,7 +682,7 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [available, chord, direct, pressAction, primary, research, targeting, bump]);
+  }, [available, chord, direct, pressAction, primary, research, targeting, bump, render]);
 
   // ------------------------------------------------------------------ view
   if (status === "error") {
@@ -722,9 +733,11 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
               ))}
             </select>
           </label>
-          <Action onClick={() => setFogOn((f) => !f)} active={fogOn}>
-            Fog
-          </Action>
+          {setup.spectate && (
+            <Action onClick={() => setFogOn((f) => !f)} active={fogOn} title="Spectators only: show the whole map">
+              Fog
+            </Action>
+          )}
           <Action onClick={() => setAutopilot((a) => !a)} active={autopilot} title="Let the AI command your side">
             Autopilot
           </Action>
@@ -734,7 +747,7 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/* board */}
-        <div ref={wrapRef} className="relative min-h-[420px] flex-1 overflow-hidden bg-black" onWheel={onWheel}>
+        <div ref={wrapRef} className="relative min-h-[420px] flex-1 overflow-hidden bg-black">
           <canvas
             ref={boardRef}
             data-testid="board"
@@ -811,11 +824,13 @@ const GameScreen = ({ setup, onExit, onRestart }: { setup: Setup; onExit: () => 
             </ul>
           </div>
 
-          <details className="rounded-lg border border-white/10 bg-white/[0.03] p-2">
-            <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-widest text-stone-500">Enemy AI ({setup.enemy}) · debug</summary>
-            <pre className="mt-1 whitespace-pre-wrap font-mono text-[10px] leading-relaxed text-rose-200/80">{enemyCaption.join("\n")}</pre>
-            {autopilot && m?.autopilot && <pre className="mt-1 whitespace-pre-wrap font-mono text-[10px] text-emerald-200/80">autopilot: {m.autopilot.phase}</pre>}
-          </details>
+          {setup.spectate && (
+            <details className="rounded-lg border border-white/10 bg-white/[0.03] p-2">
+              <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-widest text-stone-500">Enemy AI ({setup.enemy}) · debug</summary>
+              <pre className="mt-1 whitespace-pre-wrap font-mono text-[10px] leading-relaxed text-rose-200/80">{enemyCaption.join("\n")}</pre>
+              {autopilot && m?.autopilot && <pre className="mt-1 whitespace-pre-wrap font-mono text-[10px] text-emerald-200/80">autopilot: {m.autopilot.phase}</pre>}
+            </details>
+          )}
         </aside>
       </div>
     </div>
@@ -1009,14 +1024,14 @@ const TechPanel = ({ world, onResearch, hasLab }: { world: WorldView | null; onR
 
 // ------------------------------------------------------------------------------------------ events
 
-type Snap = { ids: Map<number, string>; enemy: Map<number, string>; tech: Record<string, number>; baseHp: number; alarm: number };
+type Snap = { ids: Map<number, string>; enemy: Map<number, [string, Cell]>; tech: Record<string, number>; baseHp: number; alarm: number };
 
 function snapshot(world: WorldView, prev: Snap | null): Snap {
   const ids = new Map<number, string>();
-  const enemy = new Map<number, string>();
+  const enemy = new Map<number, [string, Cell]>();
   for (const o of world.objects) {
     if (o.player === 1) ids.set(o.id, o.name);
-    else if (o.player === 2) enemy.set(o.id, o.name);
+    else if (o.player === 2) enemy.set(o.id, [o.name, o.pos]);
   }
   const tech: Record<string, number> = {};
   for (const t of Object.values(TECHS)) tech[t.variable] = world.tech(t.variable, 1);
@@ -1035,8 +1050,9 @@ function events(world: WorldView, prev: Snap | null, next: Snap): LogLine[] {
   for (const [id, name] of prev.ids) {
     if (!next.ids.has(id)) out.push({ tick, text: `${DISPLAY[name] ?? name} lost`, tone: "bad" });
   }
-  for (const [id, name] of prev.enemy) {
-    if (next.enemy.has(id)) continue;
+  for (const [id, [name, pos]] of prev.enemy) {
+    // an enemy that left our sight is not destroyed: only report it when its cell is still visible
+    if (next.enemy.has(id) || !world.visible(pos)) continue;
     out.push({ tick, text: `enemy ${DISPLAY[name] ?? name} destroyed`, tone: "info" });
   }
   for (const t of Object.values(TECHS)) {

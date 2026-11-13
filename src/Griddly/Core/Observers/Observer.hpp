@@ -68,6 +68,11 @@ class Observer {
   // Shuffle player Ids of objects so that current player is player 0
   uint32_t getEgocentricPlayerId(uint32_t objectPlayerId) const;
 
+  // Fog of war (Environment.Player.FogOfWar): may this observer's player see `object` right now?
+  // Always true for global observers (player 0) and without fog. Other players' objects are hidden
+  // unless their cell is visible now; terrain and neutral objects show once explored.
+  bool playerCanSee(const std::shared_ptr<ObjectRules>& object) const;
+
   virtual ~Observer() = default;
 
  protected:

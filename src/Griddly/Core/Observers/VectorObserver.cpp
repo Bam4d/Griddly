@@ -80,6 +80,8 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
   bool processTopLayer = true;
   for (auto& objectIt : grid_->getObjectsAt(objectLocation)) {
     auto object = objectIt.second;
+    // fog of war: hidden objects are not in the player's observation at all
+    if (!playerCanSee(object)) continue;
     auto objectName = object->getObjectName();
     spdlog::debug("Rendering object {0}", objectName);
     auto memPtrObject = memPtr + grid_->getObjectIds().at(objectName);
@@ -223,6 +225,13 @@ uint8_t& VectorObserver::update() {
           outy++;
         }
         outx++;
+      }
+    }
+  } else if (grid_->getVisibility().enabled() && config_.playerId != 0) {
+    // fog of war changes which objects a cell shows without the cell itself changing: redraw all
+    for (uint32_t outy = 0; outy < gridHeight_; outy++) {
+      for (uint32_t outx = 0; outx < gridWidth_; outx++) {
+        renderLocation({static_cast<int32_t>(outx) + config_.gridXOffset, static_cast<int32_t>(outy) + config_.gridYOffset}, {outx, outy}, true);
       }
     }
   } else {
