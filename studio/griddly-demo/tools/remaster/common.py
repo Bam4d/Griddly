@@ -33,6 +33,7 @@ from __future__ import annotations
 import collections
 import json
 import random
+import re
 import struct
 import sys
 import zlib
@@ -157,6 +158,10 @@ def header(name: str, description: str, avatar: str, win: list[str], lose: list[
     win / lose are condition lines like "eq: [gem:count, 0]". `variables` is raw YAML for
     Environment.Variables (indented 4, e.g. "    - Name: box_count\\n      InitialValue: 0\\n").
     """
+    # The python package registers every GDY as a gymnasium env `GDY-<Name with spaces as ->-v0`;
+    # gymnasium only accepts [A-Za-z0-9_.:-] there, so keep Environment.Name plain (the demo shows the
+    # catalog meta name, which may use any characters).
+    assert re.fullmatch(r"[\w.:\- ]+", name), f"Environment.Name {name!r} is not a valid gymnasium env id part"
     bg = BACKGROUNDS.get(background, background)
     desc = "\n".join("    " + line for line in description.strip().splitlines())
     vars_block = f"  Variables:\n{variables}" if variables else ""

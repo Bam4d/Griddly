@@ -406,7 +406,7 @@ def objects(spr):
 
 
 def header():
-    return C.header("Timber & Tide", """
+    return C.header("Timber and Tide", """
         A lumberjack must rescue the lost hens. Chop trees for logs (carry 3; old oaks take two chops),
         build log bridges over rivers (deep water takes 2 logs) or drop log piles on the ground, and
         carry water in a bucket. Fire spreads to trees, brambles, log piles and bridges every few

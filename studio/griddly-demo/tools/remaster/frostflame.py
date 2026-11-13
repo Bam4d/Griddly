@@ -408,7 +408,7 @@ def objects():
 
 
 def header():
-    return C.header("Frost & Flame", """
+    return C.header("Frost and Flame", """
         An elemental push puzzle on a frozen mountain. Ice is slippery: you and ice blocks slide until
         something stops you. Push an ice block into open water to freeze it into an ice bridge. Push a
         fire brazier onto ice to melt that tile into water (the fire goes out), into a beacon socket to

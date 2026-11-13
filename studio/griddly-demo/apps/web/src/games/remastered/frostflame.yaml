@@ -1,6 +1,6 @@
 Version: "0.1"
 Environment:
-  Name: Frost & Flame
+  Name: Frost and Flame
   Description: |
     An elemental push puzzle on a frozen mountain. Ice is slippery: you and ice blocks slide until
     something stops you. Push an ice block into open water to freeze it into an ice bridge. Push a
