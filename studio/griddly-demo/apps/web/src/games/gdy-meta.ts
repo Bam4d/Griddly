@@ -20,14 +20,26 @@ export type GameMeta = {
   original: string;
   accent: string;
   icon: string;
-  controls: { move: string; extra: ExtraControl[] };
+  /**
+   * scheme "absolute": ↑/↓/←/→ move in that direction (move ids 1 left, 2 up, 3 right, 4 down).
+   * scheme "relative": the avatar turns; ↑ forward (2), ↓ back (4), ← turn left (1), → turn right (3).
+   */
+  controls: { move: string; scheme: "absolute" | "relative"; extra: ExtraControl[] };
   hud: HudItem[];
   win_text: string;
   lose_text: string;
 };
 
 export type LevelInfo = { name: string; blurb: string; width: number; height: number };
-export type Camera = { name: string; label: string; follows: boolean };
+export type Camera = {
+  name: string;
+  label: string;
+  /** Tracks the avatar: rendered via the player's observer (observePlayerImage). */
+  follows: boolean;
+  /** Rotates with the avatar (egocentric view). */
+  rotates: boolean;
+  kind: "sprite" | "isometric";
+};
 
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 
@@ -51,6 +63,7 @@ export function normaliseMeta(raw: Record<string, unknown>, fallbackId: string, 
     icon: str(raw.icon, "🎮"),
     controls: {
       move: str(controls.move, "move"),
+      scheme: (controls as { scheme?: unknown }).scheme === "relative" ? "relative" : "absolute",
       extra: extra.filter((e) => e && typeof e.action === "string" && typeof e.key === "string"),
     },
     hud: Array.isArray(raw.hud) ? (raw.hud as HudItem[]).filter((h) => h && typeof h.kind === "string") : [],
@@ -96,7 +109,10 @@ export function parseLevels(gdy: string): LevelInfo[] {
 type GdyDoc = {
   Environment?: {
     Name?: string;
-    Observers?: Record<string, { Type?: string; TrackAvatar?: boolean; Width?: number; Height?: number } | null>;
+    Observers?: Record<
+      string,
+      { Type?: string; TrackAvatar?: boolean; RotateWithAvatar?: boolean; Width?: number; Height?: number } | null
+    >;
     Player?: { AvatarObject?: string };
   };
 };
@@ -104,14 +120,29 @@ type GdyDoc = {
 /** The GDY facts the player page needs: cameras (render observers) and the avatar object name. */
 export function parseGdy(gdy: string): { name: string; avatar: string; cameras: Camera[] } {
   const env = (parse(gdy) as GdyDoc)?.Environment ?? {};
-  const cameras = Object.entries(env.Observers ?? {})
-    .filter(([name, o]) => name === "Sprite2D" || o?.Type === "SPRITE_2D")
-    .map(([name, o]) => ({
-      name,
-      follows: !!o?.TrackAvatar,
-      label: o?.TrackAvatar ? `Follow ${o.Width ?? "?"}×${o.Height ?? "?"}` : "Whole map",
-    }));
-  if (!cameras.some((c) => c.name === "Sprite2D")) cameras.unshift({ name: "Sprite2D", follows: false, label: "Whole map" });
+  // Render observers: the built-in Sprite2D / Isometric (whole map) and any named SPRITE_2D /
+  // ISOMETRIC observer (typically avatar-tracking, optionally rotating with the avatar).
+  const kindOf = (name: string, type?: string): Camera["kind"] | null => {
+    const t = (type ?? name).toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (t === "SPRITE2D") return "sprite";
+    if (t === "ISOMETRIC") return "isometric";
+    return null;
+  };
+  const cameras: Camera[] = [];
+  for (const [name, o] of Object.entries(env.Observers ?? {})) {
+    const builtin = name === "Sprite2D" || name === "Isometric";
+    const kind = kindOf(name, builtin ? undefined : o?.Type);
+    if (!kind || (!builtin && !o?.Type)) continue;
+    const follows = !!o?.TrackAvatar;
+    const rotates = follows && !!o?.RotateWithAvatar;
+    const iso = kind === "isometric" ? "Isometric · " : "";
+    const label = follows
+      ? `${iso}${rotates ? "First person" : "Follow"} ${o?.Width ?? "?"}×${o?.Height ?? "?"}`
+      : `${iso}Whole map`;
+    cameras.push({ name, label, follows, rotates, kind });
+  }
+  if (!cameras.some((c) => c.name === "Sprite2D" || c.name === "Isometric"))
+    cameras.unshift({ name: "Sprite2D", follows: false, rotates: false, kind: "sprite", label: "Whole map" });
   return { name: str(env.Name), avatar: str(env.Player?.AvatarObject), cameras };
 }
 

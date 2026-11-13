@@ -1,0 +1,40 @@
+{
+  "id": "frostflame",
+  "name": "Frost & Flame",
+  "tagline": "Slide on ice, freeze water, melt snow - light every beacon.",
+  "description": "An elemental push puzzle. Ice makes everything slide, ice blocks freeze water into bridges, and fire braziers thaw ice and melt snowmen around them. Combine them to light the mountain's beacons and reach the shrine.",
+  "tags": [
+    "puzzle",
+    "original"
+  ],
+  "difficulty": "hard",
+  "original": "",
+  "accent": "#38bdf8",
+  "icon": "\ud83d\udd25",
+  "controls": {
+    "move": "move",
+    "extra": []
+  },
+  "hud": [
+    {
+      "label": "Beacons unlit",
+      "kind": "remaining",
+      "object": "socket",
+      "tone": "orange"
+    },
+    {
+      "label": "Braziers",
+      "kind": "remaining",
+      "object": "brazier",
+      "tone": "amber"
+    },
+    {
+      "label": "Ice blocks",
+      "kind": "remaining",
+      "object": "cube",
+      "tone": "sky"
+    }
+  ],
+  "win_text": "The mountain is ablaze with light!",
+  "lose_text": "Not enough fire left for the beacons. Reset and try again."
+}

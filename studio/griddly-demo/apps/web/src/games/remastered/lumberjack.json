@@ -1,0 +1,63 @@
+{
+  "id": "lumberjack",
+  "name": "Timber & Tide",
+  "tagline": "Fell trees, bridge rivers, tame wildfire, rescue the hens.",
+  "description": "A lumberjack's puzzle-adventure: chop trees for logs, build bridges over rivers (deep water costs two logs), lay log fuses to let fire burn through bramble walls and carry water to douse the flames before they eat your bridges.",
+  "tags": [
+    "puzzle",
+    "crafting",
+    "fire",
+    "original"
+  ],
+  "difficulty": "medium",
+  "original": "new game",
+  "accent": "#f59e0b",
+  "icon": "\ud83e\ude93",
+  "controls": {
+    "move": "move",
+    "extra": [
+      {
+        "key": " ",
+        "label": "Chop",
+        "action": "chop",
+        "directional": true
+      },
+      {
+        "key": "b",
+        "label": "Build",
+        "action": "build",
+        "directional": true
+      },
+      {
+        "key": "e",
+        "label": "Bucket",
+        "action": "bucket",
+        "directional": true
+      }
+    ]
+  },
+  "hud": [
+    {
+      "label": "Hens",
+      "kind": "count",
+      "object": "hen",
+      "tone": "amber"
+    },
+    {
+      "label": "Logs",
+      "kind": "var",
+      "object": "avatar",
+      "variable": "logs",
+      "tone": "orange"
+    },
+    {
+      "label": "Bucket",
+      "kind": "var",
+      "object": "avatar",
+      "variable": "bucket",
+      "tone": "sky"
+    }
+  ],
+  "win_text": "Every hen is safe. Timber!",
+  "lose_text": "Caught in the flames."
+}

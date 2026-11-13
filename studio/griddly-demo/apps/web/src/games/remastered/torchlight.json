@@ -1,0 +1,55 @@
+{
+  "id": "torchlight",
+  "name": "Torchlight",
+  "tagline": "Your torch is burning down. Don't look away from the spiders.",
+  "description": "Explore pitch-dark caverns from a first-person, rotating view. Relight wall sconces and braziers to keep your torch alive while you collect every crystal. Bats flee your flame, and cave spiders only creep closer while you aren't looking at them.",
+  "tags": [
+    "exploration",
+    "egocentric",
+    "survival",
+    "partial-observability"
+  ],
+  "difficulty": "hard",
+  "original": "",
+  "accent": "#f59e0b",
+  "icon": "\ud83d\udd25",
+  "controls": {
+    "move": "move",
+    "scheme": "relative",
+    "extra": [
+      {
+        "key": " ",
+        "label": "Wait",
+        "action": "wait"
+      }
+    ]
+  },
+  "hud": [
+    {
+      "label": "Fuel",
+      "kind": "global",
+      "variable": "fuel",
+      "tone": "orange"
+    },
+    {
+      "label": "Crystals",
+      "kind": "collected",
+      "object": "crystal",
+      "tone": "sky"
+    },
+    {
+      "label": "Torches lit",
+      "kind": "count",
+      "object": "sconce_lit",
+      "tone": "amber"
+    },
+    {
+      "label": "Spiders",
+      "kind": "count",
+      "object": "spider",
+      "tone": "rose"
+    }
+  ],
+  "win_text": "Every crystal gathered. You climb back into the daylight!",
+  "lose_text": "Darkness takes you."
+}

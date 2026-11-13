@@ -1,0 +1,64 @@
+{
+  "id": "minecrawler",
+  "name": "Deep Delve",
+  "tagline": "Dig, mine and dodge cave-ins in an isometric mine.",
+  "description": "Tunnel through dirt and rock with your pickaxe, mine ore veins and fill the ore carts before taking the lift out. Undermined boulders roll downhill and lava oozes into fresh tunnels - prop them up with timber beams.",
+  "tags": [
+    "action",
+    "puzzle",
+    "mining",
+    "isometric"
+  ],
+  "difficulty": "hard",
+  "original": "",
+  "accent": "#f97316",
+  "icon": "\u26cf\ufe0f",
+  "controls": {
+    "move": "move",
+    "extra": [
+      {
+        "key": " ",
+        "label": "Dig",
+        "action": "dig",
+        "directional": true
+      },
+      {
+        "key": "b",
+        "label": "Build beam",
+        "action": "build",
+        "directional": true
+      }
+    ]
+  },
+  "hud": [
+    {
+      "label": "Carts to fill",
+      "kind": "global",
+      "variable": "carts_needed",
+      "tone": "violet"
+    },
+    {
+      "label": "Ore",
+      "kind": "var",
+      "object": "miner",
+      "variable": "ore",
+      "tone": "fuchsia"
+    },
+    {
+      "label": "Stamina",
+      "kind": "var",
+      "object": "miner",
+      "variable": "stamina",
+      "tone": "emerald"
+    },
+    {
+      "label": "Timber",
+      "kind": "var",
+      "object": "miner",
+      "variable": "timber",
+      "tone": "amber"
+    }
+  ],
+  "win_text": "The lift creaks up into the daylight, carts full of ore!",
+  "lose_text": "Buried in the deep."
+}

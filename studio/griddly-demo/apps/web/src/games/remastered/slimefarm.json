@@ -1,0 +1,56 @@
+{
+  "id": "slimefarm",
+  "name": "Slime Ranch",
+  "tagline": "Merge, feed and breed slimes on an isometric ranch.",
+  "description": "Herd wobbly slimes around their pens: push two of the same colour and size together to merge them, harvest crops to feed them, collect the gems the jellies produce to fill orders, and breed royal King slimes for the thrones.",
+  "tags": [
+    "puzzle",
+    "farming",
+    "isometric"
+  ],
+  "difficulty": "medium",
+  "original": "",
+  "accent": "#a3e635",
+  "icon": "\ud83d\udfe2",
+  "controls": {
+    "move": "move",
+    "extra": [
+      {
+        "key": " ",
+        "label": "Feed",
+        "action": "feed",
+        "directional": true
+      }
+    ]
+  },
+  "hud": [
+    {
+      "label": "Gem orders",
+      "kind": "global",
+      "variable": "gems_needed",
+      "tone": "fuchsia"
+    },
+    {
+      "label": "Kings wanted",
+      "kind": "global",
+      "variable": "kings_needed",
+      "tone": "amber"
+    },
+    {
+      "label": "Food",
+      "kind": "var",
+      "object": "rancher",
+      "variable": "food",
+      "tone": "lime"
+    },
+    {
+      "label": "Gems",
+      "kind": "var",
+      "object": "rancher",
+      "variable": "gems",
+      "tone": "violet"
+    }
+  ],
+  "win_text": "Every order filled. The slimes wobble with pride!",
+  "lose_text": "The ranch went quiet."
+}

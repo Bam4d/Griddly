@@ -1,0 +1,50 @@
+{
+  "id": "nightgarden",
+  "name": "Night Garden",
+  "tagline": "Steal the lanterns. Stay out of the guards' sight.",
+  "description": "A stealth game seen over your shoulder in a first-person, rotating view. Guards walk fixed rounds through the hedge garden and see three tiles straight ahead. Hide in tall grass, time your moves, collect every lantern and slip out through the gate.",
+  "tags": [
+    "stealth",
+    "egocentric",
+    "partial-observability",
+    "timing"
+  ],
+  "difficulty": "medium",
+  "original": "",
+  "accent": "#818cf8",
+  "icon": "\ud83c\udfee",
+  "controls": {
+    "move": "move",
+    "scheme": "relative",
+    "extra": [
+      {
+        "key": " ",
+        "label": "Wait",
+        "action": "wait"
+      }
+    ]
+  },
+  "hud": [
+    {
+      "label": "Lanterns left",
+      "kind": "global",
+      "variable": "need",
+      "tone": "amber"
+    },
+    {
+      "label": "Hidden",
+      "kind": "var",
+      "object": "avatar",
+      "variable": "hidden",
+      "tone": "emerald"
+    },
+    {
+      "label": "Guards",
+      "kind": "count",
+      "object": "guard",
+      "tone": "rose"
+    }
+  ],
+  "win_text": "You slip out through the gate with every lantern. Nobody saw a thing.",
+  "lose_text": "Caught by the night watch!"
+}

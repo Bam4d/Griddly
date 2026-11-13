@@ -279,12 +279,14 @@ const Player = ({ game }: { game: Game }) => {
   const extra = useCallback(
     (i: number) => {
       const e = game.controls.extra[i];
-      if (e) act(e.action, e.directional ? lastDirRef.current : 1);
+      // relative games: the action points where the avatar faces (the "forward" input id 2)
+      if (e) act(e.action, e.directional ? (game.controls.scheme === "relative" ? UP : lastDirRef.current) : 1);
     },
     [act, game]
   );
 
   const solution = game.solutions[level];
+  const relative = game.controls.scheme === "relative";
 
   /** Restart the level with the solution's seed and replay its actions with a timer. */
   const watchSolution = useCallback(() => {
@@ -593,20 +595,24 @@ const Player = ({ game }: { game: Game }) => {
 
             {/* controls first on small screens so the d-pad sits right under the board */}
             <div className="order-first flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4 lg:order-none">
-              <Pad label="Up" onClick={() => move(UP)}>
+              {/* Relative games: the same ids mean turn left (1), forward (2), turn right (3), back (4). */}
+              <Pad label={relative ? "Forward" : "Up"} onClick={() => move(UP)}>
                 ▲
               </Pad>
               <div className="flex gap-2">
-                <Pad label="Left" onClick={() => move(LEFT)}>
-                  ◀
+                <Pad label={relative ? "Turn left" : "Left"} onClick={() => move(LEFT)}>
+                  {relative ? "⟲" : "◀"}
                 </Pad>
-                <Pad label="Down" onClick={() => move(DOWN)}>
+                <Pad label={relative ? "Back" : "Down"} onClick={() => move(DOWN)}>
                   ▼
                 </Pad>
-                <Pad label="Right" onClick={() => move(RIGHT)}>
-                  ▶
+                <Pad label={relative ? "Turn right" : "Right"} onClick={() => move(RIGHT)}>
+                  {relative ? "⟳" : "▶"}
                 </Pad>
               </div>
+              {relative && (
+                <p className="text-center font-mono text-[10px] text-[var(--accent)]">↑ forward · ↓ back · ←/→ turn</p>
+              )}
               {game.controls.extra.length > 0 && (
                 <div className="mt-1 flex w-full flex-wrap justify-center gap-2">
                   {game.controls.extra.map((x, i) => (

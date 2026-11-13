@@ -513,6 +513,10 @@ def load_png(path: Path) -> tuple[int, int, list[list[tuple[int, int, int, int]]
 
 
 def save_png(path: Path, w: int, h: int, px: list[list[tuple[int, int, int, int]]]):
+    # Every pixel must be RGBA: an RGB triple here silently produced truncated (undecodable) PNGs.
+    assert len(px) == h and all(len(row) == w for row in px), f"{path}: pixel grid is not {w}x{h}"
+    bad = next(((x, y, p) for y, row in enumerate(px) for x, p in enumerate(row) if len(p) != 4), None)
+    assert bad is None, f"{path}: pixel {bad[:2]} is {bad[2]!r}, expected (r, g, b, a)"
     raw = b"".join(b"\x00" + bytes(v for p in row for v in p) for row in px)
     chunk = lambda t, data: struct.pack(">I", len(data)) + t + data + struct.pack(">I", zlib.crc32(t + data) & 0xFFFFFFFF)
     png = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0))

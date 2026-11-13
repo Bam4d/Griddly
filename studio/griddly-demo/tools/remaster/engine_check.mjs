@@ -5,6 +5,9 @@
 // studio/griddly-demo/packages/ts/griddly-wasm, i.e. `bun run sync-wasm` once), then for every level:
 //   * loads/resets it and reports size + object count
 //   * checks the avatar starts facing down (render tile 2) and that moving changes its facing tile
+//     (games whose `move` action is Relative - egocentric avatars like torchlight / nightgarden - are
+//     detected automatically and checked instead for: a set initial orientation (A[U] etc.), 1/3
+//     turning left/right, 2 stepping forward along the facing)
 //   * runs `episodes` episodes of a random-ish agent (biased to keep moving) for up to maxSteps,
 //     reporting wins / losses / timeouts using the GDY's own termination (step() result)
 // Exits non-zero if a level fails to load, the avatar is missing, or facing doesn't work.
@@ -35,6 +38,11 @@ const moveIdx = actions.indexOf("move");
 // step() with a 2-element action [actionTypeIdx, actionId] when there is more than one action
 const act = (name, id) => (actions.length > 1 ? [actions.indexOf(name), id] : [id]);
 
+const relative = !!g.getActionInputMappings()?.move?.relative;
+if (relative) console.log("  (relative move action: checking orientation instead of facing tiles)");
+const DIRV = { UP: [0, -1], RIGHT: [1, 0], DOWN: [0, 1], LEFT: [-1, 0] };
+const ORDER = ["UP", "RIGHT", "DOWN", "LEFT"];
+
 let failed = false;
 for (let l = 0; l < n; l++) {
   g.loadLevel(l);
@@ -46,16 +54,41 @@ for (let l = 0; l < n; l++) {
     failed = true;
     continue;
   }
-  const startTile = a0.renderTileId;
-  // try each direction until one changes the facing tile
+  let startTile = a0.renderTileId;
   let facingOk = false;
+  if (relative) {
+    // initial orientation set; 1 turns left, 3 turns right; 2 moves forward (when not blocked)
+    const o0 = a0.orientation;
+    startTile = o0;
+    const turned = (id) => { g.reset(); g.step(act("move", id)); return avatar()?.orientation; };
+    const i0 = ORDER.indexOf(o0);
+    const leftOk = i0 >= 0 && turned(1) === ORDER[(i0 + 3) % 4];
+    const rightOk = i0 >= 0 && turned(3) === ORDER[(i0 + 1) % 4];
+    let fwdOk = false;
+    for (const pre of [[], [3], [3, 3], [1]]) {
+      g.reset();
+      for (const p of pre) g.step(act("move", p));
+      const b = avatar();
+      g.step(act("move", 2));
+      const c = avatar();
+      const v = DIRV[b.orientation];
+      if (c && c.location[0] === b.location[0] + v[0] && c.location[1] === b.location[1] + v[1]) { fwdOk = true; break; }
+    }
+    facingOk = leftOk && rightOk && fwdOk;
+    if (!facingOk) console.log(`  L${l}: relative controls broken: left=${leftOk} right=${rightOk} forward=${fwdOk}`);
+    if (i0 < 0) failed = true;
+  }
+  else {
+  // try each direction until one changes the facing tile
   for (const dir of [1, 2, 3, 4]) {
     g.reset();
     g.step(act("move", dir));
     const a = avatar();
     if (a && a.renderTileId === { 1: 3, 2: 0, 3: 1, 4: 2 }[dir]) facingOk = true;
   }
-  if (startTile !== 2 || !facingOk) failed = true;
+  if (startTile !== 2) failed = true;
+  }
+  if (!facingOk) failed = true;
 
   let wins = 0, losses = 0, timeouts = 0, totalSteps = 0;
   for (let ep = 0; ep < episodes; ep++) {
@@ -79,7 +112,7 @@ for (let l = 0; l < n; l++) {
     if (!done) timeouts++;
   }
   console.log(
-    `  L${l}: ${g.width}x${g.height} objects=${g.getState().objects.length} startTile=${startTile} facing=${facingOk ? "ok" : "BROKEN"} | random agent: win ${wins} lose ${losses} timeout ${timeouts}`
+    `  L${l}: ${g.width}x${g.height} objects=${g.getState().objects.length} ${relative ? "orientation" : "startTile"}=${startTile} facing=${facingOk ? "ok" : "BROKEN"} | random agent: win ${wins} lose ${losses} timeout ${timeouts}`
   );
 }
 process.exit(failed ? 1 : 0);

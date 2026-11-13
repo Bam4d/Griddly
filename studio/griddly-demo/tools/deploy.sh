@@ -4,7 +4,9 @@
 # afterwards so the ~15 MB copy never gets committed. js/griddly-wasm stays the source of truth.
 set -euo pipefail
 cd "${0%/*}/.."
+# keep a pre-existing local sync (dev tools/tests use it); only remove what this script created
+had_sync=$([ -d packages/ts/griddly-wasm ] && echo 1 || echo 0)
 bash tools/sync-griddly-wasm.sh
-trap 'rm -rf packages/ts' EXIT
+[ "$had_sync" = 1 ] || trap 'rm -rf packages/ts' EXIT
 bun install --frozen-lockfile
 mistral deploy --from-disk "$@"

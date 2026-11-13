@@ -26,17 +26,53 @@ describe("gdy-meta", () => {
   test("cameras are Sprite2D plus the named SPRITE_2D observers", () => {
     const { cameras, avatar } = parseGdy(spidersGdy);
     expect(avatar).toBe("gnome");
-    expect(cameras.map((c) => [c.name, c.follows])).toEqual([
-      ["Sprite2D", false],
-      ["GnomeCam", true],
-      ["GnomeCloseUp", true],
+    expect(cameras.map((c) => [c.name, c.follows, c.rotates, c.kind])).toEqual([
+      ["Sprite2D", false, false, "sprite"],
+      ["GnomeCam", true, false, "sprite"],
+      ["GnomeCloseUp", true, false, "sprite"],
+    ]);
+  });
+
+  test("isometric and rotating (egocentric) observers become cameras", () => {
+    const gdy = `Environment:
+  Name: T
+  Observers:
+    Sprite2D:
+      TileSize: 24
+    Isometric:
+      TileSize: [32, 48]
+    IsoFollow:
+      Type: ISOMETRIC
+      TrackAvatar: true
+      Width: 11
+      Height: 11
+    EgoView:
+      Type: SPRITE_2D
+      TrackAvatar: true
+      RotateWithAvatar: true
+      Width: 9
+      Height: 9
+    Block2D:
+      TileSize: 24
+    Vec:
+      Type: VECTOR
+  Player:
+    AvatarObject: hero
+`;
+    const { cameras } = parseGdy(gdy);
+    expect(cameras.map((c) => [c.name, c.kind, c.follows, c.rotates, c.label])).toEqual([
+      ["Sprite2D", "sprite", false, false, "Whole map"],
+      ["Isometric", "isometric", false, false, "Isometric · Whole map"],
+      ["IsoFollow", "isometric", true, false, "Isometric · Follow 11×11"],
+      ["EgoView", "sprite", true, true, "First person 9×9"],
     ]);
   });
 
   test("metadata is normalised when optional fields are missing or bad", () => {
     const m = normaliseMeta({ difficulty: "insane", accent: "red", hud: "x" }, "foo", "Foo Game");
     expect(m).toMatchObject({ id: "foo", name: "Foo Game", difficulty: "medium", accent: "#34d399", hud: [], tags: [] });
-    expect(m.controls).toEqual({ move: "move", extra: [] });
+    expect(m.controls).toEqual({ move: "move", scheme: "absolute", extra: [] });
+    expect(normaliseMeta({ controls: { scheme: "relative" } }, "x").controls.scheme).toBe("relative");
   });
 
   test("search matches names, tags and descriptions, loosely", () => {

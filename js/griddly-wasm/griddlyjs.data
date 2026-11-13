@@ -13141,42 +13141,90 @@ Environment:
     Lose:
       - lt: [brazier:count, socket:count]
   Levels:
-    # Sandbox A | mechanics test
+    # Glacier Rink | Ice is slippery: you slide until something stops you. Reach the shrine.
     - |
       w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
-      w   .   .   b   .   .   .   .   i   i   i   i   p   p   p   .   .   x   .   .   .   w
-      w   .   A   .   .   f   .   .   i   i   i   i   p   b   p   .   .   s   .   .   .   w
-      w   .   .   .   b   .   .   .   i   i   i   i   .   .   .   .   .   z   .   .   .   w
-      w   .   .   i   i   i   i   i   i   i   .   .   p   p   p   p   p   .   .   .   .   w
-      w   .   .   i   i   i   .   i   i   i   b   .   p   .   f   .   p   .   .   g   .   w
-      w   .   .   i   i   i   i   i   i   i   .   .   p   p   p   p   p   .   .   .   .   w
-      w   .   .   .   .   f   .   .   .   .   .   .   .   b   .   .   .   .   .   s   .   w
-      w   .   .   p   p   p   .   .   .   s   .   .   .   i   i   i   i   .   .   .   .   w
-      w   .   .   p   b   p   .   .   f   f   .   .   .   i   i   i   i   .   .   x   .   w
+      w   .   ,   &   i   i   i   i   @   i   i   i   i   i   i   @   i   i   i   i   i   w
+      w   _   _   &   i   i   i   i   i   i   i   i   i   i   @   i   i   i   i   i   i   w
+      w   _   ,   &   i   i   i   i   @   @   i   i   i   i   i   i   i   i   i   i   i   w
+      w   _   ,   &   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   w
+      w   _   ,   &   i   i   i   i   i   i   @   i   i   i   i   i   i   i   i   i   #   w
+      w   A   .   i   i   i   i   .   i   i   i   i   .   i   .   i   i   #   i   g   i   w
+      w   .   ,   &   i   #   i   i   i   i   i   @   i   i   &   i   i   i   i   i   i   w
+      w   .   .   &   i   i   i   @   i   i   i   i   i   i   i   i   i   i   i   i   i   w
+      w   .   ,   &   i   i   i   #   i   i   &   i   i   i   i   i   i   i   i   i   i   w
+      w   .   .   &   i   i   i   i   i   i   &   i   i   i   i   i   i   i   i   i   i   w
+      w   .   ^   &   i   i   #   i   i   i   i   i   i   i   i   i   i   i   @   @   @   w
       w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
-    # Sandbox C | sockets, frost walls
+    # Frozen Ford | Push ice blocks into the river: each one freezes a tile into an ice bridge.
     - |
-      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
-      w   .   .   .   .   .   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
-      w   .   A   .   f   .   .   .   .   .   .   .   .   .   .   x   .   .   .   .   .   w
-      w   .   .   .   .   .   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
-      w   .   z   z   z   .   .   .   f   .   .   .   .   .   .   .   w   w   w   w   w   w
-      w   .   z   g   z   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   w   w
-      w   .   z   z   z   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
-      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
-    # Sandbox B | mechanics test 2
+      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
+      w   w   w   w   &   &   &   &   w   w   &   p   p   p   &   w   w   w   w   w   w   w   w   w
+      w   w   w   &   &   ,   ,   &   &   w   &   p   p   p   &   w   &   &   &   &   &   w   w   w
+      w   w   &   &   ,   .   .   ,   &   &   &   p   p   p   &   &   &   ,   _   ,   &   &   w   w
+      w   &   &   .   _   b   +   :   :   :   _   p   p   p   ,   ,   ,   .   _   _   ,   &   &   w
+      w   &   A   _   _   b   _   :   b   :   _   p   p   p   .   .   .   _   g   _   .   ,   &   w
+      w   &   &   _   _   _   _   .   _   ,   _   p   p   p   ,   .   ,   .   .   .   .   &   &   w
+      w   w   &   &   ,   _   _   ,   &   &   &   p   p   p   &   &   &   .   ,   ,   &   &   w   w
+      w   w   w   &   &   ,   ,   &   &   w   &   p   p   p   &   w   &   &   &   &   &   w   w   w
+      w   w   w   w   &   &   &   &   w   w   &   p   p   p   &   w   w   w   w   w   w   w   w   w
+      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
+    # Snowmen's Pass | Braziers melt snowmen next to them. Light both beacons, then visit the shrine.
     - |
-      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
-      w   A   .   .   .   .   .   i   i   i   i   i   i   i   i   i   i   .   .   .   .   w
-      w   .   .   f   .   .   .   i   .   b   .   .   i   i   .   .   i   .   .   x   .   w
-      w   .   .   .   .   .   .   i   i   i   i   i   i   i   i   i   i   .   .   .   .   w
-      w   .   .   b   .   .   .   .   .   p   p   p   p   .   .   .   i   i   .   .   .   w
-      w   .   .   .   .   .   f   .   .   p   .   .   p   .   .   i   i   i   .   s   .   w
-      w   .   .   i   i   i   .   .   .   p   p   p   p   .   .   .   i   i   .   .   .   w
-      w   .   .   i   b   i   .   .   .   .   .   .   .   b   .   .   .   f   .   .   .   w
-      w   .   .   i   i   i   .   .   z   z   z   .   .   .   .   .   .   x   .   .   .   w
-      w   .   .   .   .   .   .   .   z   g   z   .   .   .   .   .   .   .   .   .   .   w
-      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
+      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
+      w   &   &   &   &   &   &   &   w   w   w   w   w   w   w   w   w   &   &   &   &   &   &   w
+      w   &   ,   ,   _   ,   .   .   w   .   .   .   x   .   .   .   w   .   .   ,   .   ,   &   w
+      w   &   ,   _   f   _   .   .   w   .   :   :   .   .   :   :   w   .   .   x   .   .   &   w
+      w   &   ,   _   _   .   .   .   w   s   .   s   s   s   :   s   w   :   .   .   .   .   &   w
+      w   &   _   _   A   .   .   .   .   :   :   :   :   :   s   :   :   :   .   .   .   ,   &   w
+      w   &   ,   _   _   .   .   .   w   s   :   :   .   :   s   s   w   s   s   s   s   s   w   w
+      w   &   &   ,   _   f   .   .   w   .   +   :   .   .   :   :   w   .   .   .   .   .   &   w
+      w   w   &   ,   ,   .   ,   .   w   p   p   p   .   +   .   .   w   .   .   g   ,   ,   &   w
+      w   w   &   &   &   &   &   &   w   w   w   w   w   w   w   w   w   &   &   &   &   &   &   w
+      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
+    # Thin Ice | A brazier pushed onto ice melts a hole and goes out. Use holes to stop your slide.
+    - |
+      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
+      w   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   w
+      w   &   .   .   _   _   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   &   w
+      w   &   _   _   _   _   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   @   i   &   w
+      w   &   ,   _   _   _   i   i   i   i   i   i   i   #   i   @   i   i   i   i   i   i   i   i   &   w
+      w   &   ,   _   _   _   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   &   w
+      w   &   ^   .   .   _   i   i   i   i   i   i   i   i   i   i   i   i   i   .   .   i   i   i   &   w
+      w   &   ,   A   _   _   i   i   i   i   i   i   i   i   i   i   i   i   i   .   f   i   i   i   &   w
+      w   &   .   .   _   _   i   i   i   i   i   i   i   i   f   .   i   i   i   i   i   i   i   i   &   w
+      w   &   ,   .   _   .   i   i   i   i   i   i   i   i   .   .   i   i   i   i   i   i   @   i   &   w
+      w   &   .   ,   ,   _   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   &   w
+      w   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   g   &   &   &   &   &   &   &   w
+      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
+    # Bridge of Fire | Freeze a way across, carry the fire over and light both beacons.
+    - |
+      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
+      w   &   &   &   &   &   &   &   &   p   p   p   &   &   &   &   &   &   &   &   &   &   &   w
+      w   &   ,   ,   ,   ,   ,   ,   .   p   p   p   ,   ,   .   ,   .   s   ,   ,   ,   x   &   w
+      w   &   _   A   _   _   b   .   .   p   p   p   _   _   f   .   .   s   .   .   .   ,   &   w
+      w   &   .   .   _   _   .   .   .   p   p   p   _   _   .   _   .   s   s   s   s   s   &   w
+      w   &   .   .   b   .   .   .   .   p   p   p   _   _   _   .   .   .   .   :   :   ,   &   w
+      w   &   .   .   .   .   .   ,   .   p   p   p   ,   .   .   .   f   .   .   :   :   :   &   w
+      w   &   ,   _   b   .   +   &   &   p   p   p   &   &   ,   .   .   .   z   z   z   :   &   w
+      w   &   ,   ,   .   ,   .   ,   ,   p   p   p   ,   ,   ,   x   .   .   z   g   z   .   &   w
+      w   &   &   &   &   &   &   &   &   p   p   p   &   &   &   &   &   &   &   &   &   &   w   w
+      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
+    # Summit Shrine | Everything at once: slide, freeze, melt and burn your way to the summit.
+    - |
+      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
+      w   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   w
+      w   &   .   ,   ,   ,   ,   &   i   i   i   i   i   i   i   i   i   i   @   @   i   p   ,   ,   ,   _   _   ,   &   w
+      w   &   ,   _   .   _   _   &   i   i   i   i   i   i   i   i   i   i   i   i   i   p   +   .   .   _   _   _   &   w
+      w   &   _   b   _   _   _   i   i   i   &   i   i   i   i   i   i   i   i   i   i   p   .   .   x   .   _   ,   &   w
+      w   &   ,   _   A   _   ,   &   i   i   i   i   i   @   i   i   i   i   i   i   i   p   .   .   .   .   .   _   &   w
+      w   &   _   _   ^   _   .   &   i   i   i   i   i   i   i   i   i   i   i   i   i   p   s   s   s   s   s   s   &   w
+      w   &   ,   .   .   .   .   i   i   i   i   i   i   i   i   i   i   i   i   i   i   p   .   :   :   :   :   _   &   w
+      w   &   :   :   .   .   .   i   i   i   i   i   @   i   i   i   i   i   i   i   i   p   :   :   :   _   :   _   &   w
+      w   &   :   b   :   .   +   &   i   i   i   i   i   i   i   i   i   i   i   i   i   p   f   .   :   z   z   z   &   w
+      w   &   ,   :   ,   .   ,   &   i   i   i   i   i   i   i   i   i   i   i   #   i   p   ,   ,   ,   z   g   z   &   w
+      w   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   w
+      w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w   w
 
 Actions:
   - Name: face
@@ -13199,7 +13247,7 @@ Actions:
         4: {Description: Down, VectorToDest: [0, 1], MetaData: {facing: 2}}
     Behaviours:
       - Src: {Object: avatar, Commands: [{set_tile: meta.facing}, {mov: _dest}]}
-        Dst: {Object: [_empty, moss, dirt, sand, bones, skull]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, skull]}
       - Src: {Object: avatar, Commands: [{set_tile: meta.facing}, {mov: _dest}, {exec: {Action: slide}}]}
         Dst: {Object: ice}
       - Src: {Object: avatar, Commands: [{set_tile: meta.facing}, {mov: _dest}, {reward: 5}]}
@@ -13219,13 +13267,13 @@ Actions:
       - Src: {Object: avatar, Commands: [{set_tile: meta.facing}, {mov: _dest}]}
         Dst: {Object: brazier, Commands: [{cascade: _dest}]}
       - Src: {Object: cube, Commands: [{mov: _dest}, {set: [slip, 0]}]}
-        Dst: {Object: [_empty, moss, dirt, sand, bones, skull]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, skull]}
       - Src: {Object: cube, Commands: [{mov: _dest}, {set: [slip, 1]}, {exec: {Action: slide}}]}
         Dst: {Object: ice}
       - Src: {Object: cube, Commands: [{remove: true}, {reward: 1}]}
         Dst: {Object: pond, Commands: [{change_to: ice}]}
       - Src: {Object: brazier, Commands: [{mov: _dest}]}
-        Dst: {Object: [_empty, moss, dirt, sand, bones, skull]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, skull]}
       - Src: {Object: brazier, Commands: [{remove: true}]}
         Dst: {Object: ice, Commands: [{change_to: pond}]}
       - Src: {Object: brazier, Commands: [{remove: true}]}
@@ -13238,19 +13286,19 @@ Actions:
       Internal: true
     Behaviours:
       - Src: {Object: avatar, Commands: [{mov: _dest}]}
-        Dst: {Object: [_empty, moss, dirt, sand, bones, skull]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, skull]}
       - Src: {Object: avatar, Commands: [{mov: _dest}, {exec: {Action: slide}}]}
         Dst: {Object: ice}
       - Src: {Object: avatar, Commands: [{mov: _dest}, {reward: 5}]}
         Dst: {Object: shrine, Commands: [{remove: true}]}
       - Src: {Object: cube, Commands: [{mov: _dest}, {set: [slip, 0]}]}
-        Dst: {Object: [_empty, moss, dirt, sand, bones, skull]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, skull]}
       - Src: {Object: cube, Commands: [{mov: _dest}, {set: [slip, 1]}, {exec: {Action: slide}}]}
         Dst: {Object: ice}
       - Src: {Object: cube, Commands: [{remove: true}, {reward: 1}]}
         Dst: {Object: pond, Commands: [{change_to: ice}]}
       - Src: {Object: brazier, Commands: [{mov: _dest}]}
-        Dst: {Object: [_empty, moss, dirt, sand, bones, skull]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, skull]}
       - Src: {Object: brazier, Commands: [{remove: true}]}
         Dst: {Object: ice, Commands: [{change_to: pond}]}
       - Src: {Object: brazier, Commands: [{remove: true}]}
@@ -13267,6 +13315,35 @@ Actions:
         Dst: {Object: [snowman, frostwall, cube], Commands: [{remove: true}]}
 
 Objects:
+  - Name: grass
+    MapCharacter: ","
+    Z: 0
+    Observers:
+      Sprite2D: &grass_sprite
+        - TilingMode: WALL_16
+          Image:
+            - gvgai/oryx/grass_0.png
+            - gvgai/oryx/grass_1.png
+            - gvgai/oryx/grass_2.png
+            - gvgai/oryx/grass_3.png
+            - gvgai/oryx/grass_4.png
+            - gvgai/oryx/grass_5.png
+            - gvgai/oryx/grass_6.png
+            - gvgai/oryx/grass_7.png
+            - gvgai/oryx/grass_8.png
+            - gvgai/oryx/grass_9.png
+            - gvgai/oryx/grass_10.png
+            - gvgai/oryx/grass_11.png
+            - gvgai/oryx/grass_12.png
+            - gvgai/oryx/grass_13.png
+            - gvgai/oryx/grass_14.png
+            - gvgai/oryx/grass_15.png
+      FollowCam: *grass_sprite
+      CloseUp: *grass_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.25, 0.55, 0.25]
+          Scale: 0.9
   - Name: moss
     MapCharacter: ";"
     Z: 0
@@ -14154,6 +14231,1699 @@ Objects:
           Scale: 0.7
 Version: "0.1"
 Environment:
+  Name: Timber & Tide
+  Description: |
+    A lumberjack must rescue the lost hens. Chop trees for logs (carry 3; old oaks take two chops),
+    build log bridges over rivers (deep water takes 2 logs) or drop log piles on the ground, and
+    carry water in a bucket. Fire spreads to trees, brambles, log piles and bridges every few
+    ticks; brambles only burn. Walking into fire is fatal.
+    Generated by studio/griddly-demo/tools/remaster ‚Äî edit the generator, not this file.
+  # Cameras are observers. The demo picks one by name and the engine renders it.
+  #   Sprite2D   whole level (global observer)
+  #   FollowCam  15x11 window that follows the avatar
+  #   CloseUp    9x9 window that follows the avatar (also the agent's default view)
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: gvgai/newset/floor6.png
+      RotateAvatarImage: false
+      TrackAvatar: false
+    FollowCam:
+      Type: SPRITE_2D
+      TileSize: 24
+      BackgroundTile: gvgai/newset/floor6.png
+      RotateAvatarImage: false
+      RotateWithAvatar: false
+      TrackAvatar: true
+      Width: 15
+      Height: 11
+    CloseUp:
+      Type: SPRITE_2D
+      TileSize: 24
+      BackgroundTile: gvgai/newset/floor6.png
+      RotateAvatarImage: false
+      RotateWithAvatar: false
+      TrackAvatar: true
+      Width: 9
+      Height: 9
+    Block2D:
+      TileSize: 24
+  Player:
+    Observer:
+      TrackAvatar: true
+      RotateWithAvatar: false
+      RotateAvatarImage: false
+      Width: 9
+      Height: 9
+    AvatarObject: avatar
+  Termination:
+    Win:
+      - eq: [hen:count, 0]
+    Lose:
+      - eq: [avatar:count, 0]
+  Levels:
+    # Riverside | Chop trees for logs and build a bridge across the river to the hens.
+    - |
+      $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $
+      $   .   ,   &   &   ,   .   :   :   ~   ~   ~   ,   ,   ,   ,   ,   &   &   ,   .   .   .   .   .   $
+      $   .   &   &   &   ;   ;   ;   :   ~   ~   ~   ,   ,   .   ,   ,   .   .   .   .   h   ,   ,   ,   $
+      $   .   .   &   ,   .   ;   ,   ,   .   ~   ~   ,   ,   ,   ,   .   ,   ,   .   .   .   ,   ,   ,   $
+      $   .   .   ,   .   ;   ,   ,   ,   ,   ~   ~   ~   .   ,   ,   ,   %   %   .   ;   ;   ,   ,   ,   $
+      $   .   .   .   A   .   ,   .   ,   ,   ,   ~   ~   .   .   .   .   ,   .   .   .   .   .   .   .   $
+      $   .   ,   &   ,   .   ,   .   .   ,   ,   ~   ~   .   .   .   .   .   &   ,   .   .   #   .   .   $
+      $   .   &   &   ,   ,   *   ,   ,   ,   ~   ~   ~   .   .   .   .   .   .   .   .   #   #   #   .   $
+      $   .   .   ,   ,   :   .   .   .   .   ~   ~   .   .   .   :   .   .   .   .   ,   ,   .   .   .   $
+      $   .   ,   &   &   ,   :   ,   .   .   ~   ~   .   .   :   :   .   *   .   .   .   ,   ,   ,   ,   $
+      $   .   .   ,   :   :   ,   ,   ;   ;   ~   ~   ~   *   :   ,   ,   ,   h   .   ,   ,   ,   ,   ,   $
+      $   .   ,   &   ,   ,   ,   ,   ;   ;   ;   ~   ~   .   .   .   ,   ,   .   .   ,   ,   ,   ,   ,   $
+      $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $
+    # Old Oaks & Rapids | Few trees, two rivers: old oaks take two chops, rapids take two logs.
+    - |
+      $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $
+      $   #   #   .   .   .   .   .   ~   ~   .   .   .   .   .   ;   .   D   .   .   ;   ,   ,   ,   ,   h   .   $
+      $   #   .   .   ,   ,   .   ,   ~   ~   ,   ,   .   *   ;   ;   ;   D   ,   .   ;   ,   ,   ,   ,   ,   .   $
+      $   .   .   ,   &   ,   ,   .   ~   ~   ,   ,   .   O   ;   ,   ,   D   ,   .   .   .   #   #   ,   .   .   $
+      $   .   :   :   ,   .   ,   ~   ~   ~   ,   ,   .   ;   .   ,   .   D   ,   ,   .   ,   ,   #   ,   .   .   $
+      $   :   :/A :   :   :   .   .   ~   ~   ,   ,   ,   .   ;   .   .   D   D   :   :   ,   ,   ,   ,   .   .   $
+      $   :   :   :   :   :   :   :   ~   ~   .   ,   .   ,   .   .   *   .   D   :   :   ,   :   %   %   ,   .   $
+      $   .   :   :   O   :   :   :   ~   ~   .   .   .   &   ,   .   .   .   D   .   :   :   .   ,   .   .   .   $
+      $   .   .   ,   :   :   :   ~   ~   ~   ,   ,   ,   ,   .   .   .   .   D   .   :   .   :   h   .   .   .   $
+      $   .   ,   ,   ,   ,   ,   .   ~   ~   ,   ,   ,   ,   .   .   .   .   D   ;   ;   .   .   .   .   *   .   $
+      $   .   .   &   ,   ,   ,   .   ~   ~   ,   ,   ,   ,   ,   .   .   D   D   ;   ;   .   .   .   .   .   .   $
+      $   #   #   ,   ,   ,   .   .   ~   ~   ,   ,   ,   ,   .   .   .   D   .   .   ;   ;   .   .   #   .   .   $
+      $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $
+    # Bramble Pen | Brambles can't be chopped. Lay a fuse of logs from the campfire and let it burn.
+    - |
+      $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $
+      $   &   &   .   ,   ,   ,   ,   ,   ,   ,   ,   .   .   .   .   .   .   .   #   #   #   #   #   #   #   .   $
+      $   &   .   :   ,   ,   ,   &   ,   ,   ,   ,   :   :   :   .   *   .   .   #   .   .   .   .   .   #   .   $
+      $   ,   ,   :   .   .   .   .   .   ,   ,   ,   :   :   @   @   @   .   .   B   .   .   h   .   .   #   ;   $
+      $   ,   .   ,   .   .   .   ,   .   .   ,   ,   :   :   @   .   .   .   .   B   .   .   .   .   ,   #   ,   $
+      $   ,   ,   ,   ,   A   ,   ,   .   .   .   .   .   ;   @   F   .   .   .   B   .   .   .   h   ,   #   ,   $
+      $   .   .   &   ,   ,   ,   ,   ,   .   .   ;   ;   ;   @   @   @   .   .   B   .   *   .   .   ,   #   ,   $
+      $   .   .   ,   ,   ,   ,   ,   ,   ,   ,   ;   ,   .   .   .   .   .   .   B   .   :   :/h .   ,   #   ,   $
+      $   .   ,   &   &   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,   .   .   #   .   *   :   .   .   #   .   $
+      $   .   .   ,   .   ,   &   .   ,   ,   ,   ,   ,   ,   ,   ,   ,   .   .   #   #   #   #   #   #   #   .   $
+      $   .   .   &   .   .   ,   .   ,   ,   ,   ,   ,   ,   ~   ~   ~   .   .   .   .   .   .   .   .   .   .   $
+      $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $
+    # Bucket Brigade | A campfire guards the pen: fetch water from the well. Wildfire is eating the wood you need.
+    - |
+      $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $
+      $   #   #   #   #   #   ,   .   .   .   .   &   &   &   &   f   &   &   &   .   .   .   .   ~   ~   ;   .   ,   .   $
+      $   #   ,   ,/h :   #   ,   ,   .   .   ,   &   &   &   &   &   &   &   &   ,   .   .   .   ~   ~   ,   ,   ,/h .   $
+      $   #   ,   ,   .   #   ,   .   .   .   .   ,   ,   &   &   &   &   &   &   &   .   .   .   ~   ~   ,   ,   ,   ,   $
+      $   #   ,   ,   .   #   .   .   .   .   *   .   ,   ,   ,   ,   &   &   &   &   &   &   ,   ~   ~   ,   ,   ,   .   $
+      $   #   #   F   #   #   ,   ,   ,   ,   ,   .   .   ,   ,   .   ,   ,   &   &   &   &   &   ~   ~   ,   ,   ,   .   $
+      $   ;   ;   .   .   .   ,   ,   ,   ,   .   .   .   .   .   .   .   .   ,   ,   ,   .   ,   ~   ~   .   ,   ,   .   $
+      $   ;   ;   .   .   .   ,   ,   ,   ,   ,   .   .   .   .   ;   ;   ;   .   .   .   .   .   ~   ~   ,   %   %   *   $
+      $   ;   ;   ;   .   ,   ,   ,   ,   ,   ,   .   .   .   ;   ;   .   .   .   *   .   ,   ,   ~   ~   .   .   .   .   $
+      $   ;   .   ;   ,   ,   W   :   ,   :   .   .   .   .   .   ;   ;   ;   ;   .   .   ,   ,   ~   ~   .   .   .   .   $
+      $   ;   ;   ,/A ,   ,   ,   ,   :   .   .   .   ,   ,   ;   ;   ;   ;   ;   ,   ,   ,   ,   ~   ~   .   .   .   .   $
+      $   .   .   .   .   ,   ,   :   :   .   ,   ,   ,   ,   ,   ;   .   ;   .   ,   ,   #   ,   ~   ~   .   .   .   .   $
+      $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $
+    # Timber & Tide | Everything at once: wildfire races for the only bridge over the rapids, an islet, a hut and a bramble pen.
+    - |
+      $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $
+      $   &   .   .   .   .   .   .   ~   ~   .   ,   ,   ,   f   &   &   &   &   &   &   &   &   ,   .   D   D   .   .   #   h   #   .   $
+      $   .   O   .   .   *   .   .   ~   ~   .   ,   ,   ,   ,   ,   ,   &   &   &   &   &   &   ,   .   D   D   .   ,   #   F   #   .   $
+      $   .   .   .   .   .   .   .   ~   ~   .   ,   ,   ,   ,   .   ,   ,   ,   ,   &   &   &   &   ,   D   D   ;   %   ;   .   .   .   $
+      $   .   .   .   .   .   .   .   ~   ~   .   .   .   ,   ,   ,   ,   ,   .   ,   .   ,   &   &   &   =   =   ;   ,   ;   .   .   .   $
+      $   .   .   .   .   .   .   ~   ~   ~   .   .   *   ,   ,   ,   :   ,   ,   ,   ,   .   ,   &   ,   D   D   ;   .   #   #   ,   ,   $
+      $   .   A   .   ,   .   .   ~   ~   .   .   .   .   .   .   ,   ,   ,   :   ,   .   .   .   ,   .   D   D   .   .   ,   ,   ,   ,   $
+      $   .   .   ,   ,   .   .   ~   ~   .   .   .   .   .   W   ,   ,   ,   ,   ,   ,   .   ,   ,   ,   D   D   .   ,   &   ,   ,   ,   $
+      $   .   .   O   ,   ,   .   ~   ~   .   .   .   .   .   .   .   ,   :   ,   ,   .   .   .   .   .   D   D   .   .   %   %   ,   ,   $
+      $   .   .   ,   ,   ,   .   .   ~   ~   .   .   .   .   .   .   .   ,   .   .   .   .   .   .   .   D   D   .   .   .   .   ,   ,   $
+      $   .   .   :   ,   ,   ,   .   ~   ~   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   D   D   .   .   .   O   .   .   $
+      $   .   ,   ,   ,   ,   ,   ,   ~   ~   .   .   ,   ,   ,   .   .   .   ~   ~   ~   ~   .   .   .   D   D   .   .   .   .   .   .   $
+      $   .   ,   ,   ,   ,   ,   ,   ~   ~   .   .   .   ,   ,   .   .   ~   ~   .   h   ~   ~   .   .   D   D   #   #   #   #   #   .   $
+      $   ,   ,   &   ,   ,   ,   ,   ~   ~   .   ,   ,   ,   ,   .   .   ~   ~   ~   ~   ~   .   .   .   D   D   #   .   h   .   #   .   $
+      $   ,   ,   ,   .   .   .   .   ~   ~   .   ,   ,   ,   ,   ,   .   .   .   .   .   .   .   .   .   D   D   #   .   .   .   B   *   $
+      $   ,   O   ,   ,   .   .   .   ~   ~   ,   .   ,   ,   ,   ,   ,   .   .   .   .   .   .   .   .   D   D   #   #   #   #   #   .   $
+      $   ,   ,   ,   .   .   .   .   ~   ~   ,   .   ,   ,   ,   ,   ,   .   .   .   .   .   .   .   .   D   D   ;   ;   ;   ;   .   F   $
+      $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $
+
+Actions:
+  - Name: face
+    InputMapping:
+      Internal: true
+      Inputs:
+        2: {Description: Face down, VectorToDest: [0, 0], MetaData: {facing: 2}}
+    Behaviours:
+      - Src: {Object: avatar, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: avatar}
+
+  # Fire: every fire tries each neighbour every 3 ticks (one timer per direction).
+  - Name: spread
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {Description: West, VectorToDest: [-1, 0]}
+        2: {Description: North, VectorToDest: [0, -1]}
+        3: {Description: East, VectorToDest: [1, 0]}
+        4: {Description: South, VectorToDest: [0, 1]}
+    Behaviours:
+      - Src: {Object: [fire, bridgefire, campfire]}
+        Dst: {Object: [tree, oak, oakcut, bramble, logpile, bush], Commands: [{change_to: fire}]}
+      - Src: {Object: [fire, bridgefire, campfire]}
+        Dst: {Object: bridge, Commands: [{change_to: bridgefire}]}
+      - Src: {Object: [fire, bridgefire, campfire], Commands: [{exec: {Action: spread, Delay: 3}}]}
+        Dst: {Object: [grass, moss, dirt, sand, bones, mushroom, skull, water, rock, hedge, stone, tombstone, torch, stump, deep, campfire, fire, bridgefire, well, hen, avatar, _empty]}
+
+  # A fire burns out 7 ticks after it was lit; a burning bridge collapses into the river.
+  - Name: burnout
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {Description: Burn out, VectorToDest: [0, 0]}
+    Behaviours:
+      - Src: {Object: fire, Commands: [{remove: true}]}
+        Dst: {Object: fire}
+      - Src: {Object: bridgefire, Commands: [{change_to: water}]}
+        Dst: {Object: bridgefire}
+
+  # The lumberjack walks up / down / left / right (absolute).
+  - Name: move
+    InputMapping:
+      Inputs:
+        1: {Description: Left, VectorToDest: [-1, 0], MetaData: {facing: 3}}
+        2: {Description: Up, VectorToDest: [0, -1], MetaData: {facing: 0}}
+        3: {Description: Right, VectorToDest: [1, 0], MetaData: {facing: 1}}
+        4: {Description: Down, VectorToDest: [0, 1], MetaData: {facing: 2}}
+    Behaviours:
+      - Src: {Object: avatar, Commands: [{set_tile: meta.facing}, {mov: _dest}]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge, stump]}
+      - Src: {Object: avatar, Commands: [{set_tile: meta.facing}, {mov: _dest}, {reward: 5}]}
+        Dst: {Object: hen, Commands: [{remove: true}]}
+      - Src: {Object: avatar, Commands: [{remove: true}, {reward: -5}]}
+        Dst: {Object: [fire, bridgefire, campfire]}
+      - Src: {Object: avatar, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: [water, tree, bush, rock, hedge, stone, tombstone, torch, oak, oakcut, deep, bramble, well, logpile, avatar]}
+
+  # Swing the axe at the cell in the given direction.
+  - Name: chop
+    InputMapping:
+      Inputs:
+        1: {Description: Left, VectorToDest: [-1, 0], MetaData: {facing: 3}}
+        2: {Description: Up, VectorToDest: [0, -1], MetaData: {facing: 0}}
+        3: {Description: Right, VectorToDest: [1, 0], MetaData: {facing: 1}}
+        4: {Description: Down, VectorToDest: [0, 1], MetaData: {facing: 2}}
+    Behaviours:
+      - Src:
+          Object: avatar
+          Preconditions: [{lt: [src.logs, 3]}]
+          Commands: [{set_tile: meta.facing}, {incr: logs}, {reward: 1}]
+        Dst: {Object: [tree, oakcut], Commands: [{change_to: stump}]}
+      - Src: {Object: avatar, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: oak, Commands: [{change_to: oakcut}]}
+      - Src:
+          Object: avatar
+          Preconditions: [{lt: [src.logs, 3]}]
+          Commands: [{set_tile: meta.facing}, {incr: logs}]
+        Dst: {Object: logpile, Commands: [{remove: true}]}
+      - Src: {Object: avatar, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: bush, Commands: [{remove: true}]}
+      - Src: {Object: avatar, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: [grass, moss, dirt, sand, bones, mushroom, skull, bridge, water, rock, hedge, stone, tombstone, torch, stump, deep, bramble, campfire, fire, bridgefire, well, hen, avatar]}
+
+  # Build with logs: a bridge over water (deep water takes 2 logs), or a log pile on open ground.
+  - Name: build
+    InputMapping:
+      Inputs:
+        1: {Description: Left, VectorToDest: [-1, 0], MetaData: {facing: 3}}
+        2: {Description: Up, VectorToDest: [0, -1], MetaData: {facing: 0}}
+        3: {Description: Right, VectorToDest: [1, 0], MetaData: {facing: 1}}
+        4: {Description: Down, VectorToDest: [0, 1], MetaData: {facing: 2}}
+    Behaviours:
+      - Src:
+          Object: avatar
+          Preconditions: [{gte: [src.logs, 1]}]
+          Commands: [{set_tile: meta.facing}, {decr: logs}, {reward: 1}]
+        Dst: {Object: water, Commands: [{change_to: bridge}]}
+      - Src:
+          Object: avatar
+          Preconditions: [{gte: [src.logs, 2]}]
+          Commands: [{set_tile: meta.facing}, {sub: [logs, 2]}, {reward: 1}]
+        Dst: {Object: deep, Commands: [{change_to: bridge}]}
+      - Src:
+          Object: avatar
+          Preconditions: [{gte: [src.logs, 1]}]
+          Commands: [{set_tile: meta.facing}, {decr: logs}, {spawn: logpile}]
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge, stump]}
+      - Src: {Object: avatar, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: [tree, bush, rock, hedge, stone, tombstone, torch, oak, oakcut, bramble, campfire, fire, bridgefire, well, hen, logpile, avatar]}
+
+  # Fill the bucket at water or a well; pour it on a fire.
+  - Name: bucket
+    InputMapping:
+      Inputs:
+        1: {Description: Left, VectorToDest: [-1, 0], MetaData: {facing: 3}}
+        2: {Description: Up, VectorToDest: [0, -1], MetaData: {facing: 0}}
+        3: {Description: Right, VectorToDest: [1, 0], MetaData: {facing: 1}}
+        4: {Description: Down, VectorToDest: [0, 1], MetaData: {facing: 2}}
+    Behaviours:
+      - Src:
+          Object: avatar
+          Preconditions: [{eq: [src.bucket, 0]}]
+          Commands: [{set_tile: meta.facing}, {set: [bucket, 1]}]
+        Dst: {Object: [water, deep, well]}
+      - Src:
+          Object: avatar
+          Preconditions: [{eq: [src.bucket, 1]}]
+          Commands: [{set_tile: meta.facing}, {set: [bucket, 0]}, {reward: 1}]
+        Dst: {Object: [fire, campfire], Commands: [{remove: true}]}
+      - Src:
+          Object: avatar
+          Preconditions: [{eq: [src.bucket, 1]}]
+          Commands: [{set_tile: meta.facing}, {set: [bucket, 0]}, {reward: 1}]
+        Dst: {Object: bridgefire, Commands: [{change_to: bridge}]}
+      - Src: {Object: avatar, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: [grass, moss, dirt, sand, bones, mushroom, skull, bridge, tree, bush, rock, hedge, stone, tombstone, torch, stump, oak, oakcut, bramble, hen, logpile, avatar]}
+
+Objects:
+  - Name: grass
+    MapCharacter: ","
+    Z: 0
+    Observers:
+      Sprite2D: &grass_sprite
+        - TilingMode: WALL_16
+          Image:
+            - gvgai/oryx/grass_0.png
+            - gvgai/oryx/grass_1.png
+            - gvgai/oryx/grass_2.png
+            - gvgai/oryx/grass_3.png
+            - gvgai/oryx/grass_4.png
+            - gvgai/oryx/grass_5.png
+            - gvgai/oryx/grass_6.png
+            - gvgai/oryx/grass_7.png
+            - gvgai/oryx/grass_8.png
+            - gvgai/oryx/grass_9.png
+            - gvgai/oryx/grass_10.png
+            - gvgai/oryx/grass_11.png
+            - gvgai/oryx/grass_12.png
+            - gvgai/oryx/grass_13.png
+            - gvgai/oryx/grass_14.png
+            - gvgai/oryx/grass_15.png
+      FollowCam: *grass_sprite
+      CloseUp: *grass_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.25, 0.55, 0.25]
+          Scale: 0.9
+  - Name: moss
+    MapCharacter: ";"
+    Z: 0
+    Observers:
+      Sprite2D: &moss_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_moss_a.png
+      FollowCam: *moss_sprite
+      CloseUp: *moss_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.25, 0.4, 0.2]
+          Scale: 0.9
+  - Name: dirt
+    MapCharacter: ":"
+    Z: 0
+    Observers:
+      Sprite2D: &dirt_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_dirt_a.png
+      FollowCam: *dirt_sprite
+      CloseUp: *dirt_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.3, 0.22, 0.15]
+          Scale: 0.9
+  - Name: sand
+    MapCharacter: "_"
+    Z: 0
+    Observers:
+      Sprite2D: &sand_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_sand_a.png
+      FollowCam: *sand_sprite
+      CloseUp: *sand_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.7, 0.55, 0.3]
+          Scale: 0.9
+  - Name: bones
+    MapCharacter: "+"
+    Z: 0
+    Observers:
+      Sprite2D: &bones_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_bones_a.png
+      FollowCam: *bones_sprite
+      CloseUp: *bones_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.8, 0.8, 0.75]
+          Scale: 0.9
+  - Name: mushroom
+    MapCharacter: "*"
+    Z: 0
+    Observers:
+      Sprite2D: &mushroom_sprite
+        - Image: gvgai/oryx/mushroom2.png
+      FollowCam: *mushroom_sprite
+      CloseUp: *mushroom_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.8, 0.2, 0.2]
+          Scale: 0.9
+  - Name: skull
+    MapCharacter: "^"
+    Z: 0
+    Observers:
+      Sprite2D: &skull_sprite
+        - Image: gvgai/oryx/skull1.png
+      FollowCam: *skull_sprite
+      CloseUp: *skull_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.9, 0.9, 0.9]
+          Scale: 0.9
+  - Name: bridge
+    MapCharacter: "="
+    Z: 0
+    Observers:
+      Sprite2D: &bridge_sprite
+        - Image: gvgai/newset/logm.png
+      FollowCam: *bridge_sprite
+      CloseUp: *bridge_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.55, 0.4, 0.25]
+          Scale: 0.9
+  - Name: water
+    MapCharacter: "~"
+    Z: 1
+    Observers:
+      Sprite2D: &water_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
+      FollowCam: *water_sprite
+      CloseUp: *water_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.1, 0.35, 0.7]
+          Scale: 1.0
+  - Name: tree
+    MapCharacter: "&"
+    Z: 1
+    Observers:
+      Sprite2D: &tree_sprite
+        - Image: gvgai/oryx/tree2.png
+      FollowCam: *tree_sprite
+      CloseUp: *tree_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.05, 0.4, 0.2]
+          Scale: 1.0
+  - Name: bush
+    MapCharacter: "%"
+    Z: 1
+    Observers:
+      Sprite2D: &bush_sprite
+        - Image: gvgai/oryx/bush1.png
+      FollowCam: *bush_sprite
+      CloseUp: *bush_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.1, 0.45, 0.15]
+          Scale: 1.0
+  - Name: rock
+    MapCharacter: "#"
+    Z: 1
+    Observers:
+      Sprite2D: &rock_sprite
+        - TilingMode: WALL_16
+          Image:
+            - gvgai/oryx/dirtWall_0.png
+            - gvgai/oryx/dirtWall_1.png
+            - gvgai/oryx/dirtWall_2.png
+            - gvgai/oryx/dirtWall_3.png
+            - gvgai/oryx/dirtWall_4.png
+            - gvgai/oryx/dirtWall_5.png
+            - gvgai/oryx/dirtWall_6.png
+            - gvgai/oryx/dirtWall_7.png
+            - gvgai/oryx/dirtWall_8.png
+            - gvgai/oryx/dirtWall_9.png
+            - gvgai/oryx/dirtWall_10.png
+            - gvgai/oryx/dirtWall_11.png
+            - gvgai/oryx/dirtWall_12.png
+            - gvgai/oryx/dirtWall_13.png
+            - gvgai/oryx/dirtWall_14.png
+            - gvgai/oryx/dirtWall_15.png
+      FollowCam: *rock_sprite
+      CloseUp: *rock_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.45, 0.25, 0.12]
+          Scale: 1.0
+  - Name: hedge
+    MapCharacter: "$"
+    Z: 1
+    Observers:
+      Sprite2D: &hedge_sprite
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall9-0.png
+            - oryx/oryx_fantasy/wall9-1.png
+            - oryx/oryx_fantasy/wall9-2.png
+            - oryx/oryx_fantasy/wall9-3.png
+            - oryx/oryx_fantasy/wall9-4.png
+            - oryx/oryx_fantasy/wall9-5.png
+            - oryx/oryx_fantasy/wall9-6.png
+            - oryx/oryx_fantasy/wall9-7.png
+            - oryx/oryx_fantasy/wall9-8.png
+            - oryx/oryx_fantasy/wall9-9.png
+            - oryx/oryx_fantasy/wall9-10.png
+            - oryx/oryx_fantasy/wall9-11.png
+            - oryx/oryx_fantasy/wall9-12.png
+            - oryx/oryx_fantasy/wall9-13.png
+            - oryx/oryx_fantasy/wall9-14.png
+            - oryx/oryx_fantasy/wall9-15.png
+      FollowCam: *hedge_sprite
+      CloseUp: *hedge_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.15, 0.35, 0.15]
+          Scale: 1.0
+  - Name: stone
+    MapCharacter: "@"
+    Z: 1
+    Observers:
+      Sprite2D: &stone_sprite
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall2-0.png
+            - oryx/oryx_fantasy/wall2-1.png
+            - oryx/oryx_fantasy/wall2-2.png
+            - oryx/oryx_fantasy/wall2-3.png
+            - oryx/oryx_fantasy/wall2-4.png
+            - oryx/oryx_fantasy/wall2-5.png
+            - oryx/oryx_fantasy/wall2-6.png
+            - oryx/oryx_fantasy/wall2-7.png
+            - oryx/oryx_fantasy/wall2-8.png
+            - oryx/oryx_fantasy/wall2-9.png
+            - oryx/oryx_fantasy/wall2-10.png
+            - oryx/oryx_fantasy/wall2-11.png
+            - oryx/oryx_fantasy/wall2-12.png
+            - oryx/oryx_fantasy/wall2-13.png
+            - oryx/oryx_fantasy/wall2-14.png
+            - oryx/oryx_fantasy/wall2-15.png
+      FollowCam: *stone_sprite
+      CloseUp: *stone_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.45, 0.45, 0.45]
+          Scale: 1.0
+  - Name: tombstone
+    MapCharacter: "!"
+    Z: 1
+    Observers:
+      Sprite2D: &tombstone_sprite
+        - Image: gvgai/oryx/tombstone1.png
+      FollowCam: *tombstone_sprite
+      CloseUp: *tombstone_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.5, 0.5, 0.5]
+          Scale: 1.0
+  - Name: torch
+    MapCharacter: "|"
+    Z: 1
+    Observers:
+      Sprite2D: &torch_sprite
+        - Image: gvgai/oryx/torch1.png
+      FollowCam: *torch_sprite
+      CloseUp: *torch_sprite
+      Block2D:
+        - Shape: square
+          Color: [1.0, 0.6, 0.1]
+          Scale: 1.0
+  - Name: stump
+    Z: 0
+    Observers:
+      Sprite2D: &stump_sprite
+        - Image: remastered/lumberjack-stump.png
+      FollowCam: *stump_sprite
+      CloseUp: *stump_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.5, 0.35, 0.2]
+          Scale: 0.5
+  - Name: oak
+    MapCharacter: "O"
+    Z: 1
+    Observers:
+      Sprite2D: &oak_sprite
+        - Image: gvgai/oryx/tree1.png
+      FollowCam: *oak_sprite
+      CloseUp: *oak_sprite
+      Block2D:
+        - Shape: triangle
+          Color: [0.2, 0.5, 0.35]
+          Scale: 1.0
+  - Name: oakcut
+    Z: 1
+    Observers:
+      Sprite2D: &oakcut_sprite
+        - Image: remastered/lumberjack-oakcut.png
+      FollowCam: *oakcut_sprite
+      CloseUp: *oakcut_sprite
+      Block2D:
+        - Shape: triangle
+          Color: [0.4, 0.5, 0.35]
+          Scale: 0.8
+  - Name: deep
+    MapCharacter: "D"
+    Z: 1
+    Observers:
+      Sprite2D: &deep_sprite
+        - Image: remastered/lumberjack-deep.png
+      FollowCam: *deep_sprite
+      CloseUp: *deep_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.05, 0.2, 0.5]
+          Scale: 1.0
+  - Name: bramble
+    MapCharacter: "B"
+    Z: 1
+    Observers:
+      Sprite2D: &bramble_sprite
+        - Image: gvgai/oryx/bush2.png
+      FollowCam: *bramble_sprite
+      CloseUp: *bramble_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.6, 0.25, 0.1]
+          Scale: 0.9
+  - Name: campfire
+    MapCharacter: "F"
+    Z: 1
+    InitialActions:
+      - Action: spread
+        ActionId: 1
+        Delay: 3
+      - Action: spread
+        ActionId: 2
+        Delay: 3
+      - Action: spread
+        ActionId: 3
+        Delay: 3
+      - Action: spread
+        ActionId: 4
+        Delay: 3
+    Observers:
+      Sprite2D: &campfire_sprite
+        - Image: remastered/lumberjack-campfire.png
+      FollowCam: *campfire_sprite
+      CloseUp: *campfire_sprite
+      Block2D:
+        - Shape: circle
+          Color: [1.0, 0.5, 0.0]
+          Scale: 0.8
+  - Name: fire
+    MapCharacter: "f"
+    Z: 1
+    InitialActions:
+      - Action: spread
+        ActionId: 1
+        Delay: 3
+      - Action: spread
+        ActionId: 2
+        Delay: 3
+      - Action: spread
+        ActionId: 3
+        Delay: 3
+      - Action: spread
+        ActionId: 4
+        Delay: 3
+      - Action: burnout
+        ActionId: 1
+        Delay: 7
+    Observers:
+      Sprite2D: &fire_sprite
+        - Image: gvgai/oryx/fire1.png
+      FollowCam: *fire_sprite
+      CloseUp: *fire_sprite
+      Block2D:
+        - Shape: circle
+          Color: [1.0, 0.3, 0.0]
+          Scale: 0.9
+  - Name: bridgefire
+    Z: 1
+    InitialActions:
+      - Action: spread
+        ActionId: 1
+        Delay: 3
+      - Action: spread
+        ActionId: 2
+        Delay: 3
+      - Action: spread
+        ActionId: 3
+        Delay: 3
+      - Action: spread
+        ActionId: 4
+        Delay: 3
+      - Action: burnout
+        ActionId: 1
+        Delay: 7
+    Observers:
+      Sprite2D: &bridgefire_sprite
+        - Image: remastered/lumberjack-bridgefire.png
+      FollowCam: *bridgefire_sprite
+      CloseUp: *bridgefire_sprite
+      Block2D:
+        - Shape: circle
+          Color: [1.0, 0.4, 0.1]
+          Scale: 0.9
+  - Name: well
+    MapCharacter: "W"
+    Z: 1
+    Observers:
+      Sprite2D: &well_sprite
+        - Image: remastered/lumberjack-well.png
+      FollowCam: *well_sprite
+      CloseUp: *well_sprite
+      Block2D:
+        - Shape: circle
+          Color: [0.3, 0.5, 0.9]
+          Scale: 0.8
+  - Name: hen
+    MapCharacter: "h"
+    Z: 1
+    Observers:
+      Sprite2D: &hen_sprite
+        - Image: gvgai/newset/chicken.png
+      FollowCam: *hen_sprite
+      CloseUp: *hen_sprite
+      Block2D:
+        - Shape: triangle
+          Color: [1.0, 1.0, 1.0]
+          Scale: 0.6
+  - Name: logpile
+    MapCharacter: "L"
+    Z: 1
+    Observers:
+      Sprite2D: &logpile_sprite
+        - Image: remastered/lumberjack-logpile.png
+      FollowCam: *logpile_sprite
+      CloseUp: *logpile_sprite
+      Block2D:
+        - Shape: square
+          Color: [0.7, 0.5, 0.3]
+          Scale: 0.7
+  - Name: avatar
+    MapCharacter: "A"
+    Z: 2
+    Variables:
+      - Name: logs
+        InitialValue: 0
+      - Name: bucket
+        InitialValue: 0
+    InitialActions:
+      - Action: face
+        ActionId: 2
+    Observers:
+      Sprite2D: &avatar_sprite
+        - Image: remastered/lumberjack-avatar-up.png
+        - Image: remastered/lumberjack-avatar-right.png
+        - Image: remastered/lumberjack-avatar-down.png
+        - Image: remastered/lumberjack-avatar-left.png
+      FollowCam: *avatar_sprite
+      CloseUp: *avatar_sprite
+      Block2D:
+        - Shape: triangle
+          Color: [0.9, 0.2, 0.2]
+          Scale: 0.9
+        - Shape: triangle
+          Color: [0.9, 0.2, 0.2]
+          Scale: 0.9
+        - Shape: triangle
+          Color: [0.9, 0.2, 0.2]
+          Scale: 0.9
+        - Shape: triangle
+          Color: [0.9, 0.2, 0.2]
+          Scale: 0.9
+Version: "0.1"
+Environment:
+  Name: Deep Delve
+  Description: |
+    An isometric mine. Dig through dirt and rock (`dig`, two hits for rock), mine ore veins and fill
+    every ore cart (3 ore each), then ride the lift out. Digging costs stamina (rations
+    restore it). The mine slopes south: undermined boulders wobble, then roll and crush you. Lava
+    oozes into dug tunnels. Timber support beams (`build`) stop both.
+    Generated by studio/griddly-demo/tools/remaster ‚Äî edit the generator, not this file.
+  # Cameras are observers. The demo picks one by name and the engine renders it.
+  #   Isometric  whole level, isometric (the main view of this game)
+  #   IsoFollow  11x11 isometric window that follows the avatar
+  #   Sprite2D   whole level, top-down
+  #   FollowCam  15x11 top-down window that follows the avatar
+  #   CloseUp    9x9 top-down window that follows the avatar (also the agent's default view)
+  Observers:
+    Isometric:
+      TileSize: [32, 48]
+      IsoTileHeight: 16
+      IsoTileDepth: 4
+      BackgroundTile: remastered/minecrawler-cave-iso.png
+    IsoFollow:
+      Type: ISOMETRIC
+      TileSize: [32, 48]
+      IsoTileHeight: 16
+      IsoTileDepth: 4
+      BackgroundTile: remastered/minecrawler-cave-iso.png
+      TrackAvatar: true
+      RotateWithAvatar: false
+      Width: 11
+      Height: 11
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: oryx/oryx_fantasy/floor1-0.png
+      RotateAvatarImage: false
+      TrackAvatar: false
+    FollowCam:
+      Type: SPRITE_2D
+      TileSize: 24
+      BackgroundTile: oryx/oryx_fantasy/floor1-0.png
+      RotateAvatarImage: false
+      RotateWithAvatar: false
+      TrackAvatar: true
+      Width: 15
+      Height: 11
+    CloseUp:
+      Type: SPRITE_2D
+      TileSize: 24
+      BackgroundTile: oryx/oryx_fantasy/floor1-0.png
+      RotateAvatarImage: false
+      RotateWithAvatar: false
+      TrackAvatar: true
+      Width: 9
+      Height: 9
+    Block2D:
+      TileSize: 24
+  Variables:
+    - Name: carts_needed
+      InitialValue: 0
+  Player:
+    Observer:
+      TrackAvatar: true
+      RotateWithAvatar: false
+      RotateAvatarImage: false
+      Width: 9
+      Height: 9
+    AvatarObject: miner
+  Termination:
+    Win:
+      - eq: [lift:count, 0]
+    Lose:
+      - eq: [miner:count, 0]
+  Levels:
+    # Shallow Seam | Dig through the rock seam, fill one ore cart, ride the lift.
+    - |
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+      W   d   d   d   d   d   d   d   d   d   W   W   W   v   d   d   d   d   v   v   d   W
+      W   d   d   d   d   |   r   d   d   d   W   W   W   v   d   O   d   d   d   d   d   W
+      W   d   d   :   :   o   .   d   d   d   W   W   W   d   v   d   d   O   d   d   d   W
+      W   d   .   :/A .   *   .   r   r   d   W   W   W   d   v   d   d   d   d   d   d   W
+      W   d   t   .   .   .   .   r   r   d   W   W   W   d   d   r   r   r   d   d   d   W
+      W   d   d   d   o   d   O   r   r   d   W   W   W   d   d   r   r   d   r   r   d   W
+      W   d   d   d   d   d   d   r   r   n   d   r   d   n   d   |   .   d   r   d   d   W
+      W   d   d   O   d   d   d   d   d   d   W   W   W   d   .   .   .   +   d   O   d   W
+      W   d   d   d   d   v   d   d   d   d   W   W   W   r   .   .   :   .   .   d   d   W
+      W   v   d   d   d   v   d   d   d   O   W   W   W   r   +   :   :   ^   E   d   r   W
+      W   d   d   d   d   d   r   d   d   d   W   W   W   r   d   :   c   .   d   r   r   W
+      W   d   d   d   d   d   r   d   d   d   W   W   W   d   d   d   d   d   d   d   d   W
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+    # Boulder Gallery | A boulder hangs over the gate: dig, then brace it with a beam!
+    - |
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+      W   d   d   d   d   d   d   d   W   W   W   d   d   d   r   d   d   W   W   W   d   O   O   d   v   W
+      W   d   t   ^   ^   |   r   r   W   W   W   d   d   d   r   d   d   W   W   W   d   r   d   d   d   W
+      W   d   +   :/A +   :   .   d   W   W   W   d   d   d   d   d   d   W   W   W   O   r   d   d   d   W
+      W   d   d   .   o   :   d   d   W   W   W   O   d   d   d   d   O   W   W   W   d   r   d   d   d   W
+      W   O   d   d   d   d   d   d   W   O   W   d   d   d   r   r   O   W   W   W   d   d   d   d   d   W
+      W   d   d   d   d   d   d   n   d   d   d   n   d   d   r   r   d   W   W   W   d   d   d   O   d   W
+      W   d   d   d   O   O   d   d   W   W   W   r   :   +   |   r   d   W   W   W   d   d   d   v   v   W
+      W   d   d   d   d   d   d   d   W   W   W   :   :   :   :   :   v   W   W   W   d   d   d   v   v   W
+      W   d   O   d   d   d   d   d   W   W   W   d   f   o   .   d   v   W   W   W   d   d   d   d   d   W
+      W   d   d   v   d   d   d   d   W   W   W   d   d   d   d   d   n   d   r   d   n   d   r   r   d   W
+      W   d   d   v   O   d   d   r   W   W   W   v   v   O   d   d   d   W   W   W   r   |   .   c   d   W
+      W   d   d   r   r   d   d   r   W   W   W   d   v   d   d   d   d   W   W   W   d   .   .   .   .   W
+      W   v   d   d   d   d   d   d   W   W   W   O   d   d   d   r   d   W   W   W   d   .   .   E   d   W
+      W   r   r   d   d   r   r   d   W   W   W   d   d   d   r   r   d   W   W   W   d   c   d   d   d   W
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+    # Magma Pockets | Lava oozes into any tunnel dug next to it. Beams hold it back.
+    - |
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+      W   d   d   d   d   d   d   O   W   W   W   d   d   d   r   d   d   W   W   W   d   r   r   d   d   W
+      W   d   d   d   d   d   v   d   W   W   W   d   d   d   r   d   d   W   W   W   d   d   r   d   d   W
+      W   d   d   d   d   O   v   d   W   W   W   |   :   o   r   r   d   W   W   W   d   d   d   O   d   W
+      W   d   d   d   d   d   v   d   W   W   W   .   ^   :   :   d   d   W   O   W   d   d   d   d   d   W
+      W   d   d   r   r   r   v   d   W   W   W   d   f   +   :   d   n   d   d   d   n   d   d   r   d   W
+      W   d   r   L   L   L   r   d   W   W   W   v   v   d   d   d   O   W   W   W   O   d   r   L   r   W
+      W   d   d   r   r   r   d   d   W   W   W   d   d   d   r   r   d   W   W   W   v   d   d   r   d   W
+      W   d   d   r   r   r   r   d   W   W   W   d   d   d   r   d   d   W   W   W   d   v   v   d   d   W
+      W   d   d   r   r   d   d   d   W   W   W   d   d   O   d   d   d   W   W   W   d   d   d   d   d   W
+      W   d   r   r   r   d   r   d   W   W   W   d   d   d   r   d   d   W   W   W   d   d   d   d   d   W
+      W   d   r   d   r   r   r   n   d   r   d   n   d   r   L   r   d   W   W   W   r   d   d   d   d   W
+      W   d   t   .   .   |   d   d   W   L   W   d   d   O   r   d   d   W   W   W   r   c   ^   :   d   W
+      W   d   .   A   .   +   v   d   W   L   W   d   d   d   O   r   d   W   W   W   .   .   :   :   :   W
+      W   d   .   .   ^   t   v   O   W   W   W   r   d   d   d   r   r   W   W   W   |   .   +   E   d   W
+      W   d   d   d   d   d   d   d   W   W   W   v   d   d   d   d   v   W   W   W   d   v   c   r   d   W
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+    # Cave-In Crossing | Three carts, a hanging boulder and a lava gate.
+    - |
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+      W   d   d   d   d   r   r   r   r   W   W   W   O   d   d   d   r   d   d   W   W   W   d   d   r   r   d   O   d   W
+      W   d   d   d   ^   |   d   r   r   W   W   W   d   d   d   r   r   d   d   W   W   W   d   d   O   r   r   d   d   W
+      W   d   d   :   +   :   d   d   r   W   O   W   r   d   d   v   d   d   d   W   W   W   O   d   d   r   d   d   d   W
+      W   d   d   A   .   *   .   d   n   d   d   d   n   v   d   v   d   d   d   W   W   W   d   d   r   L   r   O   d   W
+      W   v   t   ^   .   o   .   r   r   W   W   W   d   v   d   d   d   d   v   W   W   W   d   r   L   L   L   r   d   W
+      W   d   d   d   t   *   d   r   d   W   W   W   d   O   d   d   d   r   r   W   W   W   d   r   r   L   r   v   d   W
+      W   d   d   O   d   d   d   d   d   W   W   W   d   d   _   +   d   r   d   W   W   W   d   r   d   r   d   v   d   W
+      W   d   d   d   O   d   d   d   d   W   W   W   |   _   _   _   |   v   r   W   W   W   O   r   O   d   d   d   d   W
+      W   d   d   d   d   d   d   O   d   W   W   W   :   _   o   .   .   v   r   W   W   W   d   d   d   d   d   O   d   W
+      W   d   d   d   r   O   d   d   d   W   W   W   :   f   .   t   .   d   d   W   W   W   r   d   d   d   d   d   r   W
+      W   d   d   r   L   r   d   d   d   W   W   W   d   d   .   .   r   d   d   W   W   W   r   d   v   d   d   r   r   W
+      W   d   r   L   L   L   r   d   d   W   W   W   d   d   r   d   r   O   O   W   W   W   d   d   v   d   d   r   r   W
+      W   d   O   r   L   r   d   d   d   W   W   W   d   r   r   d   d   d   d   W   W   W   r   d   v   d   c   d   d   W
+      W   O   d   d   r   d   d   d   d   W   W   W   d   d   r   r   d   d   n   d   r   d   n   _   f   :   :   c   |   W
+      W   d   O   d   d   d   v   d   v   W   W   W   O   r   L   L   r   d   d   W   L   W   d   _   ^   :   :   +   d   W
+      W   d   d   r   d   d   v   d   v   W   W   W   d   d   r   r   O   d   O   W   L   W   d   v   c   :   +   E   d   W
+      W   r   r   r   d   d   d   d   d   W   W   W   d   d   d   d   d   d   d   W   W   W   d   d   d   d   d   d   d   W
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+    # The Deep Lift | Three gates, four chambers: ration your stamina and timber.
+    - |
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+      W   d   d   d   d   d   d   O   W   W   W   r   d   d   d   d   W   W   W   d   O   d   r   r   W   W   W   d   r   d   d   W
+      W   O   O   d   d   d   O   d   W   W   W   r   d   d   d   d   W   W   W   O   d   r   r   r   W   W   W   d   r   r   d   W
+      W   d   d   d   r   r   d   d   W   W   W   |   r   r   r   d   W   W   W   r   O   d   f   d   W   W   W   d   d   d   d   W
+      W   d   d   d   d   r   v   v   W   W   W   :   o   *   r   d   W   W   W   r   d   r   d   d   W   W   W   O   d   d   d   W
+      W   d   d   r   r   r   d   d   W   W   W   f   :   :   r   n   d   r   d   n   d   r   d   v   W   W   W   v   v   v   d   W
+      W   d   r   L   L   L   r   d   W   W   W   :   :   t   d   d   W   L   W   d   d   d   d   v   W   W   W   d   d   v   d   W
+      W   d   d   r   r   r   d   r   W   W   W   d   d   d   d   r   W   L   W   d   d   d   d   d   W   W   W   r   r   O   v   W
+      W   d   d   r   d   d   r   r   W   W   W   d   d   d   d   r   W   W   W   d   d   d   d   d   W   W   W   r   d   d   d   W
+      W   d   d   r   r   d   d   v   W   W   W   v   O   d   d   d   W   W   W   d   d   d   d   r   W   W   W   d   d   r   O   W
+      W   O   r   r   v   d   d   d   W   W   W   v   v   O   d   d   W   W   W   |   .   f   d   r   W   W   W   O   r   r   d   W
+      W   d   d   d   d   d   d   d   W   W   W   d   v   d   d   d   W   W   .   .   .   .   +   d   W   O   W   d   d   d   r   W
+      W   r   r   d   d   d   d   d   W   W   W   O   O   d   r   d   W   W   W   ^   o   +   d   n   d   d   d   n   d   d   r   W
+      W   r   d   d   d   d   d   d   W   W   W   r   r   r   L   r   W   W   W   O   d   d   d   d   W   W   W   d   |   f   d   W
+      W   d   d   d   d   d   d   d   W   O   W   d   r   r   r   d   W   W   W   v   d   d   O   O   W   W   W   .   ^   .   d   W
+      W   d   |   .   _   :   d   n   d   d   d   n   d   d   d   d   W   W   W   v   r   r   r   d   W   W   ^   :   +   c   .   W
+      W   d   d   _/A .   :   ^   d   W   W   W   d   d   d   f   O   W   W   W   r   L   L   L   r   W   W   W   :   +   *   O   W
+      W   d   d   +   _   t   r   r   W   W   W   O   d   d   d   d   W   W   W   d   r   r   r   d   W   W   W   c   E   c   r   W
+      W   d   d   d   d   d   d   d   W   W   W   d   v   v   d   d   W   W   W   d   d   v   d   d   W   W   W   d   d   d   d   W
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+
+Actions:
+  - Name: face
+    InputMapping:
+      Internal: true
+      Inputs:
+        2: {Description: Face down, VectorToDest: [0, 0], MetaData: {facing: 2}}
+    Behaviours:
+      - Src: {Object: miner, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: miner}
+
+  # Ore carts count themselves into the level goal at reset.
+  - Name: count_goal
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {Description: Count, VectorToDest: [0, 0]}
+    Behaviours:
+      - Src: {Object: cart, Commands: [{incr: carts_needed}]}
+        Dst: {Object: cart}
+
+  # Gravity: every boulder checks the cell south of it. With room to fall it wobbles (falling=2) for 4
+  # ticks, then rolls one cell per tick (falling=1) until blocked. A rolling boulder crushes the miner.
+  - Name: fall
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {Description: South, VectorToDest: [0, 1]}
+    Behaviours:
+      - Src:
+          Object: boulder
+          Preconditions: [{eq: [src.falling, 0]}]
+          Commands: [{set: [falling, 2]}, {set_tile: 1}, {exec: {Action: fall, ActionId: 1, Delay: 4}}]
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge, tunnel]}
+      - Src:
+          Object: boulder
+          Preconditions: [{gte: [src.falling, 1]}]
+          Commands: [{mov: _dest}, {set: [falling, 1]}, {set_tile: 1}, {exec: {Action: fall, ActionId: 1, Delay: 1}}]
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge, tunnel]}
+      - Src:
+          Object: boulder
+          Preconditions: [{eq: [src.falling, 1]}]
+          Commands: [{exec: {Action: fall, ActionId: 1, Delay: 2}}]
+        Dst: {Object: miner, Commands: [{remove: true}]}
+      - Src:
+          Object: boulder
+          Preconditions: [{neq: [src.falling, 1]}]
+          Commands: [{set: [falling, 0]}, {set_tile: 0}, {exec: {Action: fall, ActionId: 1, Delay: 2}}]
+        Dst: {Object: miner}
+      - Src: {Object: boulder, Commands: [{set: [falling, 0]}, {set_tile: 0}, {exec: {Action: fall, ActionId: 1, Delay: 2}}]}
+        Dst: {Object: [water, tree, bush, rock, hedge, stone, tombstone, torch, bedrock, dirt_block, rock_block, vein, boulder, lava, ore, timber, ration, cart, cart_full, lift, beam]}
+
+  # Lava oozes into neighbouring dug tunnels (never onto natural cave floor) and burns the miner.
+  - Name: flow
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {Description: West, VectorToDest: [-1, 0]}
+        2: {Description: North, VectorToDest: [0, -1]}
+        3: {Description: East, VectorToDest: [1, 0]}
+        4: {Description: South, VectorToDest: [0, 1]}
+    Behaviours:
+      - Src: {Object: lava, Commands: [{spawn: lava}, {exec: {Action: flow, Delay: 7, Randomize: true}}]}
+        Dst: {Object: tunnel}
+      - Src: {Object: lava, Commands: [{exec: {Action: flow, Delay: 7, Randomize: true}}]}
+        Dst: {Object: miner, Commands: [{remove: true}]}
+      - Src: {Object: lava, Commands: [{exec: {Action: flow, Delay: 7, Randomize: true}}]}
+        Dst: {Object: [water, tree, bush, rock, hedge, stone, tombstone, torch, bedrock, dirt_block, rock_block, vein, boulder, lava, ore, timber, ration, cart, cart_full, lift, beam, grass, moss, dirt, sand, bones, mushroom, skull, bridge, _empty]}
+
+  # The miner walks up / down / left / right. Walking into loose ore, timber or a ration picks it up,
+  # into an empty cart with 3 ore fills it, into the lift (all carts full) wins, and into a boulder
+  # from the east or west shoves it.
+  - Name: move
+    InputMapping:
+      Inputs:
+        1: {Description: Left, VectorToDest: [-1, 0], MetaData: {facing: 3}}
+        2: {Description: Up, VectorToDest: [0, -1], MetaData: {facing: 0}}
+        3: {Description: Right, VectorToDest: [1, 0], MetaData: {facing: 1}}
+        4: {Description: Down, VectorToDest: [0, 1], MetaData: {facing: 2}}
+    Behaviours:
+      - Src: {Object: miner, Commands: [{set_tile: meta.facing}, {mov: _dest}]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge, tunnel, beam]}
+      - Src: {Object: miner, Commands: [{set_tile: meta.facing}, {mov: _dest}, {incr: ore}, {reward: 1}]}
+        Dst: {Object: ore, Commands: [{remove: true}]}
+      - Src: {Object: miner, Commands: [{set_tile: meta.facing}, {mov: _dest}, {add: [timber, 2]}]}
+        Dst: {Object: timber, Commands: [{remove: true}]}
+      - Src: {Object: miner, Commands: [{set_tile: meta.facing}, {mov: _dest}, {add: [stamina, 15]}]}
+        Dst: {Object: ration, Commands: [{remove: true}]}
+      - Src:
+          Object: miner
+          Preconditions: [{gte: [src.ore, 3]}]
+          Commands: [{set_tile: meta.facing}, {sub: [ore, 3]}, {reward: 5}]
+        Dst: {Object: cart, Commands: [{decr: carts_needed}, {change_to: cart_full}]}
+      - Src:
+          Object: miner
+          Preconditions: [{lte: [carts_needed, 0]}]
+          Commands: [{set_tile: meta.facing}, {reward: 10}]
+        Dst: {Object: lift, Commands: [{remove: true}]}
+      - Src:
+          Object: miner
+          Preconditions: [{neq: [meta.facing, 0]}, {neq: [meta.facing, 2]}]
+          Commands: [{set_tile: meta.facing}, {cascade: _dest}, {mov: _dest}]
+        Dst: {Object: boulder}
+      - Src: {Object: boulder, Commands: [{mov: _dest}]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge, tunnel]}
+      - Src: {Object: miner, Commands: [{remove: true}]}
+        Dst: {Object: lava}
+      - Src: {Object: miner, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: [water, tree, bush, rock, hedge, stone, tombstone, torch, bedrock, dirt_block, rock_block, vein, cart, cart_full, lift]}
+
+  # Swing the pickaxe at the block in front (the UI sends the last move direction). Costs 1 stamina.
+  - Name: dig
+    InputMapping:
+      Inputs:
+        1: {Description: Left, VectorToDest: [-1, 0], MetaData: {facing: 3}}
+        2: {Description: Up, VectorToDest: [0, -1], MetaData: {facing: 0}}
+        3: {Description: Right, VectorToDest: [1, 0], MetaData: {facing: 1}}
+        4: {Description: Down, VectorToDest: [0, 1], MetaData: {facing: 2}}
+    Behaviours:
+      - Src:
+          Object: miner
+          Preconditions: [{gte: [src.stamina, 1]}]
+          Commands: [{set_tile: meta.facing}, {decr: stamina}, {spawn: tunnel}]
+        Dst: {Object: dirt_block, Commands: [{remove: true}]}
+      - Src:
+          Object: miner
+          Preconditions: [{gte: [src.stamina, 1]}, {gte: [dst.hp, 2]}]
+          Commands: [{set_tile: meta.facing}, {decr: stamina}]
+        Dst: {Object: rock_block, Commands: [{decr: hp}, {set_tile: 1}]}
+      - Src:
+          Object: miner
+          Preconditions: [{gte: [src.stamina, 1]}, {lte: [dst.hp, 1]}]
+          Commands: [{set_tile: meta.facing}, {decr: stamina}, {spawn: tunnel}]
+        Dst: {Object: rock_block, Commands: [{remove: true}]}
+      - Src:
+          Object: miner
+          Preconditions: [{gte: [src.stamina, 1]}]
+          Commands: [{set_tile: meta.facing}, {decr: stamina}, {incr: ore}, {reward: 1}, {spawn: tunnel}]
+        Dst: {Object: vein, Commands: [{remove: true}]}
+      - Src: {Object: miner, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: [water, tree, bush, rock, hedge, stone, tombstone, torch, bedrock, dirt_block, rock_block, vein, boulder, lava, ore, timber, ration, cart, cart_full, lift, beam, grass, moss, dirt, sand, bones, mushroom, skull, bridge, _empty, tunnel]}
+
+  # Put a support beam into the free cell in front (costs 1 timber).
+  - Name: build
+    InputMapping:
+      Inputs:
+        1: {Description: Left, VectorToDest: [-1, 0], MetaData: {facing: 3}}
+        2: {Description: Up, VectorToDest: [0, -1], MetaData: {facing: 0}}
+        3: {Description: Right, VectorToDest: [1, 0], MetaData: {facing: 1}}
+        4: {Description: Down, VectorToDest: [0, 1], MetaData: {facing: 2}}
+    Behaviours:
+      - Src:
+          Object: miner
+          Preconditions: [{gte: [src.timber, 1]}]
+          Commands: [{set_tile: meta.facing}, {decr: timber}, {spawn: beam}]
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge, tunnel]}
+      - Src: {Object: miner, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: [water, tree, bush, rock, hedge, stone, tombstone, torch, bedrock, dirt_block, rock_block, vein, boulder, lava, ore, timber, ration, cart, cart_full, lift, beam]}
+
+Objects:
+  - Name: grass
+    MapCharacter: ","
+    Z: 0
+    Observers:
+      Sprite2D: &grass_sprite
+        - TilingMode: WALL_16
+          Image:
+            - gvgai/oryx/grass_0.png
+            - gvgai/oryx/grass_1.png
+            - gvgai/oryx/grass_2.png
+            - gvgai/oryx/grass_3.png
+            - gvgai/oryx/grass_4.png
+            - gvgai/oryx/grass_5.png
+            - gvgai/oryx/grass_6.png
+            - gvgai/oryx/grass_7.png
+            - gvgai/oryx/grass_8.png
+            - gvgai/oryx/grass_9.png
+            - gvgai/oryx/grass_10.png
+            - gvgai/oryx/grass_11.png
+            - gvgai/oryx/grass_12.png
+            - gvgai/oryx/grass_13.png
+            - gvgai/oryx/grass_14.png
+            - gvgai/oryx/grass_15.png
+      FollowCam: *grass_sprite
+      CloseUp: *grass_sprite
+      Isometric: &grass_iso
+        - Image: oryx/oryx_iso_dungeon/grass-1.png
+          TilingMode: ISO_FLOOR
+      IsoFollow: *grass_iso
+      Block2D:
+        - Shape: square
+          Color: [0.25, 0.55, 0.25]
+          Scale: 0.9
+  - Name: moss
+    MapCharacter: ";"
+    Z: 0
+    Observers:
+      Sprite2D: &moss_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_moss_a.png
+      FollowCam: *moss_sprite
+      CloseUp: *moss_sprite
+      Isometric: &moss_iso
+        - Image: oryx/oryx_iso_dungeon/floor-2.png
+          TilingMode: ISO_FLOOR
+      IsoFollow: *moss_iso
+      Block2D:
+        - Shape: square
+          Color: [0.25, 0.4, 0.2]
+          Scale: 0.9
+  - Name: dirt
+    MapCharacter: ":"
+    Z: 0
+    Observers:
+      Sprite2D: &dirt_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_dirt_a.png
+      FollowCam: *dirt_sprite
+      CloseUp: *dirt_sprite
+      Isometric: &dirt_iso
+        - Image: remastered/iso-dirt.png
+          TilingMode: ISO_FLOOR
+      IsoFollow: *dirt_iso
+      Block2D:
+        - Shape: square
+          Color: [0.3, 0.22, 0.15]
+          Scale: 0.9
+  - Name: sand
+    MapCharacter: "_"
+    Z: 0
+    Observers:
+      Sprite2D: &sand_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_sand_a.png
+      FollowCam: *sand_sprite
+      CloseUp: *sand_sprite
+      Isometric: &sand_iso
+        - Image: remastered/iso-sand.png
+          TilingMode: ISO_FLOOR
+      IsoFollow: *sand_iso
+      Block2D:
+        - Shape: square
+          Color: [0.7, 0.55, 0.3]
+          Scale: 0.9
+  - Name: bones
+    MapCharacter: "+"
+    Z: 0
+    Observers:
+      Sprite2D: &bones_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_bones_a.png
+      FollowCam: *bones_sprite
+      CloseUp: *bones_sprite
+      Isometric: &bones_iso
+        - Image: remastered/iso-bones.png
+      IsoFollow: *bones_iso
+      Block2D:
+        - Shape: square
+          Color: [0.8, 0.8, 0.75]
+          Scale: 0.9
+  - Name: mushroom
+    MapCharacter: "*"
+    Z: 0
+    Observers:
+      Sprite2D: &mushroom_sprite
+        - Image: gvgai/oryx/mushroom2.png
+      FollowCam: *mushroom_sprite
+      CloseUp: *mushroom_sprite
+      Isometric: &mushroom_iso
+        - Image: remastered/iso-mushroom.png
+      IsoFollow: *mushroom_iso
+      Block2D:
+        - Shape: square
+          Color: [0.8, 0.2, 0.2]
+          Scale: 0.9
+  - Name: skull
+    MapCharacter: "^"
+    Z: 0
+    Observers:
+      Sprite2D: &skull_sprite
+        - Image: gvgai/oryx/skull1.png
+      FollowCam: *skull_sprite
+      CloseUp: *skull_sprite
+      Isometric: &skull_iso
+        - Image: remastered/iso-skull.png
+      IsoFollow: *skull_iso
+      Block2D:
+        - Shape: square
+          Color: [0.9, 0.9, 0.9]
+          Scale: 0.9
+  - Name: bridge
+    MapCharacter: "="
+    Z: 0
+    Observers:
+      Sprite2D: &bridge_sprite
+        - Image: gvgai/newset/logm.png
+      FollowCam: *bridge_sprite
+      CloseUp: *bridge_sprite
+      Isometric: &bridge_iso
+        - Image: remastered/iso-bridge.png
+          TilingMode: ISO_FLOOR
+      IsoFollow: *bridge_iso
+      Block2D:
+        - Shape: square
+          Color: [0.55, 0.4, 0.25]
+          Scale: 0.9
+  - Name: water
+    MapCharacter: "~"
+    Z: 1
+    Observers:
+      Sprite2D: &water_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
+      FollowCam: *water_sprite
+      CloseUp: *water_sprite
+      Isometric: &water_iso
+        - Image: oryx/oryx_iso_dungeon/water-1.png
+          TilingMode: ISO_FLOOR
+          Offset: [0, 4]
+      IsoFollow: *water_iso
+      Block2D:
+        - Shape: square
+          Color: [0.1, 0.35, 0.7]
+          Scale: 1.0
+  - Name: tree
+    MapCharacter: "&"
+    Z: 1
+    Observers:
+      Sprite2D: &tree_sprite
+        - Image: gvgai/oryx/tree2.png
+      FollowCam: *tree_sprite
+      CloseUp: *tree_sprite
+      Isometric: &tree_iso
+        - Image: remastered/iso-tree.png
+      IsoFollow: *tree_iso
+      Block2D:
+        - Shape: square
+          Color: [0.05, 0.4, 0.2]
+          Scale: 1.0
+  - Name: bush
+    MapCharacter: "%"
+    Z: 1
+    Observers:
+      Sprite2D: &bush_sprite
+        - Image: gvgai/oryx/bush1.png
+      FollowCam: *bush_sprite
+      CloseUp: *bush_sprite
+      Isometric: &bush_iso
+        - Image: oryx/oryx_iso_dungeon/bush-1.png
+      IsoFollow: *bush_iso
+      Block2D:
+        - Shape: square
+          Color: [0.1, 0.45, 0.15]
+          Scale: 1.0
+  - Name: rock
+    MapCharacter: "#"
+    Z: 1
+    Observers:
+      Sprite2D: &rock_sprite
+        - TilingMode: WALL_16
+          Image:
+            - gvgai/oryx/dirtWall_0.png
+            - gvgai/oryx/dirtWall_1.png
+            - gvgai/oryx/dirtWall_2.png
+            - gvgai/oryx/dirtWall_3.png
+            - gvgai/oryx/dirtWall_4.png
+            - gvgai/oryx/dirtWall_5.png
+            - gvgai/oryx/dirtWall_6.png
+            - gvgai/oryx/dirtWall_7.png
+            - gvgai/oryx/dirtWall_8.png
+            - gvgai/oryx/dirtWall_9.png
+            - gvgai/oryx/dirtWall_10.png
+            - gvgai/oryx/dirtWall_11.png
+            - gvgai/oryx/dirtWall_12.png
+            - gvgai/oryx/dirtWall_13.png
+            - gvgai/oryx/dirtWall_14.png
+            - gvgai/oryx/dirtWall_15.png
+      FollowCam: *rock_sprite
+      CloseUp: *rock_sprite
+      Isometric: &rock_iso
+        - Image: remastered/iso-rock.png
+      IsoFollow: *rock_iso
+      Block2D:
+        - Shape: square
+          Color: [0.45, 0.25, 0.12]
+          Scale: 1.0
+  - Name: hedge
+    MapCharacter: "$"
+    Z: 1
+    Observers:
+      Sprite2D: &hedge_sprite
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall9-0.png
+            - oryx/oryx_fantasy/wall9-1.png
+            - oryx/oryx_fantasy/wall9-2.png
+            - oryx/oryx_fantasy/wall9-3.png
+            - oryx/oryx_fantasy/wall9-4.png
+            - oryx/oryx_fantasy/wall9-5.png
+            - oryx/oryx_fantasy/wall9-6.png
+            - oryx/oryx_fantasy/wall9-7.png
+            - oryx/oryx_fantasy/wall9-8.png
+            - oryx/oryx_fantasy/wall9-9.png
+            - oryx/oryx_fantasy/wall9-10.png
+            - oryx/oryx_fantasy/wall9-11.png
+            - oryx/oryx_fantasy/wall9-12.png
+            - oryx/oryx_fantasy/wall9-13.png
+            - oryx/oryx_fantasy/wall9-14.png
+            - oryx/oryx_fantasy/wall9-15.png
+      FollowCam: *hedge_sprite
+      CloseUp: *hedge_sprite
+      Isometric: &hedge_iso
+        - Image: remastered/iso-hedge.png
+      IsoFollow: *hedge_iso
+      Block2D:
+        - Shape: square
+          Color: [0.15, 0.35, 0.15]
+          Scale: 1.0
+  - Name: stone
+    MapCharacter: "@"
+    Z: 1
+    Observers:
+      Sprite2D: &stone_sprite
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall2-0.png
+            - oryx/oryx_fantasy/wall2-1.png
+            - oryx/oryx_fantasy/wall2-2.png
+            - oryx/oryx_fantasy/wall2-3.png
+            - oryx/oryx_fantasy/wall2-4.png
+            - oryx/oryx_fantasy/wall2-5.png
+            - oryx/oryx_fantasy/wall2-6.png
+            - oryx/oryx_fantasy/wall2-7.png
+            - oryx/oryx_fantasy/wall2-8.png
+            - oryx/oryx_fantasy/wall2-9.png
+            - oryx/oryx_fantasy/wall2-10.png
+            - oryx/oryx_fantasy/wall2-11.png
+            - oryx/oryx_fantasy/wall2-12.png
+            - oryx/oryx_fantasy/wall2-13.png
+            - oryx/oryx_fantasy/wall2-14.png
+            - oryx/oryx_fantasy/wall2-15.png
+      FollowCam: *stone_sprite
+      CloseUp: *stone_sprite
+      Isometric: &stone_iso
+        - Image: oryx/oryx_iso_dungeon/wall-grey-1.png
+      IsoFollow: *stone_iso
+      Block2D:
+        - Shape: square
+          Color: [0.45, 0.45, 0.45]
+          Scale: 1.0
+  - Name: tombstone
+    MapCharacter: "!"
+    Z: 1
+    Observers:
+      Sprite2D: &tombstone_sprite
+        - Image: gvgai/oryx/tombstone1.png
+      FollowCam: *tombstone_sprite
+      CloseUp: *tombstone_sprite
+      Isometric: &tombstone_iso
+        - Image: remastered/iso-tombstone.png
+      IsoFollow: *tombstone_iso
+      Block2D:
+        - Shape: square
+          Color: [0.5, 0.5, 0.5]
+          Scale: 1.0
+  - Name: torch
+    MapCharacter: "|"
+    Z: 1
+    Observers:
+      Sprite2D: &torch_sprite
+        - Image: gvgai/oryx/torch1.png
+      FollowCam: *torch_sprite
+      CloseUp: *torch_sprite
+      Isometric: &torch_iso
+        - Image: remastered/iso-torch.png
+      IsoFollow: *torch_iso
+      Block2D:
+        - Shape: square
+          Color: [1.0, 0.6, 0.1]
+          Scale: 1.0
+  - Name: tunnel
+    MapCharacter: "n"
+    Z: 0
+    Observers:
+      Sprite2D: &tunnel_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_dirt_b.png
+      FollowCam: *tunnel_sprite
+      CloseUp: *tunnel_sprite
+      Isometric: &tunnel_iso
+        - Image: remastered/minecrawler-tunnel-iso.png
+          TilingMode: ISO_FLOOR
+      IsoFollow: *tunnel_iso
+      Block2D:
+        - Shape: square
+          Color: [0.35, 0.25, 0.15]
+          Scale: 0.9
+  - Name: bedrock
+    MapCharacter: "W"
+    Z: 1
+    Observers:
+      Sprite2D: &bedrock_sprite
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall4-0.png
+            - oryx/oryx_fantasy/wall4-1.png
+            - oryx/oryx_fantasy/wall4-2.png
+            - oryx/oryx_fantasy/wall4-3.png
+            - oryx/oryx_fantasy/wall4-4.png
+            - oryx/oryx_fantasy/wall4-5.png
+            - oryx/oryx_fantasy/wall4-6.png
+            - oryx/oryx_fantasy/wall4-7.png
+            - oryx/oryx_fantasy/wall4-8.png
+            - oryx/oryx_fantasy/wall4-9.png
+            - oryx/oryx_fantasy/wall4-10.png
+            - oryx/oryx_fantasy/wall4-11.png
+            - oryx/oryx_fantasy/wall4-12.png
+            - oryx/oryx_fantasy/wall4-13.png
+            - oryx/oryx_fantasy/wall4-14.png
+            - oryx/oryx_fantasy/wall4-15.png
+      FollowCam: *bedrock_sprite
+      CloseUp: *bedrock_sprite
+      Isometric: &bedrock_iso
+        - Image: remastered/minecrawler-bedrock-iso.png
+      IsoFollow: *bedrock_iso
+      Block2D:
+        - Shape: square
+          Color: [0.3, 0.3, 0.35]
+          Scale: 1.0
+  - Name: dirt_block
+    MapCharacter: "d"
+    Z: 1
+    Observers:
+      Sprite2D: &dirt_block_sprite
+        - TilingMode: WALL_16
+          Image:
+            - gvgai/oryx/dirtWall_0.png
+            - gvgai/oryx/dirtWall_1.png
+            - gvgai/oryx/dirtWall_2.png
+            - gvgai/oryx/dirtWall_3.png
+            - gvgai/oryx/dirtWall_4.png
+            - gvgai/oryx/dirtWall_5.png
+            - gvgai/oryx/dirtWall_6.png
+            - gvgai/oryx/dirtWall_7.png
+            - gvgai/oryx/dirtWall_8.png
+            - gvgai/oryx/dirtWall_9.png
+            - gvgai/oryx/dirtWall_10.png
+            - gvgai/oryx/dirtWall_11.png
+            - gvgai/oryx/dirtWall_12.png
+            - gvgai/oryx/dirtWall_13.png
+            - gvgai/oryx/dirtWall_14.png
+            - gvgai/oryx/dirtWall_15.png
+      FollowCam: *dirt_block_sprite
+      CloseUp: *dirt_block_sprite
+      Isometric: &dirt_block_iso
+        - Image: remastered/minecrawler-dirt-iso.png
+      IsoFollow: *dirt_block_iso
+      Block2D:
+        - Shape: square
+          Color: [0.5, 0.35, 0.2]
+          Scale: 1.0
+  - Name: rock_block
+    MapCharacter: "r"
+    Z: 1
+    Variables:
+      - Name: hp
+        InitialValue: 2
+    Observers:
+      Sprite2D: &rock_block_sprite
+        - Image: oryx/oryx_fantasy/wall2-0.png
+        - Image: remastered/minecrawler-rock-cracked.png
+      FollowCam: *rock_block_sprite
+      CloseUp: *rock_block_sprite
+      Isometric: &rock_block_iso
+        - Image: remastered/minecrawler-rock-iso.png
+        - Image: remastered/minecrawler-rock-cracked-iso.png
+      IsoFollow: *rock_block_iso
+      Block2D:
+        - Shape: square
+          Color: [0.55, 0.55, 0.6]
+          Scale: 1.0
+        - Shape: square
+          Color: [0.55, 0.55, 0.6]
+          Scale: 0.8
+  - Name: vein
+    MapCharacter: "v"
+    Z: 1
+    Observers:
+      Sprite2D: &vein_sprite
+        - Image: remastered/minecrawler-vein.png
+      FollowCam: *vein_sprite
+      CloseUp: *vein_sprite
+      Isometric: &vein_iso
+        - Image: remastered/minecrawler-vein-iso.png
+      IsoFollow: *vein_iso
+      Block2D:
+        - Shape: square
+          Color: [0.3, 0.8, 0.5]
+          Scale: 1.0
+  - Name: boulder
+    MapCharacter: "O"
+    Z: 1
+    Variables:
+      - Name: falling
+        InitialValue: 0
+    InitialActions:
+      - Action: fall
+        ActionId: 1
+        Delay: 2
+    Observers:
+      Sprite2D: &boulder_sprite
+        - Image: remastered/minecrawler-boulder.png
+        - Image: remastered/minecrawler-boulder-wobble.png
+      FollowCam: *boulder_sprite
+      CloseUp: *boulder_sprite
+      Isometric: &boulder_iso
+        - Image: remastered/minecrawler-boulder-iso.png
+        - Image: remastered/minecrawler-boulder-wobble-iso.png
+      IsoFollow: *boulder_iso
+      Block2D:
+        - Shape: circle
+          Color: [0.6, 0.5, 0.4]
+          Scale: 0.9
+        - Shape: circle
+          Color: [0.6, 0.5, 0.4]
+          Scale: 0.8
+  - Name: lava
+    MapCharacter: "L"
+    Z: 1
+    InitialActions:
+      - Action: flow
+        Delay: 7
+        Randomize: true
+    Observers:
+      Sprite2D: &lava_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_lava.png
+      FollowCam: *lava_sprite
+      CloseUp: *lava_sprite
+      Isometric: &lava_iso
+        - Image: oryx/oryx_iso_dungeon/lava-1.png
+          TilingMode: ISO_FLOOR
+          Offset: [0, 4]
+      IsoFollow: *lava_iso
+      Block2D:
+        - Shape: square
+          Color: [1.0, 0.35, 0.05]
+          Scale: 1.0
+  - Name: ore
+    MapCharacter: "o"
+    Z: 1
+    Observers:
+      Sprite2D: &ore_sprite
+        - Image: oryx/oryx_fantasy/ore-6.png
+      FollowCam: *ore_sprite
+      CloseUp: *ore_sprite
+      Isometric: &ore_iso
+        - Image: oryx/oryx_iso_dungeon/ore-6.png
+      IsoFollow: *ore_iso
+      Block2D:
+        - Shape: triangle
+          Color: [0.6, 0.2, 0.7]
+          Scale: 0.5
+  - Name: timber
+    MapCharacter: "t"
+    Z: 1
+    Observers:
+      Sprite2D: &timber_sprite
+        - Image: gvgai/newset/log.png
+      FollowCam: *timber_sprite
+      CloseUp: *timber_sprite
+      Isometric: &timber_iso
+        - Image: remastered/minecrawler-timber-iso.png
+      IsoFollow: *timber_iso
+      Block2D:
+        - Shape: square
+          Color: [0.6, 0.4, 0.2]
+          Scale: 0.5
+  - Name: ration
+    MapCharacter: "f"
+    Z: 1
+    Observers:
+      Sprite2D: &ration_sprite
+        - Image: sprite2d/food.png
+      FollowCam: *ration_sprite
+      CloseUp: *ration_sprite
+      Isometric: &ration_iso
+        - Image: remastered/minecrawler-ration-iso.png
+      IsoFollow: *ration_iso
+      Block2D:
+        - Shape: circle
+          Color: [0.9, 0.5, 0.4]
+          Scale: 0.5
+  - Name: cart
+    MapCharacter: "c"
+    Z: 1
+    InitialActions:
+      - Action: count_goal
+        ActionId: 1
+    Observers:
+      Sprite2D: &cart_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
+      FollowCam: *cart_sprite
+      CloseUp: *cart_sprite
+      Isometric: &cart_iso
+        - Image: remastered/minecrawler-cart-iso.png
+      IsoFollow: *cart_iso
+      Block2D:
+        - Shape: square
+          Color: [0.6, 0.45, 0.2]
+          Scale: 0.7
+  - Name: cart_full
+    Z: 1
+    Observers:
+      Sprite2D: &cart_full_sprite
+        - Image: remastered/minecrawler-cart-full.png
+      FollowCam: *cart_full_sprite
+      CloseUp: *cart_full_sprite
+      Isometric: &cart_full_iso
+        - Image: remastered/minecrawler-cart-full-iso.png
+      IsoFollow: *cart_full_iso
+      Block2D:
+        - Shape: square
+          Color: [0.6, 0.3, 0.7]
+          Scale: 0.7
+  - Name: lift
+    MapCharacter: "E"
+    Z: 1
+    Observers:
+      Sprite2D: &lift_sprite
+        - Image: gvgai/oryx/stairsup1.png
+      FollowCam: *lift_sprite
+      CloseUp: *lift_sprite
+      Isometric: &lift_iso
+        - Image: remastered/minecrawler-lift-iso.png
+      IsoFollow: *lift_iso
+      Block2D:
+        - Shape: square
+          Color: [1.0, 0.85, 0.2]
+          Scale: 0.9
+  - Name: beam
+    Z: 2
+    Observers:
+      Sprite2D: &beam_sprite
+        - Image: remastered/minecrawler-beam.png
+      FollowCam: *beam_sprite
+      CloseUp: *beam_sprite
+      Isometric: &beam_iso
+        - Image: remastered/minecrawler-beam-iso.png
+      IsoFollow: *beam_iso
+      Block2D:
+        - Shape: square
+          Color: [0.7, 0.5, 0.25]
+          Scale: 0.4
+  - Name: miner
+    MapCharacter: "A"
+    Z: 1
+    Variables:
+      - Name: ore
+        InitialValue: 0
+      - Name: stamina
+        InitialValue: 30
+      - Name: timber
+        InitialValue: 0
+    InitialActions:
+      - Action: face
+        ActionId: 2
+    Observers:
+      Sprite2D: &miner_sprite
+        - Image: remastered/minecrawler-miner-up.png
+        - Image: remastered/minecrawler-miner-right.png
+        - Image: remastered/minecrawler-miner-down.png
+        - Image: remastered/minecrawler-miner-left.png
+      FollowCam: *miner_sprite
+      CloseUp: *miner_sprite
+      Isometric: &miner_iso
+        - Image: remastered/minecrawler-miner-iso-flip.png
+        - Image: remastered/minecrawler-miner-iso.png
+        - Image: remastered/minecrawler-miner-iso.png
+        - Image: remastered/minecrawler-miner-iso-flip.png
+      IsoFollow: *miner_iso
+      Block2D:
+        - Shape: triangle
+          Color: [0.2, 0.6, 1.0]
+          Scale: 0.8
+        - Shape: triangle
+          Color: [0.2, 0.6, 1.0]
+          Scale: 0.8
+        - Shape: triangle
+          Color: [0.2, 0.6, 1.0]
+          Scale: 0.8
+        - Shape: triangle
+          Color: [0.2, 0.6, 1.0]
+          Scale: 0.8
+Version: "0.1"
+Environment:
   Name: Night Garden
   Description: |
     Sneak through a hedge garden at night, seen over your shoulder (egocentric, rotating view).
@@ -14162,7 +15932,7 @@ Environment:
     Generated by studio/griddly-demo/tools/remaster ‚Äî edit the generator, not this file.
   # Cameras are observers. The demo picks one by name and the engine renders it.
   #   Sprite2D   whole level (global observer); oriented objects are drawn rotated
-  #   EgoView    9x9 first-person window: follows AND rotates with the avatar (forward = up)
+  #   EgoView    9x9 first-person window: follows AND rotates with the avatar (forward = up), avatar 2 rows below centre
   #   EgoClose   7x7 first-person window
   #   FollowCam  15x11 window that follows the avatar without rotating
   # The agent's default observation (Player.Observer) is the 9x9 egocentric window.
@@ -14181,6 +15951,7 @@ Environment:
       RotateAvatarImage: true
       Width: 9
       Height: 9
+      OffsetY: 2
     EgoClose:
       Type: SPRITE_2D
       TileSize: 24
@@ -14190,6 +15961,7 @@ Environment:
       RotateAvatarImage: true
       Width: 7
       Height: 7
+      OffsetY: 0
     FollowCam:
       Type: SPRITE_2D
       TileSize: 24
@@ -14199,6 +15971,7 @@ Environment:
       RotateAvatarImage: true
       Width: 15
       Height: 11
+      OffsetY: 0
     Block2D:
       TileSize: 24
   Variables:
@@ -14221,6 +15994,7 @@ Environment:
       RotateAvatarImage: true
       Width: 9
       Height: 9
+      OffsetY: 2
     AvatarObject: avatar
   Termination:
     Win:
@@ -14856,6 +16630,1002 @@ Objects:
       Block2D:
         - Shape: triangle
           Color: [0.3, 0.9, 0.9]
+          Scale: 0.8
+Version: "0.1"
+Environment:
+  Name: Slime Ranch
+  Description: |
+    An isometric slime ranch. Push two slimes of the same colour and size together to merge them
+    into a bigger slime; two jellies make a King. Harvest crops and `feed` slimes to grow them, or
+    feed a jelly for a gem. Jellies and Kings also produce gems over time. Fill every gem order
+    pedestal and breed as many Kings as there are thrones. Beasts steal the food you carry.
+    Generated by studio/griddly-demo/tools/remaster ‚Äî edit the generator, not this file.
+  # Cameras are observers. The demo picks one by name and the engine renders it.
+  #   Isometric  whole level, isometric (the main view of this game)
+  #   IsoFollow  11x11 isometric window that follows the avatar
+  #   Sprite2D   whole level, top-down
+  #   FollowCam  15x11 top-down window that follows the avatar
+  #   CloseUp    9x9 top-down window that follows the avatar (also the agent's default view)
+  Observers:
+    Isometric:
+      TileSize: [32, 48]
+      IsoTileHeight: 16
+      IsoTileDepth: 4
+      BackgroundTile: oryx/oryx_iso_dungeon/grass-1.png
+    IsoFollow:
+      Type: ISOMETRIC
+      TileSize: [32, 48]
+      IsoTileHeight: 16
+      IsoTileDepth: 4
+      BackgroundTile: oryx/oryx_iso_dungeon/grass-1.png
+      TrackAvatar: true
+      RotateWithAvatar: false
+      Width: 11
+      Height: 11
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: gvgai/oryx/grass_15.png
+      RotateAvatarImage: false
+      TrackAvatar: false
+    FollowCam:
+      Type: SPRITE_2D
+      TileSize: 24
+      BackgroundTile: gvgai/oryx/grass_15.png
+      RotateAvatarImage: false
+      RotateWithAvatar: false
+      TrackAvatar: true
+      Width: 15
+      Height: 11
+    CloseUp:
+      Type: SPRITE_2D
+      TileSize: 24
+      BackgroundTile: gvgai/oryx/grass_15.png
+      RotateAvatarImage: false
+      RotateWithAvatar: false
+      TrackAvatar: true
+      Width: 9
+      Height: 9
+    Block2D:
+      TileSize: 24
+  Variables:
+    - Name: gems_needed
+      InitialValue: 0
+    - Name: kings_needed
+      InitialValue: 0
+  Player:
+    Observer:
+      TrackAvatar: true
+      RotateWithAvatar: false
+      RotateAvatarImage: false
+      Width: 9
+      Height: 9
+    AvatarObject: rancher
+  Termination:
+    Win:
+      - and: [{lte: [gems_needed, 0]}, {lte: [kings_needed, 0]}]
+  Levels:
+    # Green Pastures | Grow your first slimes and fill three gem orders.
+    - |
+      &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &
+      &   .   ,   ,   ,   .   ,   ,   ,   .   .   ,   .   ,   ,   .   ,   ,   ,   ,   ,   &
+      &   .   .   .   .   .   .   H   H   %   .   F   F   F   F   F   F   F   F   F   ,   &
+      &   ,   _   .   .   .   .   .   .   .   ,   F   ,   ,   ,   ,   ,   .   .   F   .   &
+      &   .   .   .   .   *   A   .   *   ,   ,   F   ,   ,   ,   ,   ,   .   g   F   ,   &
+      &   ,   .   .   .   .   .   .   .   .   .   G   ,   ,   ,   ,   ,   .   .   F   .   &
+      &   .   P   .   P   .   P   .   .   .   *   F   .   .   g   g   .   ,/g ,   F   .   &
+      &   ,   .   .   .   .   .   .   .   .   .   F   .   .   .   .   ,   ,   .   F   ,   &
+      &   %   .   .   .   .   .   .   .   .   .   F   F   F   F   F   F   F   F   F   .   &
+      &   ,   C   C   C   C   C   C   C   .   .   .   .   .   .   .   .   .   .   .   ,   &
+      &   .   :   :   :   :   :   :   :   ,   .   .   .   .   .   .   .   .   .   .   ,   &
+      &   .   C   C   C   C   C   C   C   ,   ,   ,   *   .   ~   ~   ~   .   .   .   .   &
+      &   ,   .   ,   ,   .   ,   ,   .   ,   ,   ,   ,   .   ~   ~   ~   ,   .   ,   %   &
+      &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &
+    # Two-Tone Ranch | Green and blue pens, four gem orders.
+    - |
+      &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &
+      &   ,   ,   ,   .   ,   ,   .   ,   .   ,   *   %   ,   ,   .   ,   .   ,   .   .   .   ,   .   ,   &
+      &   ,   F   F   F   F   F   F   F   F   .   .   .   .   .   .   F   F   F   F   F   F   F   F   .   &
+      &   ,   F   .   g   g   *   .   .   F   .   @   @   @   @   .   F   :   .   .   ,   b   b   F   ,   &
+      &   ,   F   g   .   .   .   .   .   G   :   :   :   :   :   :   G   :   :/b ,   ,   ,   .   F   .   &
+      &   ,   F   ,   .   .   .   .   g   F   :   .   :/A :   .   :   F   :   :   .   .   .   b   F   ,   &
+      &   ,   F   ,   .   .   .   .   g   F   :   :   :   :   :   .   F   :   :   b   .   .   .   F   .   &
+      &   ,   F   F   F   F   F   F   F   F   .   P   ,   :   P   ,   F   F   F   F   F   F   F   F   .   &
+      &   ,   ,   .   .   ,   ,   ,   .   ,   ,   ,   P   P   ,   ,   .   .   *   .   .   .   .   .   ,   &
+      &   .   .   .   .   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,   ,   .   .   .   .   .   .   .   .   .   &
+      &   ,   H   .   .   .   .   .   .   ,   ,   ,   ,   ,   .   .   .   .   .   .   .   .   .   H   H   &
+      &   ,   .   .   .   C   C   C   C   C   C   C   C   C   C   C   C   C   C   C   C   .   .   .   *   &
+      &   ,   .   ,   ,   :   :   :   :   :   :   :   :   :   :   :   :   :   :   :   :   ,   .   .   ,   &
+      &   %   ,   ,   ,   C   C   C   C   C   C   C   C   C   C   C   C   C   C   C   C   ,   ,   .   %   &
+      &   ,   ,   ,   ,   ,   ,   .   .   ,   ,   .   .   .   ,   .   .   .   *   .   ,   ,   ,   ,   ,   &
+      &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &
+    # Royal Pen | Merge pink slimes all the way up to a King.
+    - |
+      $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $
+      $   .   .   .   .   .   .   _   .   .   .   .   .   .   .   .   .   ,   ,   ,   ,   ,   ,   .   .   $
+      $   .   |   .   .   .   .   _   _   .   |   .   ,   F   F   F   F   F   F   F   F   F   F   F   .   $
+      $   .   .   .   A   .   _   _   _   ,   ,   ,   ,   F   +   .   .   p   ,   .   .   .   ,   F   .   $
+      $   *   .   .   .   .   _   _   _   ,   ,   ,   ,   F   .   .   .   .   .   .   .   .   *   F   .   $
+      $   .   .   .   .   .   .   _   .   ,   ,   ,   ,   G   .   ,   ,   ,   ,   .   .   .   +   F   .   $
+      $   .   .   .   .   .   .   .   .   .   ,   ,   ,   F   ,   ,   ,   ,/p ,/p .   p   *   .   F   .   $
+      $   .   |   .   T   .   .   P   P   ,   ,   ,   ,   F   ,   ,/p ,   ,   ,   .   .   *   .   F   .   $
+      $   .   .   .   ,   .   _   _   _   .   ,   ,   ,   F   .   .   .   ,   ,   ,   ,   .   p   F   .   $
+      $   .   .   ,   ,   ,   ,   ,   _   _   .   .   .   F   F   F   F   F   G   F   F   F   F   F   .   $
+      $   .   .   ,   ,   ,   ,   ,   _   _   .   .   .   .   ,   ,   ,   .   ,   .   .   .   .   .   .   $
+      $   .   C   C   C   C   C   C   C   C   C   ,   ,   ,   ,   ,   ,   ,   .   .   .   .   .   .   .   $
+      $   .   :   :   :   :   :   :   :   :   :   .   ,   ,   ,   ,   ,   .   .   .   .   *   .   H   .   $
+      $   .   C   C   C   C   C   C   C   C   C   ,   ,   ,   =   ,   ~   ~   ~   ~   ~   .   .   H   .   $
+      $   .   :   :   :   :   :   :   :   :   :   .   .   ,   .   ,   ,   ~   ~   ~   ~   .   .   .   .   $
+      $   .   C   C   C   C   C   C   C   C   C   .   .   ,   ,   .   .   ~   ~   .   .   .   .   .   .   $
+      $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $   $
+    # Beast Prairie | Three pens, a throne and beasts that steal your crops.
+    - |
+      &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &
+      &   ,   ,   .   ,   .   ,   :   :   :   ,   .   ,   ,   ,   .   .   ,   ,   ,   .   .   ,   .   ,   .   .   ,   ,   &
+      &   ,   F   F   F   F   F   F   F   F   :   H   .   T   ,   *   H   .   ,   ,   F   F   F   F   F   F   F   F   ,   &
+      &   .   F   g   .   .   .   :   .   F   .   .   .   .   ,   ,   ,   ,   .   .   F   ,   ,   ,   .   b   ,   F   ,   &
+      &   ,   F   .   .   .   .   g   *   F   .   .   .   ,   ,   ,   ,   .   ,   *   F   ,   ,/b .   .   .   ,/b F   ,   &
+      &   .   F   .   g   *   .   .   .   G   ,   ,   ,   ,   ,/A ,   ,   ,   ,   .   G   *   .   .   b   .   ,   F   ,   &
+      &   .   F   .   .   .   g   .   g   F   ,   ,   ,   ,   ,   ,   ,   ,   ,   .   F   .   .   .   .   b   ,   F   ,   &
+      &   .   F   .   .   g   .   .   .   F   ,   ,   ,   ,   P   ,   ,   ,   .   .   F   .   .   .   b   .   ,   F   ,   &
+      &   ,   F   F   F   F   F   F   F   F   ,   ,   P   ,   ,   .   P   .   .   .   F   F   F   F   F   F   F   F   ,   &
+      &   ,   .   .   .   .   ,   .   .   .   ,   .   ,   :   P   .   .   .   .   .   .   .   .   .   .   _   _   .   _   &
+      &   ,   ,   ,   ~   ~   ,   ,   .   .   .   :   .   :   :   :   .   .   .   .   .   .   .   .   .   _   _   _   ,   &
+      &   ,   ,   ,   .   ,   .   .   .   .   .   :   :   :   ,   ,   %   ,   .   .   F   F   F   F   F   F   F   F   ,   &
+      &   .   ,   C   :   C   :   C   :   C   :   C   :   C   :   ,   ,   .   .   .   F   ,   ,   .   .   .   :/p F   ,   &
+      &   ,   ,   :   :   :   :   :   :   :   :   B   :   :   :   ,   ,   B   .   ,   G   ,   ,/p ,   .   :/p :/p F   .   &
+      &   ,   ,   C   :   C   :   C   :   C   :   C   :   C   :   ,   ,   ,   ,   ,   F   ,   ,/p ,   ,   :   :   F   .   &
+      &   ,   ,   :   :   :   :   :   :   :   :   :   :   :   :   ,   ,   %   ,   .   F   ,   ,   ,   ,   *   :   F   .   &
+      &   ,   ,   C   :   C   :   C   :   C   :   C   :   C   :   ,   ,   ,   ,   ,   F   F   F   F   F   F   F   F   .   &
+      &   ,   ,   ,   ,   ,   .   ,   ,   ,   .   ,   ,   ,   ,   ,   ,   ,   .   .   ,   ,   .   ,   ,   .   ,   ,   ,   &
+      &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &
+    # Slime Kingdom | Two Kings and four gem orders. Rule the ranch!
+    - |
+      &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &
+      &   ,   ,   ,   ,   ,   ,   ,   ,   .   .   .   ,   .   .   :   ,   :   ,   ,   .   ,   ,   ,   .   .   ,   ,   ,   ,   ,   &
+      &   ,   F   F   F   F   F   F   F   F   F   .   H   .   T   :   :   T   .   H   .   F   F   F   F   F   F   F   F   F   ,   &
+      &   ,   F   ,   ,   ,   ,   .   .   g   F   .   .   .   .   .   .   .   .   .   .   F   .   .   ,   b   ,   +   .   F   .   &
+      &   ,   F   ,   ,   ,/g ,   .   .   .   F   *   .   .   .   .   ,   ,   ,   ,   ,   F   .   .   ,   ,   ,   .   .   F   ,   &
+      &   ,   F   ,   ,   ,/g .   .   .   .   G   .   .   .   .   ,   *   ,   ,   ,   ,   G   .   .   ,   ,/b ,   ,/b *   F   ,   &
+      &   ,   F   .   .   .   .   .   g   g   F   ,   .   ,   .   A   ,   ,   ,   ,   ,   F   .   ,   ,/b ,/b ,   ,   .   F   ,   &
+      &   .   F   g   .   .   .   g   .   .   F   ,   ,   ,   .   .   ,   ,   ,   ,   ,   F   ,   ,   ,   .   ,   b   .   F   .   &
+      &   ,   F   F   F   F   G   F   F   F   F   ,   ,   ,   ,   .   ,   ,   ,   ,   ,   F   F   F   F   F   F   F   F   F   .   &
+      &   ,   .   .   .   *   .   .   .   :   ,   ,   ,   P   ,   .   .   ,   ,   P   ,   ,   ,   ,   ,   .   .   .   .   .   ,   &
+      &   %   ,   .   .   .   .   .   .   :   :   ,   ,   ,/B .   P   .   P   ,   ,   .   ,   ,   ,   ,   .   .   .   .   .   %   &
+      &   .   .   .   *   .   .   .   +   :   *   .   :   :   .   .   .   ,   ,   ,   ,   F   F   F   F   G   F   F   F   F   .   &
+      &   ,   C   C   C   C   C   C   C   C   C   C   C   C   .   .   .   ,   ,/B ,   .   F   ,/p .   .   .   .   .   p   F   .   &
+      &   ,   :   :   :   :   :   :   :   :   :   :   :   :   .   .   ,   .   ,   ,   ,   F   .   p   .   .   .   .   *   F   ,   &
+      &   .   C   C   C   C   C   C   C   C   C   C   C   C   @   .   ,   @   .   ,   ,   G   .   .   .   .   .   .   .   F   .   &
+      &   .   :   :   :   :   :   :   :   :   :   :   :   :   .   .   .   .   ,   ,   ,   F   ,   p   p   .   .   .   p   F   ,   &
+      &   .   C   C   C   C   C   C   C   C   C   C   C   C   .   |   |   ,   .   .   ,   F   ,   .   .   .   .   .   p   F   ,   &
+      &   .   :   :   :   :   :   :   :   :   :   :   :   :   .   .   .   ~   ,   ,   ,   F   F   F   F   F   F   F   F   F   .   &
+      &   ,   .   ,   *   ,   ,   :   ,   .   .   ,   .   .   ,   ,   ~   ~   ~   ,   ,   ,   ,   .   ,   ,   .   ,   .   ,   ,   &
+      &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &   &
+
+Actions:
+  - Name: face
+    InputMapping:
+      Internal: true
+      Inputs:
+        2: {Description: Face down, VectorToDest: [0, 0], MetaData: {facing: 2}}
+    Behaviours:
+      - Src: {Object: rancher, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: rancher}
+
+  # Order pedestals and thrones count themselves into the level's goals at reset.
+  - Name: count_goal
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {Description: Count, VectorToDest: [0, 0]}
+    Behaviours:
+      - Src: {Object: pedestal, Commands: [{incr: gems_needed}]}
+        Dst: {Object: pedestal}
+      - Src: {Object: throne, Commands: [{incr: kings_needed}]}
+        Dst: {Object: throne}
+
+  # Crops ripen (render tile 1) some time after being harvested.
+  - Name: ripen
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {Description: Ripen, VectorToDest: [0, 0]}
+    Behaviours:
+      - Src: {Object: crop, Commands: [{set: [ripe, 1]}, {set_tile: 1}]}
+        Dst: {Object: crop}
+
+  # Slimes wander slowly (idle inputs make half the tries a pause) and never step onto gates.
+  - Name: wander
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {Description: West, VectorToDest: [-1, 0]}
+        2: {Description: North, VectorToDest: [0, -1]}
+        3: {Description: East, VectorToDest: [1, 0]}
+        4: {Description: South, VectorToDest: [0, 1]}
+        5: {Description: Rest, VectorToDest: [0, 0]}
+        6: {Description: Rest, VectorToDest: [0, 0]}
+        7: {Description: Rest, VectorToDest: [0, 0]}
+        8: {Description: Rest, VectorToDest: [0, 0]}
+    Behaviours:
+      - Src: {Object: [slime_green, slime_blue, slime_pink], Commands: [{mov: _dest}, {exec: {Action: wander, Delay: 8, Randomize: true}}]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge]}
+      - Src: {Object: [slime_green, slime_blue, slime_pink], Commands: [{exec: {Action: wander, Delay: 8, Randomize: true}}]}
+        Dst: {Object: [water, tree, bush, rock, hedge, stone, tombstone, torch, fence, gate, crate, crop, pedestal, pedestal_full, throne, gem, king, beast, rancher, slime_green, slime_blue, slime_pink]}
+
+  # Beasts prowl outside the pens; bumping into the rancher they gobble its food.
+  - Name: prowl
+    InputMapping:
+      Internal: true
+    Behaviours:
+      - Src: {Object: beast, Commands: [{mov: _dest}, {exec: {Action: prowl, Delay: 3, Randomize: true}}]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge]}
+      - Src: {Object: beast, Commands: [{exec: {Action: prowl, Delay: 3, Randomize: true}}]}
+        Dst: {Object: [water, tree, bush, rock, hedge, stone, tombstone, torch, fence, gate, crate, crop, pedestal, pedestal_full, throne, gem, king, beast, slime_green, slime_blue, slime_pink]}
+      - Src: {Object: beast, Commands: [{exec: {Action: prowl, Delay: 3, Randomize: true}}]}
+        Dst: {Object: rancher, Commands: [{set: [food, 0]}]}
+
+  # Jellies (tier 2) produce a gem every ~30 ticks into a random free neighbour, Kings every ~12.
+  - Name: produce
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: {Description: West, VectorToDest: [-1, 0]}
+        2: {Description: North, VectorToDest: [0, -1]}
+        3: {Description: East, VectorToDest: [1, 0]}
+        4: {Description: South, VectorToDest: [0, 1]}
+    Behaviours:
+      - Src:
+          Object: [slime_green, slime_blue, slime_pink]
+          Preconditions: [{eq: [src.tier, 2]}]
+          Commands: [{spawn: gem}, {exec: {Action: produce, Delay: 30, Randomize: true}}]
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge]}
+      - Src:
+          Object: [slime_green, slime_blue, slime_pink]
+          Preconditions: [{eq: [src.tier, 2]}]
+          Commands: [{exec: {Action: produce, Delay: 4, Randomize: true}}]
+        Dst: {Object: [water, tree, bush, rock, hedge, stone, tombstone, torch, fence, gate, crate, crop, pedestal, pedestal_full, throne, gem, king, beast, rancher, slime_green, slime_blue, slime_pink]}
+      - Src:
+          Object: [slime_green, slime_blue, slime_pink]
+          Preconditions: [{lt: [src.tier, 2]}]
+          Commands: [{exec: {Action: produce, Delay: 30, Randomize: true}}]
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge, water, tree, bush, rock, hedge, stone, tombstone, torch, fence, gate, crate, crop, pedestal, pedestal_full, throne, gem, king, beast, rancher, slime_green, slime_blue, slime_pink]}
+      - Src: {Object: king, Commands: [{spawn: gem}, {exec: {Action: produce, Delay: 12, Randomize: true}}]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge]}
+      - Src: {Object: king, Commands: [{exec: {Action: produce, Delay: 3, Randomize: true}}]}
+        Dst: {Object: [water, tree, bush, rock, hedge, stone, tombstone, torch, fence, gate, crate, crop, pedestal, pedestal_full, throne, gem, king, beast, rancher, slime_green, slime_blue, slime_pink]}
+
+  # The rancher walks up / down / left / right. Walking into a slime pushes it (merging it into a
+  # same-colour same-tier slime behind it), into a ripe crop harvests it, into a gem picks it up and
+  # into an empty pedestal (carrying a gem) fills the order.
+  - Name: move
+    InputMapping:
+      Inputs:
+        1: {Description: Left, VectorToDest: [-1, 0], MetaData: {facing: 3}}
+        2: {Description: Up, VectorToDest: [0, -1], MetaData: {facing: 0}}
+        3: {Description: Right, VectorToDest: [1, 0], MetaData: {facing: 1}}
+        4: {Description: Down, VectorToDest: [0, 1], MetaData: {facing: 2}}
+    Behaviours:
+      - Src: {Object: rancher, Commands: [{set_tile: meta.facing}, {mov: _dest}]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge, gate]}
+      - Src: {Object: rancher, Commands: [{set_tile: meta.facing}, {mov: _dest}, {incr: gems}, {reward: 1}]}
+        Dst: {Object: gem, Commands: [{remove: true}]}
+      - Src: {Object: rancher, Commands: [{set_tile: meta.facing}, {cascade: _dest}, {mov: _dest}]}
+        Dst: {Object: [slime_green, slime_blue, slime_pink]}
+      - Src:
+          Object: rancher
+          Preconditions: [{eq: [dst.ripe, 1]}, {lt: [src.food, 3]}]
+          Commands: [{set_tile: meta.facing}, {incr: food}, {reward: 1}]
+        Dst: {Object: crop, Commands: [{set: [ripe, 0]}, {set_tile: 0}, {exec: {Action: ripen, ActionId: 1, Delay: 40}}]}
+      - Src:
+          Object: rancher
+          Preconditions: [{gte: [src.gems, 1]}]
+          Commands: [{set_tile: meta.facing}, {decr: gems}, {reward: 5}]
+        Dst: {Object: pedestal, Commands: [{decr: gems_needed}, {change_to: pedestal_full}]}
+      - Src: {Object: rancher, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: [water, tree, bush, rock, hedge, stone, tombstone, torch, fence, crate, crop, pedestal, pedestal_full, throne, king, beast]}
+      - Src: {Object: slime_green, Commands: [{mov: _dest}]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge, gate]}
+      - Src: {Object: slime_green, Commands: [{mov: _dest}]}
+        Dst: {Object: gem, Commands: [{remove: true}]}
+      - Src:
+          Object: slime_green
+          Preconditions: [{eq: [src.tier, dst.tier]}, {lt: [src.tier, 2]}]
+          Commands: [{remove: true}]
+        Dst: {Object: slime_green, Commands: [{incr: tier}, {set_tile: tier}, {reward: 2}]}
+      - Src:
+          Object: slime_green
+          Preconditions: [{eq: [src.tier, 2]}, {eq: [dst.tier, 2]}]
+          Commands: [{remove: true}]
+        Dst: {Object: slime_green, Commands: [{decr: kings_needed}, {reward: 10}, {change_to: king}]}
+      - Src: {Object: slime_blue, Commands: [{mov: _dest}]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge, gate]}
+      - Src: {Object: slime_blue, Commands: [{mov: _dest}]}
+        Dst: {Object: gem, Commands: [{remove: true}]}
+      - Src:
+          Object: slime_blue
+          Preconditions: [{eq: [src.tier, dst.tier]}, {lt: [src.tier, 2]}]
+          Commands: [{remove: true}]
+        Dst: {Object: slime_blue, Commands: [{incr: tier}, {set_tile: tier}, {reward: 2}]}
+      - Src:
+          Object: slime_blue
+          Preconditions: [{eq: [src.tier, 2]}, {eq: [dst.tier, 2]}]
+          Commands: [{remove: true}]
+        Dst: {Object: slime_blue, Commands: [{decr: kings_needed}, {reward: 10}, {change_to: king}]}
+      - Src: {Object: slime_pink, Commands: [{mov: _dest}]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge, gate]}
+      - Src: {Object: slime_pink, Commands: [{mov: _dest}]}
+        Dst: {Object: gem, Commands: [{remove: true}]}
+      - Src:
+          Object: slime_pink
+          Preconditions: [{eq: [src.tier, dst.tier]}, {lt: [src.tier, 2]}]
+          Commands: [{remove: true}]
+        Dst: {Object: slime_pink, Commands: [{incr: tier}, {set_tile: tier}, {reward: 2}]}
+      - Src:
+          Object: slime_pink
+          Preconditions: [{eq: [src.tier, 2]}, {eq: [dst.tier, 2]}]
+          Commands: [{remove: true}]
+        Dst: {Object: slime_pink, Commands: [{decr: kings_needed}, {reward: 10}, {change_to: king}]}
+
+  # Give one food to the slime in front (directional; the UI sends the last move direction).
+  - Name: feed
+    InputMapping:
+      Inputs:
+        1: {Description: Left, VectorToDest: [-1, 0], MetaData: {facing: 3}}
+        2: {Description: Up, VectorToDest: [0, -1], MetaData: {facing: 0}}
+        3: {Description: Right, VectorToDest: [1, 0], MetaData: {facing: 1}}
+        4: {Description: Down, VectorToDest: [0, 1], MetaData: {facing: 2}}
+    Behaviours:
+      - Src:
+          Object: rancher
+          Preconditions: [{gte: [src.food, 1]}, {lt: [dst.tier, 2]}]
+          Commands: [{set_tile: meta.facing}, {decr: food}, {reward: 1}]
+        Dst: {Object: [slime_green, slime_blue, slime_pink], Commands: [{incr: tier}, {set_tile: tier}]}
+      - Src:
+          Object: rancher
+          Preconditions: [{gte: [src.food, 1]}, {eq: [dst.tier, 2]}]
+          Commands: [{set_tile: meta.facing}, {decr: food}, {incr: gems}, {reward: 1}]
+        Dst: {Object: [slime_green, slime_blue, slime_pink]}
+      - Src:
+          Object: rancher
+          Preconditions: [{gte: [src.food, 1]}]
+          Commands: [{set_tile: meta.facing}, {decr: food}, {add: [gems, 2]}, {reward: 2}]
+        Dst: {Object: king}
+      - Src: {Object: rancher, Commands: [{set_tile: meta.facing}]}
+        Dst: {Object: [_empty, grass, moss, dirt, sand, bones, mushroom, skull, bridge, water, tree, bush, rock, hedge, stone, tombstone, torch, fence, gate, crate, crop, pedestal, pedestal_full, throne, gem, king, beast, slime_green, slime_blue, slime_pink]}
+
+Objects:
+  - Name: grass
+    MapCharacter: ","
+    Z: 0
+    Observers:
+      Sprite2D: &grass_sprite
+        - TilingMode: WALL_16
+          Image:
+            - gvgai/oryx/grass_0.png
+            - gvgai/oryx/grass_1.png
+            - gvgai/oryx/grass_2.png
+            - gvgai/oryx/grass_3.png
+            - gvgai/oryx/grass_4.png
+            - gvgai/oryx/grass_5.png
+            - gvgai/oryx/grass_6.png
+            - gvgai/oryx/grass_7.png
+            - gvgai/oryx/grass_8.png
+            - gvgai/oryx/grass_9.png
+            - gvgai/oryx/grass_10.png
+            - gvgai/oryx/grass_11.png
+            - gvgai/oryx/grass_12.png
+            - gvgai/oryx/grass_13.png
+            - gvgai/oryx/grass_14.png
+            - gvgai/oryx/grass_15.png
+      FollowCam: *grass_sprite
+      CloseUp: *grass_sprite
+      Isometric: &grass_iso
+        - Image: oryx/oryx_iso_dungeon/grass-1.png
+          TilingMode: ISO_FLOOR
+      IsoFollow: *grass_iso
+      Block2D:
+        - Shape: square
+          Color: [0.25, 0.55, 0.25]
+          Scale: 0.9
+  - Name: moss
+    MapCharacter: ";"
+    Z: 0
+    Observers:
+      Sprite2D: &moss_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_moss_a.png
+      FollowCam: *moss_sprite
+      CloseUp: *moss_sprite
+      Isometric: &moss_iso
+        - Image: oryx/oryx_iso_dungeon/floor-2.png
+          TilingMode: ISO_FLOOR
+      IsoFollow: *moss_iso
+      Block2D:
+        - Shape: square
+          Color: [0.25, 0.4, 0.2]
+          Scale: 0.9
+  - Name: dirt
+    MapCharacter: ":"
+    Z: 0
+    Observers:
+      Sprite2D: &dirt_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_dirt_a.png
+      FollowCam: *dirt_sprite
+      CloseUp: *dirt_sprite
+      Isometric: &dirt_iso
+        - Image: remastered/iso-dirt.png
+          TilingMode: ISO_FLOOR
+      IsoFollow: *dirt_iso
+      Block2D:
+        - Shape: square
+          Color: [0.3, 0.22, 0.15]
+          Scale: 0.9
+  - Name: sand
+    MapCharacter: "_"
+    Z: 0
+    Observers:
+      Sprite2D: &sand_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_sand_a.png
+      FollowCam: *sand_sprite
+      CloseUp: *sand_sprite
+      Isometric: &sand_iso
+        - Image: remastered/iso-sand.png
+          TilingMode: ISO_FLOOR
+      IsoFollow: *sand_iso
+      Block2D:
+        - Shape: square
+          Color: [0.7, 0.55, 0.3]
+          Scale: 0.9
+  - Name: bones
+    MapCharacter: "+"
+    Z: 0
+    Observers:
+      Sprite2D: &bones_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_bones_a.png
+      FollowCam: *bones_sprite
+      CloseUp: *bones_sprite
+      Isometric: &bones_iso
+        - Image: remastered/iso-bones.png
+      IsoFollow: *bones_iso
+      Block2D:
+        - Shape: square
+          Color: [0.8, 0.8, 0.75]
+          Scale: 0.9
+  - Name: mushroom
+    MapCharacter: "*"
+    Z: 0
+    Observers:
+      Sprite2D: &mushroom_sprite
+        - Image: gvgai/oryx/mushroom2.png
+      FollowCam: *mushroom_sprite
+      CloseUp: *mushroom_sprite
+      Isometric: &mushroom_iso
+        - Image: remastered/iso-mushroom.png
+      IsoFollow: *mushroom_iso
+      Block2D:
+        - Shape: square
+          Color: [0.8, 0.2, 0.2]
+          Scale: 0.9
+  - Name: skull
+    MapCharacter: "^"
+    Z: 0
+    Observers:
+      Sprite2D: &skull_sprite
+        - Image: gvgai/oryx/skull1.png
+      FollowCam: *skull_sprite
+      CloseUp: *skull_sprite
+      Isometric: &skull_iso
+        - Image: remastered/iso-skull.png
+      IsoFollow: *skull_iso
+      Block2D:
+        - Shape: square
+          Color: [0.9, 0.9, 0.9]
+          Scale: 0.9
+  - Name: bridge
+    MapCharacter: "="
+    Z: 0
+    Observers:
+      Sprite2D: &bridge_sprite
+        - Image: gvgai/newset/logm.png
+      FollowCam: *bridge_sprite
+      CloseUp: *bridge_sprite
+      Isometric: &bridge_iso
+        - Image: remastered/iso-bridge.png
+          TilingMode: ISO_FLOOR
+      IsoFollow: *bridge_iso
+      Block2D:
+        - Shape: square
+          Color: [0.55, 0.4, 0.25]
+          Scale: 0.9
+  - Name: water
+    MapCharacter: "~"
+    Z: 1
+    Observers:
+      Sprite2D: &water_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
+      FollowCam: *water_sprite
+      CloseUp: *water_sprite
+      Isometric: &water_iso
+        - Image: oryx/oryx_iso_dungeon/water-1.png
+          TilingMode: ISO_FLOOR
+          Offset: [0, 4]
+      IsoFollow: *water_iso
+      Block2D:
+        - Shape: square
+          Color: [0.1, 0.35, 0.7]
+          Scale: 1.0
+  - Name: tree
+    MapCharacter: "&"
+    Z: 1
+    Observers:
+      Sprite2D: &tree_sprite
+        - Image: gvgai/oryx/tree2.png
+      FollowCam: *tree_sprite
+      CloseUp: *tree_sprite
+      Isometric: &tree_iso
+        - Image: remastered/iso-tree.png
+      IsoFollow: *tree_iso
+      Block2D:
+        - Shape: square
+          Color: [0.05, 0.4, 0.2]
+          Scale: 1.0
+  - Name: bush
+    MapCharacter: "%"
+    Z: 1
+    Observers:
+      Sprite2D: &bush_sprite
+        - Image: gvgai/oryx/bush1.png
+      FollowCam: *bush_sprite
+      CloseUp: *bush_sprite
+      Isometric: &bush_iso
+        - Image: oryx/oryx_iso_dungeon/bush-1.png
+      IsoFollow: *bush_iso
+      Block2D:
+        - Shape: square
+          Color: [0.1, 0.45, 0.15]
+          Scale: 1.0
+  - Name: rock
+    MapCharacter: "#"
+    Z: 1
+    Observers:
+      Sprite2D: &rock_sprite
+        - TilingMode: WALL_16
+          Image:
+            - gvgai/oryx/dirtWall_0.png
+            - gvgai/oryx/dirtWall_1.png
+            - gvgai/oryx/dirtWall_2.png
+            - gvgai/oryx/dirtWall_3.png
+            - gvgai/oryx/dirtWall_4.png
+            - gvgai/oryx/dirtWall_5.png
+            - gvgai/oryx/dirtWall_6.png
+            - gvgai/oryx/dirtWall_7.png
+            - gvgai/oryx/dirtWall_8.png
+            - gvgai/oryx/dirtWall_9.png
+            - gvgai/oryx/dirtWall_10.png
+            - gvgai/oryx/dirtWall_11.png
+            - gvgai/oryx/dirtWall_12.png
+            - gvgai/oryx/dirtWall_13.png
+            - gvgai/oryx/dirtWall_14.png
+            - gvgai/oryx/dirtWall_15.png
+      FollowCam: *rock_sprite
+      CloseUp: *rock_sprite
+      Isometric: &rock_iso
+        - Image: remastered/iso-rock.png
+      IsoFollow: *rock_iso
+      Block2D:
+        - Shape: square
+          Color: [0.45, 0.25, 0.12]
+          Scale: 1.0
+  - Name: hedge
+    MapCharacter: "$"
+    Z: 1
+    Observers:
+      Sprite2D: &hedge_sprite
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall9-0.png
+            - oryx/oryx_fantasy/wall9-1.png
+            - oryx/oryx_fantasy/wall9-2.png
+            - oryx/oryx_fantasy/wall9-3.png
+            - oryx/oryx_fantasy/wall9-4.png
+            - oryx/oryx_fantasy/wall9-5.png
+            - oryx/oryx_fantasy/wall9-6.png
+            - oryx/oryx_fantasy/wall9-7.png
+            - oryx/oryx_fantasy/wall9-8.png
+            - oryx/oryx_fantasy/wall9-9.png
+            - oryx/oryx_fantasy/wall9-10.png
+            - oryx/oryx_fantasy/wall9-11.png
+            - oryx/oryx_fantasy/wall9-12.png
+            - oryx/oryx_fantasy/wall9-13.png
+            - oryx/oryx_fantasy/wall9-14.png
+            - oryx/oryx_fantasy/wall9-15.png
+      FollowCam: *hedge_sprite
+      CloseUp: *hedge_sprite
+      Isometric: &hedge_iso
+        - Image: remastered/iso-hedge.png
+      IsoFollow: *hedge_iso
+      Block2D:
+        - Shape: square
+          Color: [0.15, 0.35, 0.15]
+          Scale: 1.0
+  - Name: stone
+    MapCharacter: "@"
+    Z: 1
+    Observers:
+      Sprite2D: &stone_sprite
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall2-0.png
+            - oryx/oryx_fantasy/wall2-1.png
+            - oryx/oryx_fantasy/wall2-2.png
+            - oryx/oryx_fantasy/wall2-3.png
+            - oryx/oryx_fantasy/wall2-4.png
+            - oryx/oryx_fantasy/wall2-5.png
+            - oryx/oryx_fantasy/wall2-6.png
+            - oryx/oryx_fantasy/wall2-7.png
+            - oryx/oryx_fantasy/wall2-8.png
+            - oryx/oryx_fantasy/wall2-9.png
+            - oryx/oryx_fantasy/wall2-10.png
+            - oryx/oryx_fantasy/wall2-11.png
+            - oryx/oryx_fantasy/wall2-12.png
+            - oryx/oryx_fantasy/wall2-13.png
+            - oryx/oryx_fantasy/wall2-14.png
+            - oryx/oryx_fantasy/wall2-15.png
+      FollowCam: *stone_sprite
+      CloseUp: *stone_sprite
+      Isometric: &stone_iso
+        - Image: oryx/oryx_iso_dungeon/wall-grey-1.png
+      IsoFollow: *stone_iso
+      Block2D:
+        - Shape: square
+          Color: [0.45, 0.45, 0.45]
+          Scale: 1.0
+  - Name: tombstone
+    MapCharacter: "!"
+    Z: 1
+    Observers:
+      Sprite2D: &tombstone_sprite
+        - Image: gvgai/oryx/tombstone1.png
+      FollowCam: *tombstone_sprite
+      CloseUp: *tombstone_sprite
+      Isometric: &tombstone_iso
+        - Image: remastered/iso-tombstone.png
+      IsoFollow: *tombstone_iso
+      Block2D:
+        - Shape: square
+          Color: [0.5, 0.5, 0.5]
+          Scale: 1.0
+  - Name: torch
+    MapCharacter: "|"
+    Z: 1
+    Observers:
+      Sprite2D: &torch_sprite
+        - Image: gvgai/oryx/torch1.png
+      FollowCam: *torch_sprite
+      CloseUp: *torch_sprite
+      Isometric: &torch_iso
+        - Image: remastered/iso-torch.png
+      IsoFollow: *torch_iso
+      Block2D:
+        - Shape: square
+          Color: [1.0, 0.6, 0.1]
+          Scale: 1.0
+  - Name: fence
+    MapCharacter: "F"
+    Z: 1
+    Observers:
+      Sprite2D: &fence_sprite
+        - Image: sprite2d/fence.png
+      FollowCam: *fence_sprite
+      CloseUp: *fence_sprite
+      Isometric: &fence_iso
+        - Image: remastered/slimefarm-fence-iso.png
+      IsoFollow: *fence_iso
+      Block2D:
+        - Shape: square
+          Color: [0.55, 0.4, 0.2]
+          Scale: 0.9
+  - Name: gate
+    MapCharacter: "G"
+    Z: 0
+    Observers:
+      Sprite2D: &gate_sprite
+        - Image: remastered/slimefarm-gate.png
+      FollowCam: *gate_sprite
+      CloseUp: *gate_sprite
+      Isometric: &gate_iso
+        - Image: remastered/slimefarm-gate-iso.png
+          TilingMode: ISO_FLOOR
+      IsoFollow: *gate_iso
+      Block2D:
+        - Shape: square
+          Color: [0.8, 0.65, 0.3]
+          Scale: 0.6
+  - Name: crate
+    MapCharacter: "H"
+    Z: 1
+    Observers:
+      Sprite2D: &crate_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
+      FollowCam: *crate_sprite
+      CloseUp: *crate_sprite
+      Isometric: &crate_iso
+        - Image: oryx/oryx_iso_dungeon/crate-1.png
+      IsoFollow: *crate_iso
+      Block2D:
+        - Shape: square
+          Color: [0.6, 0.45, 0.2]
+          Scale: 0.8
+  - Name: crop
+    MapCharacter: "C"
+    Z: 1
+    Variables:
+      - Name: ripe
+        InitialValue: 1
+    InitialActions:
+      - Action: ripen
+        ActionId: 1
+    Observers:
+      Sprite2D: &crop_sprite
+        - Image: remastered/slimefarm-sprout.png
+        - Image: remastered/slimefarm-ripe.png
+      FollowCam: *crop_sprite
+      CloseUp: *crop_sprite
+      Isometric: &crop_iso
+        - Image: remastered/slimefarm-sprout-iso.png
+        - Image: remastered/slimefarm-ripe-iso.png
+      IsoFollow: *crop_iso
+      Block2D:
+        - Shape: triangle
+          Color: [0.3, 0.6, 0.1]
+          Scale: 0.4
+        - Shape: triangle
+          Color: [0.3, 0.6, 0.1]
+          Scale: 0.8
+  - Name: pedestal
+    MapCharacter: "P"
+    Z: 1
+    InitialActions:
+      - Action: count_goal
+        ActionId: 1
+    Observers:
+      Sprite2D: &pedestal_sprite
+        - Image: remastered/slimefarm-pedestal.png
+      FollowCam: *pedestal_sprite
+      CloseUp: *pedestal_sprite
+      Isometric: &pedestal_iso
+        - Image: remastered/slimefarm-pedestal-iso.png
+      IsoFollow: *pedestal_iso
+      Block2D:
+        - Shape: square
+          Color: [0.8, 0.2, 0.5]
+          Scale: 0.6
+  - Name: pedestal_full
+    Z: 1
+    Observers:
+      Sprite2D: &pedestal_full_sprite
+        - Image: remastered/slimefarm-pedestal-full.png
+      FollowCam: *pedestal_full_sprite
+      CloseUp: *pedestal_full_sprite
+      Isometric: &pedestal_full_iso
+        - Image: remastered/slimefarm-pedestal-full-iso.png
+      IsoFollow: *pedestal_full_iso
+      Block2D:
+        - Shape: square
+          Color: [0.2, 0.8, 0.5]
+          Scale: 0.6
+  - Name: throne
+    MapCharacter: "T"
+    Z: 1
+    InitialActions:
+      - Action: count_goal
+        ActionId: 1
+    Observers:
+      Sprite2D: &throne_sprite
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_command_chair.png
+      FollowCam: *throne_sprite
+      CloseUp: *throne_sprite
+      Isometric: &throne_iso
+        - Image: remastered/slimefarm-throne-iso.png
+      IsoFollow: *throne_iso
+      Block2D:
+        - Shape: square
+          Color: [0.9, 0.75, 0.1]
+          Scale: 0.8
+  - Name: gem
+    MapCharacter: "x"
+    Z: 1
+    Observers:
+      Sprite2D: &gem_sprite
+        - Image: remastered/slimefarm-gem.png
+      FollowCam: *gem_sprite
+      CloseUp: *gem_sprite
+      Isometric: &gem_iso
+        - Image: remastered/slimefarm-gem-iso.png
+      IsoFollow: *gem_iso
+      Block2D:
+        - Shape: triangle
+          Color: [1.0, 0.3, 0.8]
+          Scale: 0.5
+  - Name: king
+    MapCharacter: "K"
+    Z: 1
+    InitialActions:
+      - Action: produce
+        Delay: 6
+        Randomize: true
+    Observers:
+      Sprite2D: &king_sprite
+        - Image: remastered/slimefarm-king.png
+      FollowCam: *king_sprite
+      CloseUp: *king_sprite
+      Isometric: &king_iso
+        - Image: remastered/slimefarm-king-iso.png
+      IsoFollow: *king_iso
+      Block2D:
+        - Shape: circle
+          Color: [1.0, 0.85, 0.1]
+          Scale: 1.0
+  - Name: beast
+    MapCharacter: "B"
+    Z: 1
+    InitialActions:
+      - Action: prowl
+        Delay: 3
+        Randomize: true
+    Observers:
+      Sprite2D: &beast_sprite
+        - Image: gvgai/oryx/bear2.png
+      FollowCam: *beast_sprite
+      CloseUp: *beast_sprite
+      Isometric: &beast_iso
+        - Image: oryx/oryx_iso_dungeon/beast-1.png
+      IsoFollow: *beast_iso
+      Block2D:
+        - Shape: triangle
+          Color: [0.6, 0.35, 0.1]
+          Scale: 0.8
+  - Name: slime_green
+    MapCharacter: "g"
+    Z: 1
+    Variables:
+      - Name: tier
+        InitialValue: 0
+    InitialActions:
+      - Action: wander
+        Delay: 8
+        Randomize: true
+      - Action: produce
+        Delay: 30
+        Randomize: true
+    Observers:
+      Sprite2D: &slime_green_sprite
+        - Image: remastered/slimefarm-green-0.png
+        - Image: remastered/slimefarm-green-1.png
+        - Image: remastered/slimefarm-green-2.png
+      FollowCam: *slime_green_sprite
+      CloseUp: *slime_green_sprite
+      Isometric: &slime_green_iso
+        - Image: remastered/slimefarm-green-iso-0.png
+        - Image: remastered/slimefarm-green-iso-1.png
+        - Image: remastered/slimefarm-green-iso-2.png
+      IsoFollow: *slime_green_iso
+      Block2D:
+        - Shape: circle
+          Color: [0.2, 0.8, 0.3]
+          Scale: 0.45
+        - Shape: circle
+          Color: [0.2, 0.8, 0.3]
+          Scale: 0.65
+        - Shape: circle
+          Color: [0.2, 0.8, 0.3]
+          Scale: 0.9
+  - Name: slime_blue
+    MapCharacter: "b"
+    Z: 1
+    Variables:
+      - Name: tier
+        InitialValue: 0
+    InitialActions:
+      - Action: wander
+        Delay: 8
+        Randomize: true
+      - Action: produce
+        Delay: 30
+        Randomize: true
+    Observers:
+      Sprite2D: &slime_blue_sprite
+        - Image: remastered/slimefarm-blue-0.png
+        - Image: remastered/slimefarm-blue-1.png
+        - Image: remastered/slimefarm-blue-2.png
+      FollowCam: *slime_blue_sprite
+      CloseUp: *slime_blue_sprite
+      Isometric: &slime_blue_iso
+        - Image: remastered/slimefarm-blue-iso-0.png
+        - Image: remastered/slimefarm-blue-iso-1.png
+        - Image: remastered/slimefarm-blue-iso-2.png
+      IsoFollow: *slime_blue_iso
+      Block2D:
+        - Shape: circle
+          Color: [0.2, 0.5, 0.9]
+          Scale: 0.45
+        - Shape: circle
+          Color: [0.2, 0.5, 0.9]
+          Scale: 0.65
+        - Shape: circle
+          Color: [0.2, 0.5, 0.9]
+          Scale: 0.9
+  - Name: slime_pink
+    MapCharacter: "p"
+    Z: 1
+    Variables:
+      - Name: tier
+        InitialValue: 0
+    InitialActions:
+      - Action: wander
+        Delay: 8
+        Randomize: true
+      - Action: produce
+        Delay: 30
+        Randomize: true
+    Observers:
+      Sprite2D: &slime_pink_sprite
+        - Image: remastered/slimefarm-pink-0.png
+        - Image: remastered/slimefarm-pink-1.png
+        - Image: remastered/slimefarm-pink-2.png
+      FollowCam: *slime_pink_sprite
+      CloseUp: *slime_pink_sprite
+      Isometric: &slime_pink_iso
+        - Image: remastered/slimefarm-pink-iso-0.png
+        - Image: remastered/slimefarm-pink-iso-1.png
+        - Image: remastered/slimefarm-pink-iso-2.png
+      IsoFollow: *slime_pink_iso
+      Block2D:
+        - Shape: circle
+          Color: [0.9, 0.4, 0.7]
+          Scale: 0.45
+        - Shape: circle
+          Color: [0.9, 0.4, 0.7]
+          Scale: 0.65
+        - Shape: circle
+          Color: [0.9, 0.4, 0.7]
+          Scale: 0.9
+  - Name: rancher
+    MapCharacter: "A"
+    Z: 1
+    Variables:
+      - Name: food
+        InitialValue: 0
+      - Name: gems
+        InitialValue: 0
+    InitialActions:
+      - Action: face
+        ActionId: 2
+    Observers:
+      Sprite2D: &rancher_sprite
+        - Image: remastered/slimefarm-rancher-up.png
+        - Image: remastered/slimefarm-rancher-right.png
+        - Image: remastered/slimefarm-rancher-down.png
+        - Image: remastered/slimefarm-rancher-left.png
+      FollowCam: *rancher_sprite
+      CloseUp: *rancher_sprite
+      Isometric: &rancher_iso
+        - Image: remastered/slimefarm-rancher-iso-flip.png
+        - Image: remastered/slimefarm-rancher-iso.png
+        - Image: remastered/slimefarm-rancher-iso.png
+        - Image: remastered/slimefarm-rancher-iso-flip.png
+      IsoFollow: *rancher_iso
+      Block2D:
+        - Shape: triangle
+          Color: [0.9, 0.9, 0.2]
+          Scale: 0.8
+        - Shape: triangle
+          Color: [0.9, 0.9, 0.2]
+          Scale: 0.8
+        - Shape: triangle
+          Color: [0.9, 0.9, 0.2]
+          Scale: 0.8
+        - Shape: triangle
+          Color: [0.9, 0.9, 0.2]
           Scale: 0.8
 Version: "0.1"
 Environment:
@@ -16540,7 +19310,7 @@ Environment:
     Generated by studio/griddly-demo/tools/remaster ‚Äî edit the generator, not this file.
   # Cameras are observers. The demo picks one by name and the engine renders it.
   #   Sprite2D   whole level (global observer); oriented objects are drawn rotated
-  #   EgoView    9x9 first-person window: follows AND rotates with the avatar (forward = up)
+  #   EgoView    9x9 first-person window: follows AND rotates with the avatar (forward = up), avatar 2 rows below centre
   #   EgoClose   7x7 first-person window
   #   FollowCam  15x11 window that follows the avatar without rotating
   # The agent's default observation (Player.Observer) is the 9x9 egocentric window.
@@ -16559,6 +19329,7 @@ Environment:
       RotateAvatarImage: true
       Width: 9
       Height: 9
+      OffsetY: 2
     EgoClose:
       Type: SPRITE_2D
       TileSize: 24
@@ -16568,6 +19339,7 @@ Environment:
       RotateAvatarImage: true
       Width: 7
       Height: 7
+      OffsetY: 0
     FollowCam:
       Type: SPRITE_2D
       TileSize: 24
@@ -16577,6 +19349,7 @@ Environment:
       RotateAvatarImage: true
       Width: 15
       Height: 11
+      OffsetY: 0
     Block2D:
       TileSize: 24
   Variables:
@@ -16597,6 +19370,7 @@ Environment:
       RotateAvatarImage: true
       Width: 9
       Height: 9
+      OffsetY: 2
     AvatarObject: avatar
   Termination:
     Win:
@@ -52168,7 +54942,7 @@ N    IENDÆB`ÇâPNG
 
    IHDR         ‡w=¯   uIDATx⁄c`6¿¶b’jb¨úx˜á*x‡-Xp˝Y8o˝u0&⁄Çgø˛”ﬁR,!ŸR-!ÀR,!€b-°»b,°ÿBñP≈|ñPÕ\ñP’lñP›tKhbrëB3H"òBrÒ¿Y@”*s» HCH—•˘˝    IENDÆB`ÇâPNG
 
-   IHDR         ‡w=¯   }IDATx⁄c`‘õΩ˛”‘p^P≈Bd√qa™~gï-@7üdYÇn8#Û…∂õÎqaä-ÄÙ;-¡f8„≤ê,_`≥ õe0ZëìB¬k§õùIà(œSŸ8Rå%+G“¿HBFS•Ä•ë±ÿå4u. œ9@’‹R©    IENDÆB`ÇâPNG
+   IHDR         ‡w=¯   ÄIDATx⁄c`‘õΩ˛”‘p^P≈Bd√qa™~gï-@7üdYÇn8#Û…∂õÎqaä-ÄÙ;-¡f8„≤ê,_`≥ õe0ZëìÚüØ%nv6ˇ)¡DM'◊≤r3M'÷™◊45ó%É¶. ﬁQò}VHá    IENDÆB`ÇâPNG
 
    IHDR         ‡w=¯  “IDATx⁄µïK≤¨6Dﬂ“Ω$$–jºOö?œõÊ·±#‰<Ew√ı¸tπ*UUfVÍ◊˛ùÁ˙≈ü0<mUÕíÀÊôãÈ»uªÁ‘≠Z{ˆ„ÆokÆ:ÌÎüπl◊Ï⁄;Ωr19åœÏà}l9õbY«ï†Ï;®ö∂ÏlÛ3ß~…UøÊ∫ﬂ≤'òo=á(…∏⁄”˜Øú⁄géJgÌ”ªzÿs–”Mœ+A“ÀB£∫®õ#Wu†j™qÀEC¬WÆ%õ‘Q≥ÂÙxŸeCJ@‚y…QﬂKÌ´¢ø	<≠Ío™\ê§iœ˝ÛØ≠B]ƒû"Ùò∫C’Óñ$©®Røø{€Ep´uÙMPY†P≈IDÚ	H8û0®∫wÂÖp?_Ö§»6{ÜÒ∆AòTı¨jÄEÎ‡ÑoR€ï∫™µ'*®V∞˘Öﬁ"˙≥7v"Vâù*¢4ﬁ8(U¶ˆ
 (!VJr"⁄È‡j,¨˜pïÜÌV9™YLæ}ô¬‡Úõ é
@@ -52180,6 +54954,47 @@ N    IENDÆB`ÇâPNG
 º8wy)∂ï6“GÔgˇq†ERπ≠»ÄÕ»[ëÀ%J:S%ul*-É”4(Î9h	ƒeyzVIù!#RÖ&õ“t…‚ø<æ˛D3—1ÀåqÜIg+ˆ”djí+ëˆsí+M◊!è3ÙtTVdò˝§CJ@€y»(eªöøæœ ºûôˆ‹›fqÜ1ül    IENDÆB`ÇâPNG
 
    IHDR         ‡w=¯   KIDATx⁄c`£`<––0¯è”Ã`≤,ö6g’j`úÿ8¯¸ß&Ëê¢§å2í0Q”’ÇÄ∞í‡Û¡hç híÉi ÎHóƒcIQ    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   uIDATx⁄Ì‘1
+Ä0Ö·ﬁ¡¡≈%œYïÅ≥(&¢¸H–Â=´Ì    Ä/ë˝ŒEÅ÷™⁄_¿Cm.Îv*ÒxÅ9`µiœ|∂¨Äá«RÌ‚ΩM_âÚ .yÎ'xmdAŸ€óÌÇ,®Ì ∫˛Ø£@•⁄`#NîCZ|    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ºIDATx⁄Ìì1
+Ö0ΩâùΩXŸXy¡“÷Úﬂ¿xÎ»∫òü¨ŸƒÊ,ä3I¥™        Ä~Skh>ÔÎ`ßXÛ…gëä’B∏x[z;±b˛|tHh≈°ê–}oàt´πH∫C∑êî3ñä˘ÃCc‹ÍKÓ âœπ‰˛Æb0vµyä–¸ûƒ4‰∂ﬂ]ƒÑº9cüÿ…ØhÖà≈Z!…‚∑!ÍbIHVqLHÒøê¢b_H ;≈g,≠®*    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ΩIDATx⁄Ìì1
+Ñ0E=ç≠ùùç`µïç∞ìΩ¿ˆ{»fH63…6ˇ¡Ä†¯^Ì:        †ÄcõÕﬂƒﬂ˜ÀN≥.ÊS-$%Æ"´ÖpÒg_Ï‰ä˘ÛŸ!©ßBR˜£!“≠Ê"Èy!%g,ÛYÁ¡∏’∑‹_„‘˛Ób0èΩ	Eh˛!1πÌw@9!OŒ8&vÚ;Z!b±VH±¯ià∫XRUú“D¸+§©8RÚéÌDÔ£    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  JIDATx⁄ÌóA!Ö˝S]∫DADtà.uÍAtÓ‹oËø≥ ∏Êå„”≠ ﬁIÛ}éèMçi’™U´V_÷⁄Ø™¸¿|wÖt{>,	˝=	p∆á˚•W	H@h
+Q§åK@D ÌéK@¢ ⁄Öß€•›úèE Äc'pB@z ƒ8ÄÄ‘ò‰Ê≈ ¥ Ü Ì 7/∑¥ñÒ€X+ı⁄çLf› A3ƒ¯ öNjó°$ iu⁄[ÙKÿ≠¨y .Ru Ñ;„b 2è¯í@ÇPw@ëå´AD⁄ÒhA§V´§?)4&ôpcdÏ4Ë@§4Ñ1„‰¯ 5 Bcu§£— p∆ ∫ê§å§q‘òÙv%C@PcÒRöÇ´ÆÂ‘8ÎaÇf†˙”LõÅ—ß\>ˆ:AJûÁ/Ëô§D›K    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   xIDATx⁄Ì‘¡	Ä0D—Tì“àÌYåGèÇ≈§ÄËbÃAqa7 ˇ¡Da1Ü      >ä1ñk\À˜∂[\F<ïõèx+.„p§^õXS“G‘»sf¥Á}ì⁄◊ﬂÂ4H—<--Ó«PJsŒ-rÌ˛#Íˆ ¸ `®;Òé,    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  OIDATx⁄Ì’±
+¬0Ä·æíã EppqÑnÇìÉ¯ætÂ
+ë4Ê.wóKä–¿-¸?öê6ÕºÊï±ﬁØ{3Y¯yÎÜ©	√·É§¬≈ “∞$7¨ÜXáŸê“aR3É4˚M€Oı†= ∫”aòZg ö0Ìr1îÇÑ·$¿á‰Ñ◊K4Ã¿úèª^{n◊+4.p∑&|’Ê ÇÌq1@¡l D∞Ä° ~á˘y1à%¿Öì[‡C, aò}®≠·®s¿:Ñ)à&,PMXàA4·lÄ—ÑE˜@j4a—=`	P›ÄˇæBsò•˜@±œ1˜`‹H?«©{ {a7£7ÉX~é]4π>ƒÜŸgÄ⁄ è ∞R!Íπ6¸ç˚K1	Á@L√Hë∞R4ÃÅT	Sê™aíÛDiﬂôZë    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  IDATx⁄Ìî±
+1ÜÔï\·@pQA∏ÕApr¡óÆ‰‡§Wí4M”ﬁ“˛©‡˜ôDªÆ••••••%#ﬂœ”Aø√ÿj"!8l1ë∏òH*ÿL$¨±ãEJÉYëö`L§;Óz∑‘Ä=
+ó”ÿZ7 Lhø^ÕJâÑ‡®Ä/í~›o(X, ΩûN˚O∏ﬂnHxíÄt5·®Õ(j«… √Ä\9 &‰KëH—Ä≈+êàh¿…7¿âp`Û#ƒD∏o\ÏW‡ãp£Lï
+¯oÑz‘Ÿ0ë‹#ƒ¿—¯"!X|‹j$x& âÅ∏w-¯˜£1ÁàòÇ5"E¿)"E¡ë*`N§*ò…˘å‚PÜè\Vœ±    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ΩIDATx⁄Ìì1
+Ö0Ωó'6‚¨,<Ö•Ωı/Ï=^d]ÃO÷lbÛ≈ô$ZU        @À‹öœƒ˚6Ÿ)¬≈|≤ÖÑƒŸB§bµ.˛≠ÉùX1>:$¥‚PHËæ7D∫’\$›°[H K≈|∆°1nı%wÄƒÁ‹rW±Ë⁄⁄<Eh˛Obr€ÔÄ.bBﬁú±OÏ‰W¥Bƒb≠êdÒ€u±$$´8&§à¯_HQ±/$ÂUº„‡z≥∫    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   xIDATx⁄Ì’¡Ä0Ö·N√˛xÙË6†Ò@ÚƒûL@M˛/!±^†XÍ     ¸ïôÌÌ…◊eªD[!ë‹›oqæ-yDi>QÄ~mΩûÖ“bóÒ¨ÎÚÉª◊dy]>	ö4è`˘ÃÓÅ‹Ö∂Àh÷˛ û8 ;ÈË<∫j@ï    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   uIDATx⁄Ìí—	¿ ù∆›'c9UãÇHíèjS*w®àp˜—î     ‡è‰ú/ma‚Z´∫Wc<±Ûâxkà%uVƒ∂Ä.*•®≥bñ<©∑≤T>Fú–Ó¥ØˆÊ‹ÄQ0üÁ†Û˛ Än-)¬´^∑Ë    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ØIDATx⁄Ìñ¡	Ñ0E”]¿À÷∞ÿÑ‡5€äõ±óë9$—…Ç8ìÀQº¸óëDC       <dõµVÏ&ÒØ‹T¢,8~zLDzÂ¥;
+‹≠∏(%\V'™Ñ& Ât,∂SË
+p˘ÅÔ'–:◊·g∑	ƒ/1€	ö@JârŒU˘Îª†7â∂ÿÏ–$¥±ª«y˜CæäR\J∏˛p©\Â~•~”  O8∫ÿ∏]∂    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  æIDATx⁄ÌViS[GıøôJUú‡`É$VIO˚éA∂AÄA`V≥I2I 6!¿,∆N€ÿ±ìL&â'ìÒdô?wÊú§úôJ „$ÛI]’ıJÔuﬂ>˜úsoÎ‹π˙®è˙®è˙®è˙®è˙®è7€/b®|√ﬁÀ.Ï|õ¿ˇÌ‡ Û(*_E±˚˜8ˆøÔ¬Ìva„Û≤˜|*t¸y@n¨;Q˛$å≠/#Xˇk?\∆¡èó	$Å“G!``±ì€nÙL90æÈ¬ıÂ? –÷Ûñ¯ÕÀèÉ(û Ó¸Î2÷?£Úe{ﬂ≈9X|¿p©}ôVÃzqs◊‚ﬁ ñ˛w Uj|6Eı>3ﬁ¸"äÏ±ó,D±I⁄ãèÿ‚ª P!–·bá…>ïm£,QÏ|7OÕ…-˜ÎÉPfõ_D∞MìâÍ√ü∫Qe0Q=±ÂÇ‰(>	÷|2a≤úπmaz◊ç˘#ô
+`˜	løàõ}küE0æ·¬kgnLFJ∑æäì	à…öŸ7nÓYÊÚßaJ¡ ”Úè¨à∏Ÿ#∆¥O@o›˜3‹Ûõeµ˝5i˚ñáæ<¢`ÂY»Hq ◊Ûõ&«OW›Ê¿mcÂOBÊªÃπÕÃO,Èù*ú1Eìﬁ(;	ƒ·‚5∫˚,Ä ¨~FÅ∆õ‚AôcüaAŸßK#•„îcÓ–CöcÊpU…—OµÃó>ÙfKS{%ï¿À+ö˙ ÷∏Y‰nÿ¯[ƒòhóﬂ‰zC+PUî»H*◊J≥µ ^ ˝¶*»FÓ?f,‹¶hı„êëN2…¨ÛG^OKT∫
+iû•¶,§ÒI kF€∞…N+ã*¡hmë¡z3-¨Ûvz b| –¢YÃÌ—yñûR"äùπÎ#ª	Çç†èUíúv :‘ås•'!£_ee>’Ÿt∞ﬁ)°É¨SOò®∏∞¿LJÔ˜òÌ¡è›®÷Ä—‹Å˚dØ 8ÚÄÃ´äIÂ⁄0òo«9-’j&BX`£9´s!?¸°ã ∫êªÁ5ràV±$S˛ÏvñõÃ*˙µO4‘ÏæÁgˇàQ±±pájè›r⁄ŒûaØ…0æ·ƒÙéã˜}Üˆ36≤«îX¡OM%p“|ˇ˚ZPÊZØ∫•ªswΩf˝•ôg7L≥3Œ‹ˆò√ï¿ÿ¶˛‘{Ëû¥¡J^®»ë“[Ô˚H©á@‹X•v*ôOï£e&ï®2Qñgn7ó”ÛZπ…|™I3ΩcôRïT2‹P°ùáw“;ÑáëkBzÂ‘à
+¥Ú4HÁzLô,∞›Je[`W”]`˙).≤,•ßæKÆÕœk≠Xóíº:◊b®[≥˚ñ0∏LΩó⁄–ª`«ïYõëo˘‰ï˚Aã'∑]»ëÖ‰Ñ©Æs√7´ﬂ◊ûAìiÈi–Tâh6Œ'CÍ™ˆ, 2◊Hπ”\@±ë&ƒFõÁ”G∫«÷:È/Rº¨˛´Æ>ıaÈ7Ê™ÿ…˘ê]tôÍò°añY„j≥2ÈÓw5#J˝ñŸ§oñeñe}ÏÚÀ¸ëÖ‰å√ì-HßÏÏi∆’õ6Çua˘·+-πx‚aa3°nÎ´2Ûù∏ª¬ÃµÙßÌË∫—Ñ˛˘VÙíô¸Cø°]O1!`¶aâö/–ﬂHä—g‚∏¬o√Úü«˙∏√ÒfÙ\iƒ¬NV{pvÆ†π¬ππ„¡÷ÜÖÍúÛ©6ÑIõˇZí…ãXÍ@ﬂ∏√TáÃ*Y≤<T∑_˛ëümπ·°FxíÔ¬fΩÖ&Á_‡ΩØ˜<rÌå]B"qÉcÕ»:k N^a¢p
+b„	Â]±„˙ú…©&€ê#ÄWÌòaπ™ôHK]ø◊ÏÎ§n9ä5 ù¥¡<o˜ª˙ﬁAÑÔ¢úâ@&÷€P:M¯WoE}ÃπQ~ÊGEıΩ¡∆4C`f{[—∏@fﬁCç5<Ï@Wˇ%¯Æ4¿·}s#ÌòË±£?q	æÙ6 ûnDœƒ%ådX8tæﬁÇ3YVü˘Pz‡A&ﬂÅÚ≥M\D$ﬁÄ`OB◊.`uå7[w3¨ÿy∏§z¥„–πàÅTnRÔß˘õYˇ:ê⁄∆¬}∑ñùò›£4Âv„ãæÎM‡6¨ƒ®m˜ÿEåÿ1⁄Î¿|ï]ı}7äèîàı˚ˇò*P·CãW∂üÚ?·±ïL Ö¥£›6\ç6"«ç©B
+«ñ9¥–˙„ˇ¢YXB’gÏ|‰A.ÕV;·¿ =∂oô¯Ò8˚œ"7Áÿ˝Jèj2Ωë∆øƒ´ÛM„¸ﬂ±π6Óf    IENDÆB`ÇâPNG
 
    IHDR         ‡w=¯  0IDATx⁄µï±1«;äMr\àÉX&ÉƒËXyØ`≥ÿ≈òÕÊñÍ◊‰/ﬂ’ï∂ŒÀù/Óˇkø∂wBJ)˛âÛì$ë†PBØÛ∫º-€—◊—ßyûD sëXL(D`ÜR-Ωl5.k{N≠@0^Ñc¥˚aEáÿ¬Éäp.@‡™WŒ‹∏‰0™Â
 0ÖüÄœÇásNªE¯@¬œÉ≠ˇÍ*|	];õÆÜKÉæüiT¯K$VÛ:¬"j„¯M$¿Z@¸6k.oÿè/;c+æ·rÿ¨SS£Õz,]`&êﬁ´π ¸'ÅnÖE¿ZÂˇE√√≥V)wT[£]D$0%tè:$¡üL†Ç_‘ü∂ië<*Ü™´oñW    IENDÆB`ÇâPNG
@@ -52193,6 +55008,330 @@ U∏- pz]/ú	∫˚π0Å@Ûz”:*¿ÚîŒÜsﬁˇŸpx?∏˙üìJÇﬁsﬂÑ%ø√Å	—-b$™≈=dÜµ∆ÈÅ,X¿"
 ÚØ∂«äÇ^á3Ø´€†¿JÇ{ 	ø±˙≠≥ñXAE¢Ì`qÊa…˜ÂÖß©¿·•HÙ%ó»ÆÇÈå∫[≤ê‡◊MÊΩ‡@|∑} ˘ò⁄ÕÊÕÅÒ‰ç)fÎ¢Ì›”Ω<º?V‡ÒF˜Å≠øJ ≤•⁄I;=T™˙7ûú»|ÿBô ~ÌCøûº⁄˜T† R I„+ìfÏ0”–¯Œˇ*öÚ(ªi!Å®óy    IENDÆB`ÇâPNG
 
    IHDR         ‡w=¯  5IDATx⁄µñΩAFßù"Öh*çNÈ¸t¥î‚t—zµá—åπì|ÎÓÿeÁ¢8ôqwÛùôk«RZkıO2ﬂÜ°ÆUÀOå˚µd°9’ƒÑáa5Ó+IP0p√¡OI´˜ŸEj{ûÖÃÑüEÀ∫[–˜À¸Ÿ*3wÒ⁄›L°ÁNZ˘ÿ\,‡í}Øú(¿~æŒ9Æ∆≤q	?i˝7£Úƒ$46fMó‹:m>-≤òH$VÛ: " ˝‡E&‡ª‡Å¯Ï÷8¢;ÁQ|!ÀaK›öY≠Bçã›RoŒ€¸∫Ë}‡ˆü$π≠˙JÊÈ˘x>ÜèÍ9=Ì—¶®N5‘EOH@ R â¯ï…Vùÿ§Î_ˇ´êÚ ü4zÚ]Y˛™    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  IIDATx⁄µïΩm√0ÖµDH-d7ö 3pJ5A∆H´∆H°⁄3hi≤ÜF0>è~:›Q?éã“GÚ}wG*B≈=µjsYñ˙W L_è«§• ◊êÁl¨eA8fö˜}¨¨Ym€F1gpﬁ4M¿pYÇÿÇ±úasÄÕ2ä)_Ó∑ÖQHàK >Ï©{{Nb⁄≈∆˙NRœ≠d¸˝‹èƒ Üx/j¿û@w*L» Ûè˜kœuˆ^,µ“ÄLû%,P¯>OÃ≈8[∑ å:c6gc˜ÙÂ
+<àƒ/E∂5ÄæÃ\À$ÕAL ∑	B‹2_–-‚ﬂñt≈õ Oª«∞D7U ?_¶`Äıèvø‹†/y¿˙<ZUpˆõUUEiàÃyçí5ØÎ:ä!0◊k´ZsÎﬁ˛?ÿ˘@˜ê÷Ï    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  KIDATx⁄µï1ä√0Euâ©Mé∞çO∞gdK7!«HÎfI·zœê+“Ï5rÑeA…æ¯ûÃ»6IäèeIÛﬂÃH∆!∆ﬁ©Yõ´™ä–K0˝⁄Ì≤¶Ç\C≥±ñ·9”ºÔ˚heÕÍ∫.â!àAºh€6	ÄÎ}	bs∆√Ê. õÂ)¶|∏◊¥-*@BúXp0kΩZÊÒyø…b⁄≈∆˙Lrœ91‡ˇÙ1É‚›®@Lˇ.ã$Æ Ê<ÄÛw0!¿Ê ËÏ≠ä∏≠$†ﬂlÓU äø?Êb\¨†–≥9ªgÄÅ’¢„!∏mŸ~Übk ∫T KÊ†1» ÄqMŸHÊ˘]ÉGÄ ê+∞§ØÔl øø0U∞æh˜_P ﬁ;‰I Î˜X:‹ß u]'i3ÃÛ R4oö&	F•µŸ ≠±uoˇûó:úäÂw    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  NIDATx⁄µï1é¬0E}	¥Zâ:⁄#lìp$∂LÉ8möEjŒ¿"—Ï58B2å•Ô˝ûÃÑÄ†¯r2∂ˇœXIà1ÜwÍ°≈UUEË• ò˛¨VYSAÆ!?≥±ñ·òiﬁ˜}¥≤fu]óƒÏ¡~–∂m ß€ƒÊåeõª ,ñQLππß¥,'@BúXfOáıWÉPÆ˘ÁG6÷=…5∑2êÒ≤˚.ƒ @ 2o—= C¯ Œ«Yí yﬁn˛kÆ≥˜b–ê¡µdÄä˚¬‹0$pcÄQgÃÊáﬂê4
+–WîO‡A$∂\˜Eâÿ\›+ôƒ 4Ÿpô ƒµ9 "Îª‰ñàﬂ-qBb.Ωx 
+0U∞>ﬂÓø`,{´ì÷Ô—3}Í®Î:Iõ!Œs h»®y”4I0õ{†uoﬁ[‹$1©¸>¨    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  ?IDATx⁄Õï=j√@Ö˜&Rã!çN‡3îRM»1“™1.T˚∫Ç¿MÆë#Ñ¿&≥ñß—ÃJ¬1∏xHû›}ﬂ¸¨Ìc∑‘¶Õè˚á(™™*˛+@≈¯˚≤Kd»5ÙÃÚ⁄4&Ñc¶˘8é9C1—ÊPﬂ˜Œ‡ºË∫.…Àû´åÂõª l∆PóÑÑ8±ÄaI√€Sb_Á•="6÷3…=∑2êÁœÈy"1ƒªQã Ü;  «`B& yˇxQ[ éÂVêŸµdÄäüÁôπ+‡ñ ÄßŒòÕŸÿùÅæ¢\ÅëÿÀ![3ËañZ&1h	b∏M‚ñ˘*Än∂§+æ_¿Z	¿˙Fªˇ•ÏΩ!ØË_UtU®Î:Iõ!Œk hH—ºm€$ï÷6¥ñ÷Ω˝øRÓ0j?˘U    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  IDATx⁄µñ=¬0F#±p é¿¿ä8kƒ=zÿòzVêz:ˆ03!Ö∫»©„⁄IZï·!~‚Ô˙j’8Áåµ÷˝»Ó¬Î^’…ΩÎk«ÁY∏åˇÅ
+‰P €RÄ Ár/∂Ω ^H–pásÇ“Æ–ÉT¿ﬂ«ÁRÜ˚•x †·“dŒ¿ÁwÎE/–†MhjMy@J µL≠©éƒÑŸ5’¬π@í$k™}{Weíò∂J¨È\µ¶Z8“ 5Âé	8\ ¡H'ê÷5ˇAhs˛¡“ıê\◊ºET ˝5ì◊µTWûe]K√≥ÆÎ&ØÎ©dØÎ1ÅÍ∫ñ)éõ⁄ˇ‡:h˛v€“JÃ≤ÚãÌ„—@    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   ΩIDATx⁄c`,`≥√ö¿G∂Ñ™¢[ÄÕBöLUÓLÇ`d>Eñ`3&€b-@∂Ñ,`Ü¸ﬂ¡»|ä,ÄYÇn2¶ä(ñ‹iE`4(JI(æ†¶·4ˇA8!!éab»‚$äÕ !0é≤êÅcõ≈DπÑ—√e	LŸ2ú.'‰bb-¡	ròb”Hä%8„YÇ\KêJtk	¡8¿ó4	πòÏ$Kì|@m  4ı+°_    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  IDATx⁄çñ…„6D ˆ8(ÓGDQ≈∞Ñ#ô4|Ü5}òyñüÊ¿'	z©™.®â„Ω˙Ó®n‹Î_?˛Æ<ˇ¸ÂIóg-ˆÙœÍÜ[ç√£ñˆVsÀÔÈU=ﬂ„Â]èÔ|n5µ{uÛ^˝t≠MÏ≤{sh≠a9jÍÓ|ø÷2›™_÷öG÷.	»Z"xWÛ~æ◊@y∏≤Œ⁄Ú¨qºYaπ'AôvÇ>™66≠’‹+!õ›|#…ùÉè∫WMÏQó??ˇÈ∏€(òß_)˙EÀN%¥5ø?XÓ’ı≠øjl_tvXBOÚ¿#h‹Ù§‚+EΩkÈÆ’Ò>Qö◊⁄dkù÷H‡¡TBØO⁄Áê„±=
+æX‹∞”>gaø”%–ŒnGó°Â—⁄Ö™"Çm¡Ã¬@•3O˜†bÛô “√É'—7à|{(4Má8†Ωà∆««“#$Ü(gíê–èTtH¸"ë@>ƒf‚ƒ^ÍYkAÖ¬õ@∆4z·Píìl%1©Ú≥'ê⁄/ºÀ$P˚5E0ê™wyySÃfpEÑgëΩãd*°¢¬∏^A_Üs1}ÛÌ;Ê$O⁄˜¯AÓ§¬‘©≠‡!„pˇü"ôÕtÈó:‹åó†Å≤Bû&aG¿<®ãŸS(H46D¥ö¿2œ®ÜÏNhŸœd-	.d$ôQêVÎ8†–U¶Ãg`Ø`t[Ä5Úª	¬í ‚≤ûñ!ií†∞‹Ã&L‚Ü∂øBDqR‚Õàodt¸<h≤Å“3Õù<IE–çƒ öu-RKçÉÆDêíˇ5º†EJ»¿&¢ê8UDı©◊‡	{¢‡zS AÖ?Å≥,Ç°¶<¯Å»ÛCX∆QòùÊ%KH¨GºDúHö¢ÑÉ®X"
+òÎ¶Q@◊â~ÑEzÏD¨úÚ~íÆƒöÉ˛v1ΩÕR4å€éΩ§/íMbJ¥©l4wï]”I ñ¬f≥
+⁄˜≤eí9õX˘¥‚	ÖÄ‘$€g]ñﬂò=k¨ïô—.$ÙùT $ÀıtOﬁ'%"©Q√:]-y„tê[*QÕ«˝jÅ=n´™√ h∏LX@í«ÕÓ
+?À0uq±>+…’l£—uW˙õ˘yÈÂ˘Îô∞;[å∂Ò0!HQŸLO7*πßlıª;πI»7#i?Ω6:ÿMö ™ã%i∞&◊„ÑK‹åßcñ˘ªE‰+gv∫+t£e≤JAr”èÊ˜yœä#].t!E9Yw/´?áÀK,d—ÂÑ0"<D∫h$©¢…c¡ijë§Tˇ‰O≤bŸs—0ÔÊ9˘rµ$öd˝»ºW2ô^°ò ¸e·∫p	2ñmÉ§
+òZev›Õ‹S∑[“}–>ÁÔÉ¶{ûsÄ;¸_ì5›yƒ,ã    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   éIDATx⁄c`£ b,§˛c√T5¸‹äLKêﬂ“ÅÇ©b	∫·0◊£[B–zP=àêì#°H&…òòAÑí)∫:ä“<:&9o‡
+Ù !§ß·Ë)9Raö	©ÅQ`KíÑ‘êdU}@Û8¿óä∞•$|jH ÿ“81jH …î®°9  ^CUõ˘Ω›    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   ÍIDATx⁄µïÀ1DSB‹ÅJ(Öä·Fú∂
+Í†ãÖ¨÷—0kìœ:ñ¨˝fû‚q‰*b{⁄è1Cèà¬ª€yJwààK∏BX‹í Ú|,ﬂw´!ö8>ØÇ†©"™â7X<]1Ò[Dƒ•Á0≈™!öê
+nÁ:´9Ô®∏m5cπ{–<ŸùpÌeA.∏å&ÑÖπ÷÷I∂÷ô•·-óöÃkmòñ5ôº˙{≤-ÉŸ\>—ñE˝œBÔ◊=•&\‹™?5û!(.â%iöv∏P∏åPK\“e¢u‰r‹å√ı0eºÔ2¯[Ã¸ ¥?ÿ‰”∏ç    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   nIDATx⁄c`£`,òñÁüLë·Gd‡≈dYÇÕ]a(òlK–«f(61¢-¡ez–P›™˘ ∆JÓ?πq “KînZbˇIME =$YÄl	!“√DY ≥Ÿ2tqdå,6Z<ç@  Ÿ’^3É˛Y    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   æIDATx⁄Ìï=
+√0ÖuíNràŒ>éÁÃù3{Ï°z!7*(≈?í®∂∆∆~üy
+¿QÂπ÷U8Ä*ß•¢¿Y”Û7¿»y´•ºO·úÑs7@ı $S#£—∫.Gq¯ëˆö^üﬂ(ÖÎrø ≈MzÊ|.„ö∆b1óÄf\ñX4qsªÄVc≠ÊpÅxÃyö=Ë<çûBæ"ÇxÕ/7}&,q…˝™Á"Ù-j≈•Åyˇ!◊[G‘{Âb¸√ º    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   gIDATx⁄Ì“±	Ä0@—‚√ ú≈ﬁm\0b'bÉ¡ÄÔ√5äÚH.IRk-SüjŒ-`c:Œªtˆ¸Í}Óõ"¿õ”>`;∫öÛh˜˜Y∫–≈ˇ            ¯ ˝¶-	™÷É⁄Ç    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   GIDATx⁄c`†7ÿ‘‡ÛüRå◊ÇÓ8ìˇ»8»DÊ?∫!5$Y@∆k»5îb¢„Ê}Z®µ`‘ÇQF-µ`‘˙X@-  ôÿl¯}…‚    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  KIDATx⁄Ì’K
+¬0Ä·^D7ä¢∏ê"∏(Ó‡˝oQôB$çôG&ì°ÅŸXˇhB⁄4ÀZV∆ÍÔf∂pw{çSÜ√)·¬≈ ©a3HnX±ã!•√$§f8i⁄ÌeòÎ@{O˝8µŒ 4aVÎ›P
+ÜYÄ…	_ªg4,¿Ï˜A{n⁄3OH∑&|’Ê ÇÌq1@¡b D∞Ä° ~á˘y1à%¿ÖŸ-!Ä0,>‘÷H‘9B¢	'(à&¨ƒ öp6¿áh¬I˜ 7öp“=`	P›ÄˇæBsòSÔÅbücÈ= ∏I˝s˜ ˆ¬n&o ±¸ª(ª>ƒÜ≈gÄ⁄	 O ∞∏ı\˛∆˝•ÅòÑs ¶a§H8R4,ÅT	Sê™aíÛ¡Â/ø´*Z0    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  3IDATx⁄Ì’A
+¬0Ö·^D7ä¢∏\˜Ç˛∑®L°í¶…dÚ&IòU¡ˇ#	±iÍ™´Æ∫´{~zö≈¬∑˚{òb;lO6H(úN—ÜaHÍ∞í;ÃBJÜ]ê¶›^˙•vÄ⁄‡xÍÜ)u®I≥ZÔ¶Ä\;òM¯z{9√b Õ˛Ë—óp”ûΩÒ(ÄÙhÏ≠NA|g¨P‹0áÄCàv A¬— ÇÑaÄÇÑ’ ÇÑg …eC.aËrŒv Å ·‡ƒ@êΩ#yí?≈±Ô@∂ˇÈ; å#Hﬂﬂ7
+è3ŸD{	]·‡òê ;,æ‹—H æ@+‚æ£·_‹\$IXIF Y¬1ê¨a	§HòÉ˚ öﬂ¯„jEöI∑∑    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  OIDATx⁄ÌViOSQ‰hPàD;≤/••EZZdm°lE(¥–Ö(JÀ≤…"KqÅà¢E~‡xœÇ&Ú(Lﬁ$'∑yÈÎÃú3˜§"Dà!BÑ"Dà! *I2®Ú≥ì†»LÑ45ôè¢p•§ji*ä¯≤‚∆ÁÂAÏ>wag÷â◊ìv¨∑√ﬁPÜ—Œz§∆=@Ld∏≈Ò˜ıalåsÆœƒE|XË«ˆt7|£6,∂b™ªnk5lı•àé∏Î‘ﬁÉçané‚–7 ?ÔØz∞«ºüÔ√∞q$†›På°∂ÿÀ—TQÄ»–Àâ(ÃM√˛ö?|#ºà¸€öóèÅ‹ÓÃˆûå`¡e∆Ñ£nK5∫ÿ8öô ]A¬nA˚¥8ÄØÃÌ|øôìs"ﬂ]t·›ú[Sﬁ˛e∑3Œfñ Û—a(A£V	≠JEF"BÇo\\Ñ*'Ÿåi÷øÇÁ∆ﬁ“ F·#ÚAKV<VÃıõ0agÓ≠5Ë6ja©.Ñ°$•è3ëõ/L¿Êx'ﬁŒÙÚ9Sÿ∆ÌO9Òˆ≥ﬁvö˚ êïu«ÑIG#<Ìµpö*ò˚bî‰eBØëA#KEvR4ø¬€Üó„]x√úí[:_Mt¡7f√™∑K,t≥}Õh´-‚‰}¶Jû~S•µ≈
+Ê>ylGπ t’»·*ÖåH…!•ù\O˜1÷Uè!÷vzn´/ÅYØÊ≠◊*%|1eπ$†•J√I»%ÕòÕ8õx˙âò\ªZÙ|Êzçî;Ø#r<ZZ9)±'‰Ç§ƒFÚ•2‹QáõÅóóë“˝Ógƒ=MZﬁÚV8#K|Mëe lHS¯j&“Ëàp~
+
+!Ω¨/î¡a,gd:^‰ñÓ8-"n“©xÀ+’R»©í]]IrÃoŒ D›ÉëëòÿlÕzo3ë>ëßÛ†1]55s-OO@Fb‘9ÚõÅ◊.∑ÔÑ±ç&·d¨tl∆•˘Y\Ì
+yF¬Iÿé[~iÁgz+àm¥~≠h≥…ÿrIå∫á¥¯áÁ˚ç<8˙˙È¢§˙·Èñ”˜Œæ/ò¯Ou,ÊòÏ∏˛Â]ø∏L˘µWBÏO1‚øÁˇ?D≤èŸ¯Aæ	    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  ]IDATx⁄ÌViOSQ‰ªâÉ`ÿDŸóä,
+BŸ°P
+eá“≠ä®@ä≤*≤∏£EQ4∆„Æ%D\HƒÌçÁ\¿ ‚ıÉ…õ‰‰æº§oÊÃôsS;;2d»ê!CÜ2d»ê]î?∏¥~–ÏÙA™bÇ<ÒOI˜(†Wa∂ØüNò0”Sç∑ùïx—Zä˛Úå»√≈T~ÓPxn∂≠ò"U0æ÷·€ê∑ÚπøIƒt∑ìÌÂxl-∆ùC˘∏j—‚tUéƒ#‘”6#g‚ß,¢æöÁ7b∫´
+ìmÛzKí0JŒ“—]§∆°¨h¯oqZõàÇË@ÃŸw}»"ÑÃ‘alü3Ω4Ç¡—R<l÷„693bŒtÈ’8úç*ı∏l\/MÑ6“Ô{ç∏Yüã/D ≈ùœˆôË}5¶:´™≠Lt˜p∆ˆÎ`’©0@yhß4hî®LP ìBÍ∫—íí˛Æ« fÕ§ºd;ø„ù7f‡IK1Ó7búDé‘e„Ÿﬂ[úàñ‹XÏMãDI\“wl√¶Î˛^¿”#%x”Q!ÊÃÁsäà_SËÿˆG÷"‹£Œ9˝WÃZú´Œ@_i2åIa8ò•gæ2â¡^P˘ªˇΩÄMÖxF"^∂ñ	´˘|Nƒl˘Dì^§æ≥0AÃù…Oñ%ãÙ7ic`Nç›k¬}π$<{ÓpÇ∆!„]gªôòª›õÉKµY¬vÓ\êÁƒÎyÓ<BıB˜íõ2qçHnêêõuù“œª~ôàπÎ¡äTX“"–ñøç‘πÖ»+‚»€ÄîPÔ_‰íƒ¯π—J•„Ç1√&X€ÀÔ8È«iÔπk+é_õéÚ›°DÓèÖ∑∏…%mÅèã#⁄Û„—C©f2.~Ó‘'àé≠∫X∫lî¬rmÑ/äcÉ¡´õ≤uYÁí0B<úE¢πÛfö/€\Ç˙å(4Cbò[û∂ÒÅûÀàŸ…‰ãuuJ5ëËf„ÁR"-å	Acbuê◊2À◊‹˘J∏;9àdÛZÒ©ÙuV«x¸FjrG˚·ï≈‰˙·RÀπñ˛vMƒ√◊Î"Ÿj§´ïÕH-õ;asb[äëˇ9ˇ¯	·!ê5«ØAß    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  IDATx⁄ÌîYOSQÖ˘>‡Ü®  ZÜRS
+⁄2HÀ\†L•¥ej)EQdûîQ!NDEC¢b‘Dçq	¡?¥<{cçíñæh‚INŒÕm∫÷⁄ﬂŸ˚zx¸_˝*åÌW}Âx÷m¡„6#Jí°âÑ:ƒ[6(√iƒé[«Û∞<\ÖV6ôÔ2„aK1¶ÍÚp≈ûÖ!ìÚ üÕU·Xu`u¨Üœœ¬Ë„†oNUp3≠FÙ„öCá—≤tƒCÍÁÖﬂN˛Â¨_Ö8ÌÒ|ÛòãÎ*∏]óè	6H≈…¬‘¶G#ÿg«∆&˘1!∏Q´gÉUëúNJø4d√€”ïx—Sä'&‹o*b”6Ω
+g,ZÆÄäï·ı‹Êﬁ‰µH∏4T≈ÏIxyxÕ;!~YûÎ4cF§øs¢ ìGrp—öéAS2⁄ÖQMj®˙ƒ0◊ôÚ`ºÏ-√˚~+&èÊ`Q”≈˜Öû2Ã	4è˚{Ö\%ª6çŸq∞i‰ ‘Y.´ É˘.õP%ƒ{A<?ó:+∞Ã¥sZB3Q≠√πä4n◊ˆ<5„)MêAß8 •dØkÉ¥C˚9·lßâ/ÚBe:û
+aÍ˚ÈfÓ÷pr?/~£ˆ$ˆıY1»â:à¢∏0h≈l∏5†¡!ëÈ&4Øm∫Lz7%fÅòSﬂ7ËbYº[t°©NQ¿§ñ"+r-Ω[É¯P\Ø…f4\¥{ãY¯™H}…ö¡Ã	%oF!nâè@n¥ä@ﬂçB˜Ï¬Xy*∆m|Å¥«môåjLÙ:•Ó3$1Ûïîìì∏^àk§?ƒ›–Í…(·∞YÉ≥ñE©˝®íé|5ö∫P[≤%KÓ:qôø7ünÁ »{;ã– uà§t∂‰(ô;	SKñ& ¯BU?$ÖÔ˚%˘ÜÈùK≤{'™4ëÃó∂]<g+2¶éIë±¡¶≈ù+¿ÀìáÜ>”t
+öÌ˜OÙz$õw.˙â9€rrwF¥]â˛ë?≥æ∞œPÁÛ¿q    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  IDATx⁄ÌîiOSaÖ˘&j4Ç®à,
+•Xñ,≠@ŸK°eë.X ]h°lñ}+ÉBDE‘ÄQ~‡ÒùëkP¯ $ì{ì¶gŒ<3s√¬.„¢Qòõ è3.lNÙ`m¥¡~;≤RCˆ$Á.V…∞∑Ï«èïAÏ.‡k–áO≥nlåw£Øπs}6åv÷√e≠BBÃΩ≥“Âe‡ÁÍ~≠cﬁ€åΩ?æ-˙yŒ√]¨é¥c¡˜
+c›çæ2†’§C\‘¸ßÛ?‚˚oG∞ø6¬Ô‘â‘¡{—¡õ·6t7ï#pP†Ωæe˘∏q˚Ù"⁄Ï4∆!πgq·~ e∆ˆ|>L9±Ëƒ“†3+#Ú\mu:.@ù_øz%tr8Â≤∞(ÂÆp˛}±_Ñ¯÷¥ÎØ{¬3—€[µNK%ÏµE0ï‰ÅÊ&Oé;πÄJûÑ-±);^ÊMπÙb[pﬂövb∞’»ÏÏòv[ÿ=·Èl,ÉUØÖ°0⁄ú4ﬁ¨ª†bÄ¥éØªò7πﬁúÏ≈ª±.!ﬁ∆‚3n+]çh©EØπUö,∆SÆ~Ü¸Ãd§%<ƒ≠◊é»ï%bM8$1BAπË{ﬂéÂ°VñéÜR˜;åpY™òΩπ≤@∏œAëR∆∑≤ ˝H"ÀbÄ+BêÜ∑‰wQÕäùüt61rÓdÒFc‘)AÊÚ»}bLËÇ›xœKF0Î±qk&!j31Û:1Lrn—k`“©MÅ‚)2S‚Y<dÅ§∏(¯Ï5nØcßîÕÜB¯≈pΩv_,¥Ela1+Y\ìï
+ÖË>˛A‰È(»YØπn´nõûE{ö*–)ÿ;å≈∞äµl({µp\ö/gÁäÓá3‰ƒFE0W⁄Î!HœrµÊ*oJMë
+(mÃa,î‘EH˜RDﬂBπbx*Nz◊k≥	´)»IK¿£Ë»cŒˇ).Ed¯MºGCüiz ì‚ê'ÓD˙D>ì∏Ùát±v°%$Á?ZàÚñH¢æ)~Q)0◊z˙    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  IDATx⁄Ìï±¬0E3%#§ö©"1tî‘àÜ5hÅéXÄ!êX ù•CñuNlÁtQ–}ÈKâÁΩÿNRçF£—L=eYËh€Ïa+.‚¬_õœØ"!∏àÑá∂m+'‡√≈%|Å„¸lKI∞
+∏`ÑRı˜Ñ∏ J`YÊ±pÃ&æ7&E ≤ }^+[îËC·z?Ï∂ÆÎ^∞ﬂdëÀam†]"1≈Òªfe-p⁄/4Wƒo´ÖmÚ§äÑ¿…3‡
+ƒàtÅY\	JƒªPVji®©¿„>Ë4®ı"¿ÚÊdøÜ8 Ù=à†Œìˇ	!ëê 8eFXü8GD‹%"
+¶DFk4ï/TûÍ!g$Ï    IENDÆB`ÇâPNG
+
+   IHDR         Ûˇa   äIDATx⁄cPTT¸¬Ø;ˇ/IQ¬¿jjj`å,R”« cÄ$<m¥Q0H„æÕ`b√ƒAjqÄl3H„yÛg(ò(êm˛¸˘3È¿4gäïÇ1≤K`·Å’ òÕ0ç»Ÿ≤Ä¬xΩ@»ú^@NÑ4cMËiÄ5 ã¬‚2$a»≈ Ã©¡—Î>0™    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ‡IDATx⁄Ì◊M
+É0`ÔSªÈ⁄µ–#¥ªû°ª^£◊^•ôí@ ÑâÕ¸4E˙Ñ∫ê˜9¢∆a¯˚çà~         Ä}^ÀL!›©x}N1à©∏å‚RlÅ∏k _)ñ@X¿„v¢Ø	\ÊcL3‡~)D)ãœ”!F<)§V,û@hÅlª r)ãÛRW wk∏Qw§˝O•˚p˜€py5 ıcòN®ΩZ ‹±¯cTÉ‘ íb—Áxk"“+6-H8à∂ÿ¥$À!⁄bóEi*«  XÚè…¯v|G‚¥    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ãIDATx⁄Ìî—	Ä õ†«FpÖ^]ß⁄¶-§-Z¿ä_0D|–_ä;¯¿ßÓ@i   æé1Êíuìo„ÓßÀè˘|¶Ò&WâàÂ2Áú^@*WèHñiıÀETà≈Aö[˙&‘BDX’ÄÒ“ 9Wøˇ“Y≥GX"n˙∞÷ˆ    ¸ñÆŒ–±¥>ö    IENDÆB`ÇâPNG
+
+   IHDR         Ûˇa   TIDATx⁄c`  ‘‘‘˛É09 §qﬂf0&ŸòÊÛÊœP0…6˛¸ôt`ö3≈J¡Ÿ%xΩ≥¶#Bñ0C@ò(ˇ„2Ñ®ÿ†HÛ(ä  Ûvá`%Ïí    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ∏IDATx⁄Ìì1
+Ä0E=èìÉõ£ì‡(∏Èú=%ãkõ÷Â?äÔµ’™        Ë«≈–¸&û÷›N±.Êì-$$Œ"´ÖpÒ8ovb≈¸˘Ëê–äC!°˚ﬁÈVsëtán!)g,Ûiª¡∏’ó‹üs»˝\≈.†n:Û°˘<âi»mø∫à	˘r∆>±ì_—
+ãµBí≈_C‘≈íê¨‚òê"‚∑ê¢b_H ;rî˛°([    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  QIDATx⁄Ì’±
+¬0Ä·>èõ8π8t–QPƒAá>Çõã/·ãVÆIcÓrwπ§‹b¡ˇ£	i”Ãk^Î˝∏ˆ0ìÖ_›aòjê0N1H*\"õAr√jàuò)&!5√1HsﬁÆ˙©ﬁ ¥@wiá©u†	≥[/∆ÄRê0ú¯êúÛæèÜŸ ò€i”ko¬cªD„" wk¬Wm¿ ÿÑ,¿@Q *Ä‡wòü7ÉX\8π>ƒÜŸgÄ⁄.Ä:¨CòÇh¬b —Ñ’ÄDŒ¯MXt§F›ñ ’=`¯Ô{¿!4˜Ä˘◊Pz˚sÔ6¿çÙsú∫∞gv3z1àÂÁÿEì[‡C, aò}®≠· ∞ +¢ûk√ﬂ∏ø4ìpƒ4¨Å	K E√Hï0©∆ 9ˇÒæó~'¨≠    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  IDATx⁄Ìî=
+1Fs;±≤±ÿBKA¡{;/·E#≥∞í˘ô$3Ÿf>¯`!∞Ô1båF£—h4ç¶!ﬂ◊›B∆”‘n"å+&íãâîÇŸDZ¡’"‹`≤à48)“1◊˝∆.5`O„mò⁄Î zÿÆ|)Œ
+∏"-‡˜Ûì†èÀŒ÷æÑÁaÖ	PWÉGÕ.âÌò] æ±∫P±	∏"!p±¿\™Ä{ñÇƒŒ <◊õ@H$%ÄWêò°Ÿ∏"Læ©’Pb`O í•Œk¡∏õpã+∏FD\""
+¶àtßD∫Çc"-ˇ¯úÑ¥Yﬁ–    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   äIDATx⁄c`£`åÇQ ﬂNî¸«ÜÈfÓ†u¿¡π—·°„ GK≈ˇÿ0•¿eÓ‡s πëÎ°ÁÄ'≤$·°Á BŸê\P≠påñÑ√ø$$µ†°è:`Ë8@NVò(Sˇ_W}å¶R£`¯9`‰§bÉöZx9`åÇQ0b o|ÖP.#    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  xIDATx⁄µï=Nƒ0Ö}:Ñê®#é@¡A∏BƒË°M≥BÄ–l¡"—pñth%≥„›gΩLÊ9≈Sˇº/„;)Áú˛Sr†Î∫¨˙°S÷ 	„8ŒL`zˆ¯^Å¸⁄êlœaä`Ú¥Ä ∏˝ÿqTºÆ0¯¸êìaŒ˝ `Í˚~a^ Lµ–¶i*OÑ	Ì^n™Ñh"Û
+0:Ñâº=ﬁú€âø
+∞à`Íﬂ9ö?¯Î°¸ıvxZ
+˜Hûïd∞*‰¯æΩø.RêYâPK6ÕÅ‘˙–å¿ÿ‹oèá,>‡7 µ-låí∂‰£ ¬´bm+º9åπ(Lö%ô∑†ñ‹
+ áìHÄ√£ˆõÕ}"∑à!˛0yc—I í£´Àãìƒ∆8¨∏Àd1‰˚Û<îçÒ-‡ÕÂˇ m\b
+†r —üÕ Q÷«ÂÍØx˘À‰§Úñ1Ê-Ö òn7Yê◊ªTìjmæ≥0è◊…®Øi›9≠u?«cH$=≤]a    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  $IDATx⁄Ìï¡	¬@ESÖGOº	¡ãXÇˆ ûÏ@m¿
+¨AlB¨¡õ5+˘a¸nP»$ã0>ªYc˛õù%…2óÀÂrπ\ÆRûÁ!ixòNC2	æE:∞›C  »ÿ)ÑHQ–»µvkÑ«aÚfY[¨w’}f·:Æ!Ù‹‰Ì©  <«µﬂÆ≤`´æÆ˙ç∏∑
+◊„G0˜ﬂt∑yÈX’r0—?œ*”p<±≠«oM∂ü´Ê*å[’
+ÄT&Å‚{xÕeÀh†ç0à9ªQ∏TÄﬁf\:¬Åf˝g Æ>f”7`‡Wõ|p–ÙA<-á’®´’Îç_Ï+¯≠Á≠ÏÇÀÂÍBOE?B∂Td¶    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  )IDATx⁄Ìï¡	¬@ESÖGOº	Çó4`	⁄Éx≤A¥+∞±	±o÷ lò»ìa#¡Ãn@Ê√g%˛∑«òe&ì…d2ôLˇ¶<œ˝†·æ(¸ ø;óÄO37ÄO
+Äp
+M–ûÄá'@8≠‹—¥ﬁ´ı}^4	¶ÚV„Å°pæGÄÚŸœ·ámÊ%Ní Ωê ≤â∂F¯5ıÆ?  ˚«•Ç<æ-Îp∏PìÁ™≤ /Å úC»pÏD•Y≠
+µ√€Ë=à¯B4A+ô_˛≥í±Ø
+ ˇÃgE˝‰˚‡õG˚ye ‡j‘ﬁà¸ƒ!B†À…eÍ–`]7”zÂ≠Á| 1†Q±ÎL®¸+öL¶ò*	?B=3Ã2    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  IDATx⁄µïΩm√0Ö5A∫ 0‡Z»)<àWPcdÄÙI´&<@H„¬p„Y‘hùG<=›)v·‚A•{è?«*•T›S·á∫ÆS‘]˛–u›»¶o?EHc]≤=€∂ÕÇ…˚`µ?eqVW ¯¯ÒZM~Ü9˜Ä©iöây0’RÎ˚>?ë&t˙z)b≤ÒÃ¿Ë~‰ÈQsn3ƒ[¯∞\<Â À¶˙ŒŸ‹0s xÙP:~_û∂ÑÉ 
+œFa¶øá«,k√ÄU ÔªÕsV)6g /t6†ı`65¿õ"ÖLp ö6∆ñ∂≈«pKE4Eûÿò∑µâA£E∂^≥»¿·d‚0«ºM£iÅπf†∑¬ììk°(v0“Í© --‹áZÊ¢•ïï!Z	˛Ω–÷ãÖÌ"Æƒ≥W¶B∂Îj$iâØL%OYà‰`∫˚º»⁄Äx é—∏p¢—Ã’úπ∏3⁄¿SÕŒÍDî    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  zIDATx⁄µï1Nƒ0E}:ÑV¢é8≈dØêq zh” ¥‡4[pÅH4ú%Z…ª„Â[??3Î≈ó'˛œè«)Áú˛S·áÆÎr‘]26¸a«ô	LØû>™<êéu…÷√PìÁ„ÄıÁæàW≈„* _”‚gòs?@ ò˙æ_ò Smi”4ïÀÑˆo˜U¬j<Û
+0:Ñ9<jŒœÒ6æ	∞¡Tﬂ—wª∫˘;ÄgÂÔ˜Sk[xîL·9à6¨
+˘}ﬂ=‹ÛüØÎ"ÕRÄö≤iÙ† 
+qlÆ·Qà`»Y@^ô•Û≈ÄV¸Ÿg≈í¡—‚$sj 5 8ú∫…HÂÄ√„≈[Õ±˜Üà!\I !$‹Á∞…0“Í© =ò‹áZfœûK5*+C¥4Ô<Î≈¬‚,bq%>{e*dªI3)HK|xeÚ,9d íÄÈÓı${ƒÓA4õhÜ≠q@*=wÙE    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  xIDATx⁄µï1N≈0D}:Ñê®#é@¡A∏BƒË°MÉ‡4ø‡ëh8K:Ù%Û«ü±∆õ]G QåúÿÒ<{wÌ§ús˙OÖ√0d€wq~ñ!åy„ﬁ‹Éyû}ú·˘‰˛ÕŸπ.Ì4MExVsÖ\øÔã≤Û*ÄÉèwiı1ZkN ç„∏2/ •bkÀ≤îñ€ÙVoCyÊ :≈!&uKÑxâÔ0Ü°›?_≠ﬁŸ˝@#U˛|=∂H·AÖÁ J2TÚÛæªΩ,ä MâPK6µ@ä> ∫;∞ 5∑·±ê’~à¬¢∆,i$ü‡^[°∞Ê4÷¢Ä‘$YCPKn¿√©"§x8tzÕÌ,$ëBÏa≤∆ˆ¢L2ç !HØÏ¡‘>ﬁeaÈÍ	¢,ƒﬁõˇ>Î™≠¢*“õ∏˚À¥êóõ‘»Ç‘∏˚À‘Uj»"@$@”›”Qx&ƒË;/ÃA¥öﬁù”õ˜Y˛FÈj*ì    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  ∏IDATx⁄Ìîm/[a Ü˝Èåçat)%™^™®Æ£=I”≥“.}ÒR÷çÿê⁄°˙≈óe¬ó}XlÛAÑÿÑ¨•?ËÚú3'Ÿh"œï<…˘v_Áæüs**
+ÖB°P(
+Ö‚ñ∏ OÒ∑ê°Xò·NÉèW∆8]{≈˘Á$õi.∑'¯'3-_‰g.∆˜Eù√≈GÀQô≥ınD§ÜÔfF¯ö’ÿ{£ÒÂı˚oC|{ÊWÓ%'´1~o§Ñƒ§<âè∫áç¯ [Iyqv“>vßÃÜÃF	£	iŸÄì˜Zπ∞õz7ü¢÷c^
+„C¢ï ?ñ"Ê›êÆªÎHyô≤3˚¢Ö˘†ì!≥Óbe‘√v gN"%‹ÔxÄ÷^√Xwioô¡ßB§ôl¿¡‹∞ìyÕENÔ!/&ë"0`∑1‹ZEƒUCºßñÑÁâ)2ﬁﬂ»ƒ†ùi+s!óºÌ˚ö*yÓ∞â¢âhÁ#F›èE#µƒ{ÎIxõÂ~~•Râ~{%1E∞≠JàTõGZ 7XœÜ@±X4%|œl¯E“ﬂÿ¬
+ø”Ωhó%¸	Kƒö£,eP(˜ñkûx	¥≥:b™    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  EIDATx⁄Ìî=
+1F˜$V^¿NA±ÿ ∆¬¬JAè ÿx	œôÖ»lÃL&ìü*|Uƒ˜2Ì∫ñññññññÑ<û≠
+ùM'∆Çœ˜˜–j"é[LƒΩ1îí»*‚KgT"X*ÅœƒëÇ]êd¨àÏﬁT*Ò'¢S–XënµÌM 4jy¿ˆ«€PJ$ÊVR0tæÿå8ë	¿")ßÎÀ@w˝≈Ñ˛Ç©/◊%⁄j‘Ÿ(Íç£ ÊrÂ >!,EN FD?ÅDDéﬁNÑg_Büw„bø,¬çZ,`+¿gÑ:∞Ìh>ë‘%ÙÅÉOÄEr∏`ÒpO#†¿#Hƒùk¡?8éF$8E$+X#R#R,©ÊD™Ç)ëîÔ¯rÌ]ﬁ™	    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   ØIDATx⁄’’¡Ä Pá‚≈#[0„0Saz®¸E§Â‡°F	˛◊ö®õs.Ø¨ç!Ñc4≠îRX"Ny¿·p`‰<vUxòA⁄
+ﬁC‡B˚D@ö`@·√¿(¢ﬁﬁØë†Oî]Iê˘#B·Âπ	Ä:Á5.Ù^pµ◊®AÔ f™†Æ4HÙFüE™oQ[ºÆAn`˘/s∂√·	˛¨¨¬Tô!”˙u¡    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  PIDATx⁄Ì’Ω
+¬0¿Òæîõ.Ç..‚–…≈¡¡IAApÒ%|Œ "iÃ}‰rI∏≈ÇˇMHõfZ” X˜«ªÉ-|∫Ω˙©	√·Ép·bê‘∞$7¨ÜXá≈ê“aR3É4ÀM€çı†›vák?µŒ 4afÛıP
+ÜYÄ…	/œhXÄŸ∂ÁN{.V{4ûênM¯™Õ€„bÄÇƒ à`!
+ C0 ¸ÛÛbKÄ≥[‡C, aX|®≠ë®s :ÑDNPMXàA4·lÄ—ÑìÓn4·§{¿†∫, ˇ}8ÑÊ0ˇ¶ﬁ≈>«“{@pì˙9ÊÓÏÑ›ﬁ@b˘9vQv|à ãœ µ5  `q!Íπ6¸ç˚K1	Á@L√Hëp
+§hX©¶ U√$Á?>G8P;8˘    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  IDATx⁄Ìî±
+1ÜÔ•‹Dptqáõ\úÙ_¬Á<…¡I[“4Mõﬁí˛©‡˜ôDªŒb±X,KAûØÔ ù|y|∆6	¡a’DR`5ë\p5ëR∞X§6ò-¢&EZÇ1ënΩÎáπ& ÏQ‡p∫èmu¿Ñ.ñ[_@K$'\ë˘ˆF¡lËæø“¬’ÊÖg	pWé∫∫@L$∂„lÄa@™ r•¢»ëÄŸ+‡àH¿Ÿ7@âP‡ÍGàâPﬂXÌW‡äP£fLÂ
+∏o$ˆ‡©ﬁ0ë“#ƒ¿…∏"5B0˚®’pb`O íQÔRÓF"R\"R,QÁà®Ç9"M¿îHSpL§‰3~ß—˝≥ï≠pã    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ïIDATx⁄Ì‘±	ÉPÄaÉç§qÇsGHó∆l¢ªàs8G¶x·Åß>≈ãˇ•ﬁ]e     úïà∏£3-oû‚˙˙·Ü∂˙ˆÓ⁄`øÁöæÔß3¸ÃŸ´HmË°ñÜo…t@)…¨≠ã¥–˜¶ä,˘7ùg>`öu°ﬂ˝zŸ¿Z˘mú.ú∆œ8• g(Xãà±    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ∫IDATx⁄Ìì1
+Ö0=è’±≤˙÷V"XjÎ˝ŸÄAc≤fõ7∞ (Œ$—™        òÜﬁ–|&ﬁñ—N±.Êì-$$Œ"´ÖpÒ:vb≈¸˘Ëê–äC!°˚ﬁÈVsëtá.!)g,Û˘wçq´/π$>Êê˚8ã]@˚´Õ]ÑÊ_p'¶!∑˝Ë"&‰Õ˚ƒN~F+D,÷
+IøQKB≤äcBäàüBää}!)Ôÿå&Ï…%—˙&    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   “IDATx⁄ÌV¡É0dä>˚Ã¢;tvÍJ}f ™ 2ßÄDz4B∫ì,0æ≥Ü¡0√∏:RJSWÚúÛ‘Mƒ˝˝úã¢NÑ‡≈
+9§œkı¨¯Ú Ä ÅY |Ä)9gW†22ÚZï2gìê≥ dã±?ø”RÖ#ŸÅc…Ç~nA»¡πBQîl
+j‰(mº∆©êé·^_π
+À^Pé·÷ñ;rFN€åµ÷HaK{‚˝ﬂ>Lë¥yˆïËBŒõ”øiÜaÜaó¬ SµÌ_‘*6    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   ÑIDATx⁄c`C®©©˝∫Äˇ¸˘ÛöX2Tnóÿ™[3fÅ⁄ÎXÍYÇl8≤T±›pt(≤õ·ÿ, ŸêB0F3Ÿ0\ò$üÄãµõa`ê/∞âëLÑ, €p\ñ [@±·ÿ,ÅY@5√—-Å•&ö4/F+≠° ˚H¸±É¢·    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  ©IDATx⁄Ìì1JD1Ü˜ññÔk%Çç∞€ÿà≈Ç`caaµz/·%ºíÂ;¿ì	¸è…0ô7…À€E»¿∞f≥Œ˜e2Y≠Z¥h—¢≈èÆÎÜì¬˚æN&q˛≥î\j1!ß$8∫ﬂáË;ZWÔ (,∞Ü $™¬ÂÈ4!.ÄŒTÉk≈£5;πÃ*p)Ä”üΩ_å)◊·rªˆÒùu:@Ò,•’£tÅ)ü_ø∆î'í≈eá∏%Øï—¿<58ZÀ?˘´ÄÑV/±¿©. ä=Ÿ~]V› qΩ›S‡"¸T93¢uÄÿA‡ÓÒ“+bÕuAŒâ¶\_nbÅÌz¯ﬂxRÄãxª¡°òëß˝ß
+vPﬁÓ^\A' ßﬂ_›‹'·Yﬁ´¡ã †∫@J$u«Ÿ”ÄVZ MàK%;ê#Rv_ÅG§ú=ñàÆ>Ñöàu‚≈^±ZÌ@z¯ûIÌu@ô;ÑxÚ
+∏H	vœÄu5Å8†òY˚•‡Œ£D§
+xéHUpâ»"‡ëE¡ë£Ä-ë£ÇS"sj¸É*3mØ•‹g    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   „IDATx⁄›’Ω√ Üa¶Hôí“±@v» Líöu≤≥§d GÈ¢„¯é`ßHq.,Ù> ˘«yÔó#«—%∆∏§î¶NŒπf"ß^Ã@8nﬂZ?Ô=ƒtºBC ≠-•@mr’	h›˘q}Ÿpúˇº5»f@∆% ^ø–qhd∞‚Ë!¯|GTD∆¨A-◊;ﬁÈ~iÜNÅÓYÖ Ω4— «—ªé[àdúßË8B@qçTÄ◊?MV\"’∑—Ωë∏\Ô~ÚÀŸÕñ˘#‡»y·)úz"¸l    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   ~IDATx⁄c`£`†¶¶ˆ¶ä·◊˛‡ƒYb≥ÁœBòØf3yñÄ4q«µÉ —ÿ0HÑAël8Ã`ÕnÑ◊™[ÄÏ+™XÄÕÂ KAòj‡
+&ä-@6õ%T± ñZ∞aê·%S|f	ŸüÀ…Œ`£   £"óC/ó    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   ïIDATx⁄c`£@MMÌ?±ò,√;Æ˝!ìdH°ÕàFMM–ò·§Z¿W≥ô∞ IêBÓ∏v8M©Öaê%c≤·»∞[ëd	IÄá—4±Äó√,ßâ»>§ÿ\¡D$[ÄÕBëå7£·≤ÄXÀÕ4œ…D[@
+& ptKH¡d’C  .såÙﬂ    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   ëIDATx⁄c`@§Ôˇ|xpZÄl oÍ6ºò,ÀËf∫AÑ,!€`∂_LÿW-°ª˚¸ˇ/g‡∆ q[VH:Å1H—†[$4ÜaÜÅ-≤Añ»BÂ»édö[ ∂DœÇAÜ¡ÿHò™ônËÿ,¿«¶»p\ñ·R3¬,¿4≠›Üh S Ç≈ÕÊyZä    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  PIDATx⁄c`£`åÇQ0
+F¡(£`åÇQ0
+ÜPõ˛üëÊñ®C-ÒY˘ü»Ó–ò˛øH7q;›|
+¥Ï®˙¥øOdÚv˛ó-‹∆2˘{˛≈ qM-WÈz¡≤\,u›ç˛∑ˇÂ+œ¸óŒŸ˛_:w«…‹ù GLêJ^ŒDKﬂOJﬂˆÒÂˇˇMß}¯ØîµÓøJ@≈YÔ“ˇs/¸ˇ/Y{Û?0ZîhJSˇ?—∞Òˇ/•Á¯ˇƒ”ˇˇ˘îÕ˛Kj€˛˜ãJ˝Ø0Ö∆! Köìæ<—wˇØh·Ûﬂ¿%¸øæΩﬂ†√hü†êbKçﬁWˇ’∫ûˇ◊Ë}˝ƒñõ¸_(ŒOØú`ƒ)@¸ ?£6Èª =≥‚(˝]å^êÖ“—≈Ëò8¯@AŒƒ»Œ+¿»»bÛ“”3ÄxÆ≠G¡(   Õ¢‚Cq2    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  ÖIDATx⁄ÌñKhQÜì†∂Sì"’Êâiíâ•1q°¯h|µ;µ†ËVƒ
+bí∆RS€∏–MIçÕ§∏*ÇËFjCã|u·F¡ÖE4ã‚SQL’‰˜‹8ÅY∏ú
+˜áè{nŒÓπgÓ9çÜãããããããããããk!H»B[µw›ÑñÊ!"·…"∆ ˚'6T◊πeœ(ƒ"¬LlÜÁÁ\√Ûp_*V†9ÿ\»¸ÖÃo;≠Y¶FLƒcA,Âm'ßÀñPñ¨'¿ô"{é≥oÁhÕ'¢[—ÕùÁguïì”ÊGn√Ã¡ì˙Ôe¿|¸ﬁ_Ç„X—uÆT¥vàe¡t¯ÜN©”á(Õ{t∫¥¥kˆ‘lπ–}Ä96É∆‡L›S0#;Áπw%zÊ!ÀöR\t¶ã®ßÆøZ{F±N,†ı*`Îå¡π∑÷ùΩËΩÚ-=wKçß_≥,îÈÇ:À@S∫X®>*=ÕÕÅ¨‹wÕÒÿ÷∂°ﬁµµ?ƒ—1‚œ`<ıFπTÀ…%¬».òm6ˇvhñ{ &ﬂD˙∞ƒ‰eî]Ìá*·—Øxx§*Xù˛ñ_≥˚ÿ/ﬂ∂x€Bt¬ﬂ~ æ≠{–æı≈≠FHT˚¿Fœ‡á˜Brñ∆èõ*cêPæ»;!Ωä≈N_âÁé4ﬁß1IøÉP≠ ÇyElílë¨lò˛Æ';Eô≤™˝]`%÷ Ÿ÷tdæ¬•v /Èî4Æb=BÊÎ˛C¨Ï√$ŸMDVÊ3V}j ¿–’÷±QO‘hkÙ≠Vgê|:µà	VÔaŸ<*•™Fˆﬁá˛Û˘_8Æ•?ƒ˚u…PÜºµ    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  qIDATx⁄Ìñ[HTQÜœå„úôsºTíó“.DtµãïDAëê=tz)D-m¥,–ÚRŸåf•›âÑË)Ë≠ázêB"F,‘»",≠%/P≈Ãﬂøwgb≤îöéq|¨Ωœ¨≥ˆ÷^güQ√3Ã0√3Ã0√~—50˝j¨˝7bˇm#]“Ø©¢ä∏5ñÎ*Ü	-$Åƒ0Y˝=Çq|?æ,b…T•G¶êáLﬁOz’≤w~€¡N®á∫`;¸∂#Ø§WΩê0fàÒ›"ûﬁ“¢¢lÅ“1I¥ñˆì°¥¬RÚ“^1(«÷¸G“´˚Ω~Å≠¥Á[EËÀCÈ°oQ≥(ª|ÚaŒÛ¬Z‹â	ßÅË3Ä≠ºj—Sâµ¯ô$l_,Eùıb‘‹ÊPÀ/n–~ÙùO…kÅR¯¶j`∆%`q#E!bn)ÓUë(PÚ[•ààZ¯x≥ÿ∆P4ÿ<êIsÔ¬wÂ1∞Ùÿ}$ùR/≤
+./b∑]D‚∂”à€Ïñîﬁyã˙ π¨Õßˇ$*·'©!W¿Í∆†RÚ∆wÌ	pøò≥.é7wÿûSÇ§eõ‡úΩÊ‰t…≠¶<x,hËÉrÚ+ zÄ2,ß–ª¨¢≥◊f#a—zƒßeaK~Ö\Ëû∑éô´1y·zâ$ÑM<+∑'¥~∏_ﬂ˜'ƒÏjDÚ“,(ÒÛ˝Òã7‚vS*k/¿î∏D<Ω_ê≤¡ÖàBØlBﬁ˚goA9ÓF?ªøwÓ÷≤œiôŸòóïÉi´v`÷⁄›X¥q/“2wJí?`≈∫πxËÁ¿œNBs5bÈWD’°á@Y˘JÊŒœpÔcÌ˝N¬ø'`‰æ©Ñ≥)áI;ÀÏ·¸«M◊qçäq˘2⁄´-L∂í¢û”Ô•∑í>éK5±≠ÌÙs™yÕfΩˇ%ùBÑ6O$Ô9Ø”ÊëŒœ—∑ì$]0ÒMÌ|ü§-òJƒèàªÍ¯˙!ö©∑Är&Ì<}
+ÊıÜ±‚Ù-íä∑B0ù¯x˝ Xq∫òÍj˚°ì”Æ√Œ≈\\hÕh˜Ÿ<÷ıœ©ç8&ªS¯H":]U‘(ß…&—bøÈjÈ‰)“«l!9t≠HãŸ£â–’2…U"öÆ~Då¯EèwFc‹*`ÿˇi_ †áhˇ'Ãµ    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ‘IDATx⁄ÌóÀÑ0Diâ∂âΩ—MÏç"∂Pêñåe'8a–å‰üÿ/NòàaÄ Ç ˙ˇæ+≈’5Ú,Ûg•`ê^02Âœ¿◊Û4ûëc)E ⁄=[Œ˜ ~…®-ã◊n ÛÁ– Äµ,^ª)B≈ètEÊÁVöã¶àÏÓ+LlWòg\ê˜∫Ä‹‡µ€˙4K ÕÀr@≠›¿Ûã⁄≤4ùñIyÊUÉz&@ƒTﬁp∆NÂÿ@o◊˚"/@◊”´PøÄ$µ˙¶2Ï2ö    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   øIDATx⁄ÌìA
+É0E=M∑=Å∏rUƒ3<A◊“3xœô@Éí&c&qÛäÔ%—Æ        
+¯.Ω°πMºØ/;ÕB∏òOµêî∏ZàT¨¬≈€g¥ì+Êœgá§Vú
+I›èÜH∑öã§;‰Öîú±TÃÁ==ç[}À ÒoºÄ⁄ﬂ¿YÏÊ·aBöAHLCn˚–EN»ï3éâù¸åVàX¨R,æ¢.ñÑTÁÑ4ˇi*éÖîº„ âqMf≥Nnª    IENDÆB`ÇâPNG
+
+   IHDR         Ûˇa   íIDATx⁄c∏<«¯?ô ¨wgã⁄ÉÉ`ÍAz¡Äßf eLH=Ü¯\Éb+≤ ä ◊`ÿ
+e√Ù¬9∏\É.é¢ ª¶Ÿ585„W¢b
+ŸVå¿¬S8C≈5¯l≈∏(Æ¡%âX0>V√∞Ÿä+å@0ä–¢n ±ö—ΩÑíî… Ω õÇ$Ûq ∂    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   tIDATx⁄Ì‘¡	Ä0Ö·N‡≈Y≤•#Èl—à)A¨∑¥˛§5ﬁ£ä•  ÄŸâà-†óÓe<H◊CùÕ|MØÅOÅ∏∑5≠ƒWPùÖyJâø†}ŸÓÀÓ}üR†‰œ|û˙
+ﬁA∂è'‘Á#lˇ'    ò“	ßì™eŒ⁄)    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ãIDATx⁄Ì‘À	Ä0EQp£ï§Er·⁄¢¨ :B¬C#ÇN»Êö(º…Gª     ¸BàMàáf3ﬂÜ%&⁄Ø∂*bWÃ˝q=[ï"4§Tå‡æ5O!˘^«ÑÀ≤øÖÃ˝tkV®ÎﬁóB¨Ÿ≥“s˜3p±¶sêﬁ—Òj_Å˚Ú~)¢˘ﬂÄßOˆÒB0π1    IENDÆB`ÇâPNG
+
+   IHDR         Ûˇa   [IDATx⁄c`˛@WW˜?EöAÄlÕ˜ó˛áí\”7@x/Ò.A÷åb ‘º.˚¶I: ËäE<ˇa‰
+õËp )D7 Dì0çdßXÄÛº ÑdÖdÑËˆ    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   |IDATx⁄c`£ÄÓ@WW˜?MöX2Ùæ‡“ˇ0@UK`Ü√-ﬁK=KêG±Äñ†éa%ñ`3´‰XN-ËÜ ÜêÏÉE<‰lbd!»6ó%»Pl86K`PÕptK`©â¶≈MºQ@u  èPÈÓ›≤[    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   ~IDATx⁄c`£`†¶¶ˆ¶ä·Mˇó·ƒY¢ˆ:ˆ?!,∑Àã<K@öƒ⁄Õ¿Ähl$∂ h…Ü√—ÇôZx-°∫»æ¢äÿ\≤Ñ©fÆ`¢ÿdÉ∞YB`©'WJí)>≥ÑÏåÜœÂdg∞QÄ µŸzˆx    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   ñIDATx⁄c`£@MMÌ?±ò,√õ˛/#ìdXÒÎXàF M0õê%0√Iµ@nóa@í ÖbÌfpöR√ K∆d√ë-Ã‘"…í, £ib1.áYNê}H±∏Çâ*> &.H∂ õ%Ñ"oF√e±ûõiûìâµÄLî·Ëñê<‰‘C  ˚uHÈıdΩÛ    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   ìIDATx⁄c`@‚ø»|xpZÄlÄ¿6^ºò,ÀËf∫AÑ,!€`v˛oO–W-°ª˛Ôˇ/Ô(∆ q[÷QˆøºìÉ‘m∫E2é“p3l©ƒ…ë…4∑ lâΩ4;J#ÿHò™ônËÿ,¿«¶»p\ñ·R3¬,¿4≠›Üh S <ãú∏    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  NIDATx⁄Ìï=KAÜsgù‰P‹w\èªMríX(*Xÿáãù@{¡J¥“2v6b!bóRVÇB˛Ä]ä≈ ZV·u/úÕu∑ÖÃ/3;[ÃÏÃ.[(AAAƒ¢_…=Ià`ídmE¯«!¯Å∞áBGO<4∆AÏˆ-TÔÌâ‹;¢à°ÿ€…59ı‘$πﬁ´ |Á`Œç	Á÷Ñ’◊!
+ËZWÜöÁN*◊”∏ƒñ?·ı¸=ÓÆçsú¡~÷E'8Àµ>X\ÎpòÎûàÚR	∆öéh;Çájæ¯ΩÛ_µ∏’iÇµg±∞ŸB+j" ÜyﬂÅt¶–J¯∆QÒé8ŒåàóeΩÑU°-°Q∫‘ø}MÊSDj?≤1Yÿ©gc≤–¶Jj“rU)*ö¢*â_îY¿©P7£}˙	‚Ø¸ m7ä˜ê™¡≠    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  ÉIDATx⁄ÌVMLAÓV-öj˜∑îvg€›“j¢AETº´'ΩzıÄˆ@Í	$â·‹çz1z1¡àâòx—ÉââQD1£‘ˆÛ›∆<ÓHÊKæÃº}≥Ûæ};ÔÌõòTõüDüDv?qƒÅ5\%ªDºlÉu’÷Ÿ0%ØE4P Öx»^g´Èı$“kÊ…∑Ì_l¬˛√Z”ÍGd⁄¯©]fKÌz≈òUaÃ©à=“õ◊`<PaæèØ“ö‚OÉ[Àâ‡∆ìSËùÙYŒ{ëÅ~_©rFÅ|wR% ÿ	nUo…AØûæü“\ä/Â–Ãvt¸4–ã‰—cQÅ:Ö6/cÁtÍlÏC¢L˜<&!≤W∆≠µ"”m∏ÅÎËπŸçÆ“>E7b√:Ãã	äœêΩÁîµ∑Q–=:†qœ2¿÷:JmOZ /È|Úï›»,¶a◊±cörMòúû¿ëóáyˆ.µrJ!Ê,6¢√8¶#`*JØå¬Pçôm\@≈<õ¨VÃA™¿⁄®ÇÃ˜‘Rˆ\ÁÔ\>ãŒ3∞S{NÁê;AˆmÁ+_qºÆW@m¨8ü¨èDp⁄ÀŒÁÍú*„*	0Ø˚@}'§W±’B‚ÒC|Ñ∆á4é“uá|ÎÑˇ6foà›πJÂÛÙ≥ôÊ◊(SöØﬂ
+¬MƒÕLú7ù:ﬂ]K˙-‡5—\Ìdè◊˘k>?h¸√‰
+Ë {≤ŒÆ˘¸DàsKKêèÕƒF©Y
+IA)‰˙Ç~(.yΩüØ≥ãÆ(_1E‰Ô}Ï?‰æ∞¯ÖÿT¯À><3ñö#    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  `IDATx⁄ÌñÀkQ∆'qíôÃ$M“óµèhÍ˚ç≠⁄V∫“E≈ïR•‡FA–∫°J[WT¨|° Æˇ¢))j≈ZA§huS—*ËBI>øsù@®$ù"»ú„‹{ÁÃπÁû{Óùhö'ûx‚â'ûx‚â')QXæøµ-B»˜0y“F¨ˆqÏ 9A∫r8N∫]ÜuREäÈl=ı'j‰¬±‹ˆE±%≥I‘ç,TíGt˛ûåÖﬂô∞âàÅKÍW¶“ˆCAõO¥{Í∂Ç&ï¥eSG'Òüìsï_C∞Ñ^Ík"†⁄V_Pi;edÑ»ENF¯nG!5î≥z€/iW+ˇj òÚ√¢ÑÓÀGdú+j(¨gAÖ—?Ê∞û›ñŸ˚Å·/4˝RpEÔBiΩ_É˛LC>,¬<4†ûÅDUﬂ—%+
+}àvö
+";Õ˜{e‡l¶r∫˚“Wp	ç˜◊ â,@-JSqî](¡Ïì’(Ô.U{€ésËAr0ë|”$R[pl'Ù◊Z˙Æ‚ÓciÎDnX®@)Z∑ ±µÒ1Ë~≈Ì°[xHÀ˙Òï@õjl?XÇ>÷‘ªã[°zSf5W`{Á65—›ëª∞70†M3êVâ2Ÿû¬j ˜p‘)à~≥PvΩâÊ¥Zf÷ñ
+‹ºÉÆÛ]Øˆ…Í3¬‹∂$¢)[aÊ‘NAÓ=`!û’?∂¸Ë≤Ôı≠uX±w9í;Ê`·Æ®€≥
+ı;Îµ}âèÃÿ('/¸¯›Mh¿_B›TäË°òkî#ôÌÏüÊﬁóDrÌ&¸wLﬁ∑0å ãÚ3y¬4ü`ˇ€˜ÿ>≈6:ßÂÀôÈt∂éA=ßﬁC$„l∑;¡r˚Ò*éŸΩﬁ~y≤qåK?WfU≥ˇÅ˝SŒÛà¿˛Í'§∆’ Ë¯¶søó;÷íè≤‚Ivó≈éÃw;Ä: Æå:I>s¸l>;7àãS9N sIö„óÚŸπ"ˆ†ÒK%ØE]àìµq¢çz/¸ÿtıœ©IbÇè?9D*›–¢õ·S86ŸgÆJ9B9»5{ÄÃ;‰ÿÏvÇpU6ìÀDäÆ'b#°¯tg‡OL[<˘?Âˇ‰3fQ    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   ÆIDATx⁄c`É˛'ìlˇE$a¢,|ZÇAalb0 iúñ†N™@b+n`ÜÉëäaÜ¥ §`}#≥	aÅñ–◊t√aö≤Ç!õ°Ë‚dYÄÀ≈ √±©ßö»>Ä—T∑ Ÿ'0ölàâ≤-@v.K»≤ 9%—‘¢s3¥» ±iûì	Z@ä·Ë‡-Iaä®n86KH¡$◊h‘ `c4ÊÜ%Ú    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  DIDATx⁄ÌóﬂKSa«ùêóñ^	˛»õîúõÉ(ƒ´.È¶¿ZÖ•xÉ,°‹RA4‰‘+¬ãË""ÔqÅm˛Hë%
+*Ì*(ÿNœgægÊ&S'+Ÿ‹ÛæœÛ}ûÛûÛû◊ìíí¥§%-iIKZ“˛G^∞ô∂3æˇ¿˙¶,ÈÓ)À1¸=º‚SÑÏR¯á~,y1€„Eõ	Oπ}ß¬!LöÅ	5Ó$åZ;n‰¬ı£©„ÊtÏí+’†o*T4``c|cæ»#WÀüf≠Y">&ÇÅ∞%è
+±*~å¸]5ù5OÑ÷’UáÆv(ÆØ“:˘ªm GÑVÀÀ
+Ë¨íèX€·
+¨≈c€¿É…‚t∑◊bA_x°h>±¡x…#?./"Ÿ^ï"∫¶Gπ˜~ÊâÖ∏ºàå÷?c5É[	(ïø¬¸ûúvΩ^ãUä∏¿ÕUF∫ˇ´„"¬5c>-ﬁÄ∫Á–Â1g©√®¡¯*ÓızΩEZÒØ‚ è|t∂}$ÈvüÂ≠j†ˆoV≠«[ËúÃ◊tW‘BPGÚ—â˘…7ø≠†∞a° =eæ=ﬁÇÔ/Ì⁄áo#!gûX≈∞ oçVgì]∫óõ⁄9a>$Iı¿˚\¯%øk∫ßsÛAÆxÈÕßf-†˘C‡3Œ<±@û:GÍ—Ù∑\ÖÑ7 ˚8[í¶Âæµ I-£'“D§N¸ﬂA|≈˛°ô2ÌÈ‹π¯å3O,êG~PM˝à€Nﬂ"ÉÛ%G‘∂j∆û|¥]z_r≥⁄⁄És%⁄¿|°ß{>Ûö>„Ã‰©±Qﬂ™ËG˝⁄˘¨ M:,ìÓgÂ©Èﬁ÷>V¥~‹Ï—<πÈE°”òãœ8Ûƒy¢eCM@ü:ë∑û/∏ó_˝<}¸˘◊ì7†”c˛b;s∞ª¶#TÊó†Ï|fØ)5≈!)WugûX ØÀS¸4}Í¸õ<Z∞ï∑ø.jñü•g+ª†¢>{N|Wiy∆HÂ›ú8êfjí±;R¥MüqÊâÚ»GM@ü:õ> ¬>"¯»p(.’BïpEQ-Ek‰oÂW´˘*Eµ w(M{\>Zí∂ØÏ∑ò3◊‡÷ŸÊ    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   √IDATx⁄c`HÎåË&ñ?x- ÑinÅ°°!m8H1±¸P«DYRˇ¥(ÒúF¬ pZ∑%0√A∏"Äã(ål¯ã≠∏-ÄRD*ÜN–êÇıåÃ&Ñ1,<-Jg–ái 
+Ü`lÜ¢ãìe.É«¶ûj ˚ FS›dü¿h≤- &.»∂ Ÿu∏,!À‰îDSàŒÕ–"ƒ¶yN&h)Ü£[Ä∑$Ö)¢∫·ÿ,!ì\£Q  MP°Êy¬A    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ÊIDATx⁄Ìî±¬0E3M
+7t©ê(h2\Zj$˙¿∞
+´“Góp&∂1
+&˜•/€Áƒˇ…N\U&ì…d2ôJW€∂îe°æ?ëÊ©˜ËÆw0¡Î∆  àÍA\Cõ†ÎˆÀ  »>∑<∆ÛY¥†gM‘%D0¿fª#Õ/·J–yuxò«Ë¿∑nÄ/s®À#üıÿ¸íƒ}ÃaG$∏œI Zê¥¨e8:ÂÚ ¶~√TÄl˜¿Ï ©.¿wa‘nd<möÅ?æ	g¯ñÀà=ÇˇXŒ7∫’π¸{ &ìi±∫õ"oÛëIU    IENDÆB`ÇâPNG
+
+   IHDR         Ûˇa   íIDATx⁄c®¨l˙O	f )«’H÷”√ prr"	£∏ ü∫∫∫§ rÉ4É ≤—Ä4ﬂ\˙@|¢ÄiÜ ºÓÇ kF1 j,L∞ ˆ3L1í&t@–ãx*‡‰
+9FF#H!∫ ö‰t ”à--ïîaJTR&;3	ãÀ¸ßSl  1$+è€â    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   áIDATx⁄c`£`åÇQ0
+F¡(ÄÇY≥ñ˝«ÜÈfÓ†u@eeExË8@S«‡?6L©pô;¯@ÆA‰:|Ë9†_\ú$<Ù@(íÎ ™ïÓÄë[
+ãÀÖaÍÔ)+£`äK¬w ≠–q ©Q0¸0r“ ±AM-<¯0
+F¡(±  G˙ﬁÕ&XQÑ    IENDÆB`ÇâPNG
+
+   IHDR         Ûˇa   @IDATx⁄c®¨l˙O	f ˜îïI÷”√ prr"	£∏Ä™ÄúÜè@&P%)ìùôÑ≈e˛SÇ)6  zF/DqúÅ    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   }IDATx⁄c`£`†¶¶ˆ¶ä·ˇ/.√â)≤‰ˇˇˇ1PYñÄ4ù72 ¢±aê-"=X†ÉË~%%¸ñP€d_Q≈l.Y
+¬T≥ W0Ql≤Aÿ,°ä‘Çß(ô‚√0K»œh¯\Nn»  Ó'À√åﬁ/    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   îIDATx⁄c`£@MMÌ?±ò,√ˇ_\F4&…"∞·3¸!öA41Ä4AK‡Üìja¿Üû72Ç”ƒ`∞·0¥d`,@6ŸÇ~%%“,!≈ê·0ö&„ròÂ4± Ÿá[Ä+ò®‚b‚Çd∞YB0íÒe4\ç°πôÊ9ôhH¡Dén	)ò¨˙`H  ~+ÑA_N'    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   ìIDATx⁄c`‡ø»ﬁˇ¯‡¥ ŸÄmºmx1Yñ—ÕtÉYB∂¡`lí†ØZBw˛Ô˚ﬂQŒåA‚0∂£¨Ÿ'90©!⁄tã•Õ‡fÉÿ K¿(Gv$”‹∂ó6cêA062¶j¶:E6±)2óe∏‘å0≈Mk7Ü°àƒ√‘ ≥ËQVCO    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  RIDATx⁄c`£`åÇQ0
+F¡(£`åÇQ0
+Ü¯Øvàëˆñ®C,˘Ôsñ»Ó¯Øq®H7q;˝|™~ËË_ıÉOv Ù˛ﬂ/;å˜»Ùˇä? ‚öZ˛Be#»ÚubÕˇﬂjl˚F~ˆˇÌ“›ˇwH˜¸ﬂ)ŸrƒÑÂRL¥Ù˝ƒmBˇˇ/~˙ˇÉÈûˇÎî⁄˛W®$˛/ïç˘ˇÓ„ˇ7%ˇFãMC‡ø“¡'˛.ˇ•Ã˛ˇ?Ò˛øüˆ[I„ˇ©~qˇˇ+†m¿“¿Õ›O¸ı›˛˚(:¸7˘ÔßÔ˙Ë0⁄ß®§ÅÿÚï∆Êˇœ’6˛≠±Â?à˝_ÓÄ0Púü^9¡
+àSÄ¯5îÊª⁄zf≈ˇP˙=∫Ω •ˇ¢ã—1qÉÇúâóëSÄâë	ƒÊ•ßf Ò4\7Z#éÇQ@*  æª¨oX¶n=    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  âIDATx⁄ÌñKLQÜi„3ZlY†¥ù6ñ∂SI+lQ4ÒÅ´Ft•&nX∏¡eA01ÅcòÑ®Ï"M
+µ••µ&∏–ÖââQLàèPå∆¢∂øÁ÷)÷ƒÂÃÇ‰˛…ó{Óú{sœúôsf  ∏∏∏∏∏∏∏∏∏∏∏∏VÉ ¶4+∂˜ôÜÊmÑW W@L]&zà=+Îú˜(ƒ¬DÏ[„KÀé8≤Œ©4õˇÉøƒi+≠Ÿ¢Fåƒ£úòúO[B˘à9Ä®π”¬5$Ñ bÊ~º±ç.—öOƒE_∞ﬂ’≤;gáﬂ™ºÇà)ÄœÆ0‡ô¡Ñ©∑¿§…è€[Ø"„ò ≠`Y1˙¥J›}•9ì∂Ürìõ%|∑> <º≥ò3ç Z@¬Dÿ–ÉŸoÌc9⁄ÛêeM© ÇY˚¬0Ù7%dv≈Ä∆4|ñ≥∏hoAápè;Ó`‹›ó{U5ƒ≤êß‘¶X≤’±ÃLy0á'ãhÆ9ÇﬁmÁ0W3ä√ñÏÆp£nÉ·¡õò›?å◊ÜaÂ2P,'8RˆÇIñV¥‘√U&‰Î—›~	ûu6@æ≈qºP¥ßK˘*p˝©ÇØ;¢Û≠;OˇlÆ=äS/NàM8YÁ≈±⁄&åπ•E:\˘*ê(ˆÅÜÆ˚Ô0ƒ{¯Ë/ÿT
+@˘>O't§÷¬û¸B<á-)—ß—O◊At´÷	KÇyIÏïm3·gˆ7gTGv?eJP˚ª¿J¨R∂m¨Èî¯BÑCÌ ^Çlog=¢ƒ◊UÙ©Ä¿>L≤]M\/Òä>5•gîk7±QG¨◊i6Íµ≠^ˆi’†ìhóaı~ædﬁ)•™B{ÓˇÅ˘¸ékUÈ784å◊6åóÔ    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  xIDATx⁄ÌñYHTQ«Ôå„‹;◊ÃµÖLK[êh”ˆ›'L{	[Ñ^ÈALâ,‘û
+ rZ‘\¢¢Í¡HÁ⁄¢àäbdñf ajæ®π@>3ˇæsºCi%2^)‚~„;ÁÃwœ˘üÔ~Á‹›t”M7›t”M7›¶hê√îc-Sè˝∑L\Îk4ñBú'≤‚,qNe≥¶bhBD¯”d€»ë«8‰qÌ<++ã?-≤∞Ä®°…˚àÓÒæ´U*FõXÇvÈ6>Jw∏ˇ ﬁ‰PÃ≈wxYIılQJõ;u4âMù#ñR4ä◊–n∫ÂÙ~ƒ€uf;˜ı‚£K∫˜##≤íÈI˝‚£y⁄iÁ#b)Íçv¥öãÅŸÄÌz•áx+rZÃEúØ+h5πE‰≤◊P%Ê=M?+∏¡ÀgÉ`Gãp0îK´ÄuµÄ_Ô∑ôäYV8ÕB>UÑè‚§Á´ŸkÙTÄíÉOäcÔú»ˇÑ $"¯%VÖz€u\H≈ÖÖ…8òƒ˘úQ‰v†)‰¶sTx¬2·"¬<œÄŸ1ÿ)‹u¢∞®ÏG¬äX‹í”Å¿Á8y q¡Qÿeç¿&c8ß˘>e¶™ΩkûBŸ43¿j¿ÏÿSywı∆"$Ñ«":h+bÊoG÷˛|°6Â5v…k=oá	b¬0Á9{=û’¿∏S 9¯)ïÀP‚üéòêùX-Ñ∫ˆŒﬂÅ¶áµ∏öùÉıÜÂl˜.FjËa‘˚\+B…1ΩS0ÓvÙQıwü^ô¯-!ríV≈„‡‚=8≤<âÒ8«©)†åu@ö∆=€õ–X@~¸ûu‡¯VåIv‹c≥+rË›P÷4ª	ˇûÄ_>F¢√õäròxCi>O˝Ø‘~AÌã‘ÜJ÷å|-èM4ŸVıû|"y3—KÌUl#gÏˆ≥VãóåZˇ8C¥2j!ÒÖ˙’æ/«¢\&ˇÜ÷VÄEπ£ﬁÔs’√à∂„	q<NVñi- ì&mvÔå|(1L„ˆ…‚¥`cì≤S°
+XB8i<≤8M¨I,¯•íYc°≈Ri°®?=˜J ”Ùœ©DXV√,Ê}	VÈ¢ü [ΩFé„˛MS€Dú"“Tÿ5õBˇi,Mç9™ä–‘v+∫‹I`1Ï#dõÈ¸âÀÄnˇß}B∑wN√æ    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  IDATx⁄µî¡	1E∑	A<…‚MXºlñ†=à';D∞kkƒÏBÑ»_òevúÃFü@&¸ó?≥õÃ9ó≈(œsg’„ÕÀ“YêhÛ[Q§¿0)˛êÊId”‰ üy 7O s¨\— 2Znˆ’˙:Œ"àõ :¿5s^√‰û
+@a∑ŒúÑ–Õ4†ò	$@&Ò%‚m4g‡»êªü Ú1Ç@√Àº6«@µ4£«¢Rk	 sëÊT#PP]iÈxÔW$H2Ë˜ÇêÉÖ`ºvT°∆œ‰ˇ‡†÷›N+ÄZg>‹úZ•›û.Ú5†≠U≤5?%¿‡Œ´qΩ‚˚|¿0h≤jæWı9¡Ñ%MÆ}    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  $IDATx⁄Ìï¡	¬@ESÖGOº	¡ãXÇˆ ûÏ@m¿
+¨AlB¨¡õ5+˘a¸nP»$ã0>ªYc˛õù%…2óÀÂrπ\ÆRûÁ!ixòNC2	æE:∞›C  »ÿ)ÑHQ–»µvkÑ«aÚfY[¨w’}f·:Æ!Ù‹‰Ì©  <«µﬂÆ≤`´æÆ˙ç∏∑
+◊„G0˜ﬂt∑yÈX’r0—?œ*”p<±≠«oM∂ü´Ê*å[’
+ÄT&Å‚{xÕeÀh†ç0à9ªQ∏TÄﬁf\:¬Åf˝g Æ>f”7`‡Wõ|p–ÙA<-á’®´’Îç_Ï+¯≠Á≠ÏÇÀÂÍBOE?B∂Td¶    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  )IDATx⁄Ìï¡	¬@ESÖGOº	Çó4`	⁄Éx≤A¥+∞±	±o÷ lò»ìa#¡Ãn@Ê√g%˛∑«òe&ì…d2ôLˇ¶<œ˝†·æ(¸ ø;óÄO37ÄO
+Äp
+M–ûÄá'@8≠‹—¥ﬁ´ı}^4	¶ÚV„Å°pæGÄÚŸœ·ámÊ%Ní Ωê ≤â∂F¯5ıÆ?  ˚«•Ç<æ-Îp∏PìÁ™≤ /Å úC»pÏD•Y≠
+µ√€Ë=à¯B4A+ô_˛≥í±Ø
+ ˇÃgE˝‰˚‡õG˚ye ‡j‘ﬁà¸ƒ!B†À…eÍ–`]7”zÂ≠Á| 1†Q±ÎL®¸+öL¶ò*	?B=3Ã2    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  ,IDATx⁄µîÕ	¬@Ñ”Ñä û$xÇ∞ÌA<ŸÅ ⁄ÄXÉXÉ ÷‡ÕDxÚ"&œ›Mb‚aÿ¸êÔ€Ÿ]âHT'qKË}}¯t*!Im¯5Iö(p?J˛#∞FÄ+¥qÅ˛≥†◊Ìàﬁà@· Æ#Á'ÅBüóVΩ÷Î]:æì\ ±bØÄ· d·,—	ÿg_∑ñÿkx¯æ•qµÌCpâxm*∑cNí7πûep›PWõ¡}û¶∞é‰v	é©ﬁ≥ƒ¬Ò¢¬‚%bê}f€8OëK†M–H£¿á|FﬁW@b	_„ûSZÄè}BN{3Nñ.¯/b8œÿH*	 Ã‹∂®‹@7Ó¥f#∑‚Áº¡8 •ÆTi÷ﬂvêOËów    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  )IDATx⁄µî¡	¬@E”Ñä û$xÇ∞ÌA<ŸÅ ⁄ÄXÉXÉ ÷‡ÕDX˘ë&„Ïí5Ò…Ü˜vv≤&Œπ§N“4u°ı˙È‘Ö$µ·◊,k^ ‡~î˝G†·ç
+¥qÅﬁà@¬-AØ€˘]@8™å¯$A0≤XÔÚ˙:LJ°Á•ïGãÃ[)Å\ÆaR†%%¯vï8-a'ñ–'êØ@w‚ÎHQ¥@wÄ∏€1(0èHKê˛yV¿1P´õ¡}7d
+óÁ?SÎ¬}	$@wb=√ªÑ£-Ò
+ÿ	*‡√}*¬u}\AÅ,Câ¸-g≈TË˚J{3ŒCè.¯W!·r«V(âTŸπÓ"∫Ó¥Uv%üÀÛ®$∞”Yoæ-præqü    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯  2IDATx⁄≠î¡	¬`ÖªÑä û§x
+Çó.‡∫ÉxrAt'pqAú¡õ#àIÂï4¶i~èî˛Â}yI€Ñàí•iJﬁyêŸ†ﬂ#V≈<œ…ÉôøÆùB|Û[ñ≈§πÑ¸†Õ!6èX›ÀQ ,µI—#bÉ√$+GÇŸˇeD0Á*Ä—r≥/Í˚8´vx@ZÊÚå–˜L Ï÷	i:≥Ä‡&– ù§.ë£ªÉ:ÄN¿¢˚© ?; Ñ5ºÃKs^®ïfÙXjL†0ómé3ÄZ%–—µëïN¶©}ã4 I∏≤ÿIﬂ ¬y@/D^À]yc2˙{‘›NÄ—πø
+i.;∂H†MÁ:Ep^‹y5.´L%ÔÀ„h∞í^
+jˇµA≠¸    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ÀIDATx⁄ÌïA¬ E·ΩÑwÆ›∫‚Ó\xo„<S-Q"Ûù	Åí*……ﬂ º¬¥uéB!ÑÚÔLÁiŒS5˜‰^N@]DKÕ=-˘~ÔE“ıöπÉ
+cb·w—e8hÒ◊VÅ¬8„`
+|‰÷øf£-<.«9≈êL ÊçÖ±Ë˝‡D∫‰M&û:ãﬂv¢È⁄è m)¿]âb—(8∞Ä∂µ1ö@·º√™ü<Y(ÙÁÁ÷Ú˝!⁄XÄ“â'⁄¶MV-oŒH    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo  TIDATx⁄ÌîAä¬@Eì;x¡ÅA‚ ôÖ(¢‚B7.ÑY8^¿Ωg6^¡3E+Z±∫¨ä›âÍ√á$›©ˇ∫∫ì(2ôL&ì…d2ôLØÆ⁄™ñPÕFøÄXDr»;E hÅ¯3våœCÊæ)Ä2ÊæÜûáßí„ø¢ ä÷ãØªUè∫:¿Æ¸W†¥›fíø3+0’()˜9“É≈! Ù–éÒÏ1ﬂgÖêÂ∏ùöüxæo\∫& ~¡¯"m+‡](E√=÷@h¨Ô
+0Ô∑‡Ω¢£•÷Ç•PÛ:“≥YØôd´BW´ï:†ÖK¡h 0HÍ åÅ}Ç3Ä^ßûHd˚3HMãI ⁄|)ŸÈ9Äj˛#“ˆXŒ¬©äÄ¯∂:7¯Y •ÉãÇ<=8‰_É}@*	Œ©4X)S„QV‡'∏Òs    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   ¥IDATx⁄c`£Ä&@$^‰?2&Zù;√ˇÅ≥ C!6åE=!u850Í2¢`ò8±Í[ÄEE3‘`†î/:fÃ"dû D_¨ ,¶≥¯R÷»Ç≥ivˇAáe#9Ú–-º«ÑmÃp¢•dÉßjB0‘_ÇAÑÕuËæÇd0≤°É¿t√AÜ`≥ èaæÀ#òÎ`.ƒcıJX,P`ÊﬂëQy Ó$∆À•≥    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   wIDATx⁄Ì‘¡	Ä0@—‡ä'˜uq∑JÑBµPhõÉˇA¿[Q    ÄF«-Igª÷ÙøÄ|∞¶3Ù÷˚πºc#ja√û›G¯0˝Óu+ç ˚∞Æµó)ê_"4`⁄ZÜÿ’õ·ˇ	~ †≈˜Úvπ≤®    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ¸IDATx⁄Ìì=
+1ÖÉGP¨ÏmÌÏl¨¨l<Äùx{¡kxÔô¿ÑŸ!1?õçÕ{`Q„˜Ì$1AAAA
+≥˘K]Ωóˆv9∏˛M‡y?πva∞,K∞u÷∑^øÆR"$÷d"<⁄–ÿµÑ£ÁÍ≠·Ö”„ñcg∞ìüeãh∞Ó„zt’˙{-êIÅc",†≈x±ı#ëplj◊üáùıoﬂz)0w$Pr‰’„)§D$ÿ˚≠IHë–·ìWOﬂ˝˚òJlwË!G§fèc`ói%Rn%2\+“\"2+8G§¯óHWpLd |˚H ± P“    IENDÆB`ÇâPNG
+
+   IHDR         ‡w=¯   mIDATx⁄c`£`hÈ=ˇAXxæ-êF∆Ëñ√0YÆmcctKYN¥01l¡ƒê≈AlÇ‡s»bò°»‚0KáÑÇó!4∑ ÊöZ@ïº14-@/2®j	∫¡Ëx¥J†  Ë¨ö) v¯    IENDÆB`ÇâPNG
+
+   IHDR       0   p¨xo   ïIDATx⁄c`£`åÇQ0î¿Ø3¢ˇAòX˛u !<ÍÄ·ÎÄä Æˇƒ‡°ù◊++õ˛”ãÀPì‰ i5#™„°È ık(òãê’"≥G£Ä,ú˛o «#3‹˜îïqbr,ß{ê]®fÕZˆüñò†hë ëÒ‡w -™bd<ÍÄ¡ÔÄQ0
+F¡à ˜ı>†    IENDÆB`ÇâPNG
 
    IHDR         ‡w=¯  IDATx⁄µï¡¬0E≥BTúªE'`Ë8]á*±Mo\ÇÒ—ØÎ$NáØ“‘˘/NÏbåÍ˚>Ú˚/¥2üÁ9∂B$æ4g8MS¿≥®& Vâymé C˘ŒÚ,jcÆ'X∆"YΩÁÃäòŒÄC[ƒ{Õ+÷Yπ˜[®nÉ¨s·ß≤¿∆…@~S)8Ñçô6∆y,ÀídÅ≤ s.QÉ≤e™Sƒ∫"∏|1Êå„òÇLaõ[%¨!Ÿã,óÅ6∂/–çvΩú£Gú9˜à´ì≈‡ı<ôíob
 iÛj`Ôs œÎXY»òÆ"w‡}ÜØ"øeLƒ£Îí™¿{3™ıM¨™ÄíJˇÕ•¯7ﬁg„∏üX    IENDÆB`ÇâPNG
