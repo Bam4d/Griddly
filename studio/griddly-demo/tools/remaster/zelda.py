@@ -198,9 +198,9 @@ def dark_citadel():
 
 
 def hunters_keep():
-    """Rooms in a ring around a sealed vault: three locks, five hunters that speed up after two doors."""
+    """Rooms in a ring around a sealed vault: three locks, few side doors, seven hunters that speed up after two doors."""
     m = C.Map(37, 23, seed=7, border="W")
-    box = K.rooms(m, [0, 9, 18, 27, 36], [0, 7, 15, 22], extra=0.9, door=1)
+    box = K.rooms(m, [0, 9, 18, 27, 36], [0, 7, 15, 22], extra=0.6, door=1)
     a = K.centre(box[0][0])
     m.set(*a, "A")
     goal = K.centre(box[2][3])
@@ -208,7 +208,7 @@ def hunters_keep():
     K.lock_path(m, a, goal, 3, WALK, WALLS, min_key_dist=5)
     props(m, a, TORCH, 12, wall_side=True)
     props(m, a, STONE, 6)
-    enemies(m, a, spiders=3, hunters=6, min_dist=10)
+    enemies(m, a, spiders=3, hunters=7, min_dist=10)
     return m, a, dict(dirt=8, bones=10, skull=6, moss=3)
 
 
@@ -227,9 +227,9 @@ def spider_warren():
     goal = (37, 21)
     m.set(*goal, "E")
     K.lock_path(m, a, goal, 2, WALK, WALLS + TREE, min_key_dist=6)
-    props(m, a, BUSH, 10)
-    enemies(m, a, spiders=3, hunters=6, min_dist=12)
-    enemies(m, a, nests=2, nest_ch="B", min_dist=14)
+    props(m, a, BUSH, 22)
+    enemies(m, a, spiders=3, hunters=9, min_dist=12)
+    enemies(m, a, nests=3, nest_ch="B", min_dist=14)
     return m, a, dict(grass=18, moss=6, mush=6, dirt=3)
 
 
@@ -241,9 +241,9 @@ LEVELS = [
     ("Lake Temple", "Flooded chambers behind rock walls.", lake_temple),
     ("Dark Citadel", "Twelve rooms, three locks, nests in the dark and a hunter on your trail. Good luck, hero.",
      dark_citadel),
-    ("Hunter's Keep", "☠ Nightmare: six hunters stalk twelve rooms and three locked doors - and they get faster "
+    ("Hunter's Keep", "☠ Nightmare: seven hunters stalk twelve rooms and three locked doors - and they get faster "
      "after the second door.", hunters_keep),
-    ("Spider Warren", "☠ Nightmare: twisting root tunnels, hunters and brood nests that hatch more of them.",
+    ("Spider Warren", "☠ Nightmare: twisting, bush-choked root tunnels, nine hunters and brood nests that hatch more of them.",
      spider_warren),
 ]
 

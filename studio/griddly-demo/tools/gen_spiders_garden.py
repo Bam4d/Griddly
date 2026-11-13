@@ -271,12 +271,12 @@ def queens_lair():
 
 
 def hunted_hedges():
-    """Braided hedge maze full of loops; four hunters and a locked gem vault you must come back out of."""
+    """Braided hedge maze with a few loops, no tall grass; seven hunters and a locked gem vault you must come back out of."""
     m = Map(35, 21, seed=77, border="H")
     m.maze(0, 0, 34, 20, "H", braid=1.0)
-    for y in range(2, 19):  # knock out ~40% of the hedge segments: loops everywhere
+    for y in range(2, 19):  # knock out ~33% of the hedge segments: a few loops
         for x in range(2, 33):
-            if (x + y) % 2 == 1 and m.get(x, y) == "H" and m.rng.random() < 0.4:
+            if (x + y) % 2 == 1 and m.get(x, y) == "H" and m.rng.random() < 0.33:
                 m.set(x, y, ".")
     m.rect(14, 8, 20, 12, "W", filled=False)       # the vault
     m.rect(15, 9, 19, 11, ".")
@@ -285,9 +285,9 @@ def hunted_hedges():
     m.set(33, 19, "K")
     for p in [(16, 10), (18, 10), (33, 1), (1, 19), (25, 5), (9, 15)]:
         m.set(*p, "g")
-    for p in [(26, 3), (31, 11), (7, 17), (23, 17), (21, 5), (13, 13)]:
+    for p in [(26, 3), (31, 11), (7, 17), (23, 17), (21, 5), (13, 13), (9, 9)]:
         m.set(*p, "P")
-    return m, dict(grass=4, dirt=8, mush=5)
+    return m, dict(grass=0, dirt=8, mush=5)
 
 
 def spider_queens_court():
@@ -329,8 +329,8 @@ LEVELS = [
     ("Sunken Crypt", "Tombs, torches and a locked treasure room.", sunken_crypt),
     ("The Bog", "Wade through the mire. Watch the spiders in the reeds.", bog),
     ("Queen's Lair", "Deep caves, many nests. A hunter guards the queen's treasure.", queens_lair),
-    ("Hunted Hedges", "☠ Nightmare: six red-eyed hunters track you through the hedges. Use the loops, hide in "
-     "the grass, and get the key for the vault.", hunted_hedges),
+    ("Hunted Hedges", "☠ Nightmare: seven red-eyed hunters track you through the hedges, and there is no grass "
+     "to hide in. Use the few loops, and get the key for the vault.", hunted_hedges),
     ("Spider Queen's Court", "☠ Nightmare: courtyards and narrow gates, hunters and brood nests that hatch more. "
      "The last gems wait behind the queen's door.", spider_queens_court),
 ]

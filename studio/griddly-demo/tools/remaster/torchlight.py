@@ -228,18 +228,18 @@ def heart_of_the_mountain():
 
 
 def shadow_warrens():
-    """Looping tunnels, few torches: three shadow hunters close in whenever the flame runs low."""
+    """Looping tunnels, few torches: six shadow hunters close in whenever the flame runs low."""
     m = C.Map(33, 19, seed=306, fill="w", border="w")
     hubs = [(3, 3), (12, 3), (22, 3), (29, 4), (6, 10), (16, 9), (26, 11), (3, 16), (14, 16), (29, 16)]
     cave(m, hubs, [(0, 1), (1, 2), (2, 3), (0, 4), (1, 5), (2, 5), (3, 6), (4, 5), (5, 6), (4, 7), (5, 8), (6, 9),
                    (7, 8), (8, 9)], width=1, rad=(1.4, 2.0))
     a = (3, 3)
     m.set(*a, "A")
-    sconces(m, a, 6, spacing=9)
+    sconces(m, a, 5, spacing=9)
     place(m, a, "c", 7, 7)
     place(m, a, "v", 3, 8)
     place(m, a, "x", 2, 12)
-    place(m, a, "h", 3, 14, clear=2)
+    place(m, a, "h", 6, 10, clear=2)
     return m, a, "R", dict(dirt=6, bones=10, skull=6, mush=3)
 
 
@@ -269,8 +269,8 @@ LEVELS = [
     ("Drowned Grotto", "Underground lakes and long stretches between torches.", drowned_grotto),
     ("Heart of the Mountain", "Every crystal in the heart of the mountain, and everything that guards them.",
      heart_of_the_mountain),
-    ("Shadow Warrens", "☠ Nightmare: let your torch burn low and the shadow hunters come for you. Few torches, "
-     "many tunnels.", shadow_warrens),
+    ("Shadow Warrens", "☠ Nightmare: let your torch burn low and six shadow hunters come for you. Only five "
+     "torches, many tunnels.", shadow_warrens),
     ("The Long Dark", "☠ Nightmare: one brazier, six sconces and four shadow hunters in a deep cave.", the_long_dark),
 ]
 

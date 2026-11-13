@@ -195,28 +195,28 @@ Environment:
       R   R   R   R   R   R   R   R   R   R   R   R   R   R   .   .   .   .   .   R   R   R   R   R   R   R   R   R   R   R   R   R   .   .   .   .   .   R
       R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   .   .   g   G   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R
       R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R   R
-    # Hunted Hedges | ☠ Nightmare: six red-eyed hunters track you through the hedges. Use the loops, hide in the grass, and get the key for the vault.
+    # Hunted Hedges | ☠ Nightmare: seven red-eyed hunters track you through the hedges, and there is no grass to hide in. Use the few loops, and get the key for the vault.
     - |
       H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H
-      H   A   .   ,   ,   .   .   .   .   .   H   .   .   .   H   .   .   .   H   .   .   .   .   .   H   .   .   .   .   .   H   .   .   g   H
-      H   .   H   H   H   .   H   H   H   H   H   .   H   .   H   .   H   .   H   .   H   .   H   .   H   H   H   .   H   .   H   .   H   .   H
-      H   .   .   .   H   .   d   d   u   .   .   .   H   .   .   .   H   .   .   .   .   .   H   .   .   .   P   .   H   .   .   .   H   .   H
-      H   H   H   .   H   .   H   H   H   H   H   H   H   .   H   H   H   u   H   H   H   .   H   H   H   .   H   H   H   .   H   .   H   d   H
-      H   .   .   .   H   .   .   .   .   d   .   .   .   .   u   .   .   .   .   .   .   P   .   .   .   g   .   .   .   .   H   d   d   d   H
-      H   H   H   H   H   .   H   .   H   H   H   .   H   H   H   .   H   H   H   .   H   H   H   .   H   .   H   H   H   .   H   d   H   d   H
-      H   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   u   .   .   .   .   .   .   .   .   d   .   H
-      H   .   H   .   H   H   H   H   H   H   H   H   H   .   W   W   W   D   W   W   W   H   H   d   H   .   H   .   H   H   H   H   H   H   H
-      H   .   .   .   .   .   u   .   .   .   .   ,   .   .   W   .   .   .   .   .   W   .   d   d   .   .   .   .   .   .   .   .   .   .   H
-      H   .   H   .   H   .   H   H   H   H   H   ,   H   H   W   .   g   .   g   .   W   .   H   H   H   .   H   H   H   H   H   H   H   .   H
-      H   .   .   .   H   .   .   .   .   ,   H   ,   ,   .   W   .   .   .   .   .   W   .   .   .   .   .   .   .   .   .   .   ,/P H   .   H
-      H   H   H   .   H   H   H   .   H   .   H   ,   H   .   W   W   W   W   W   W   W   H   H   .   H   H   H   .   H   .   H   ,   H   .   H
-      H   .   H   .   H   .   .   .   H   .   .   .   .   ,/P .   d   d   d   .   .   .   .   .   .   .   .   .   .   .   .   H   ,   .   .   H
-      H   .   H   .   H   .   H   H   H   H   H   H   H   ,   H   .   H   H   H   H   H   .   H   .   H   H   H   .   H   .   H   .   H   .   H
-      H   .   .   .   .   .   H   .   .   g   .   ,   ,   ,   ,   ,   .   .   .   .   .   .   .   .   .   .   .   .   H   d   d   .   .   .   H
-      H   .   H   .   H   .   H   .   H   .   H   H   H   ,   H   .   H   .   H   H   H   H   H   .   H   .   H   .   H   H   H   d   H   H   H
-      H   .   H   .   .   .   .   P   H   .   .   d   d   d   H   .   .   .   .   .   .   .   H   P   H   .   .   .   .   .   .   .   .   .   H
-      H   .   H   .   H   H   H   H   H   .   H   .   H   H   H   H   H   H   H   H   H   .   H   .   H   .   H   .   H   H   H   .   H   .   H
-      H   g   .   .   .   .   .   .   .   .   H   .   .   .   .   .   .   .   d   d   .   .   .   .   H   .   .   .   H   .   .   .   .   K   H
+      H   A   .   d   d   .   .   u   .   .   H   .   .   .   H   .   .   d   H   .   .   .   .   .   H   .   .   .   .   .   H   .   .   g   H
+      H   .   H   H   H   .   H   H   H   H   H   .   H   .   H   .   H   d   H   .   H   .   H   .   H   H   H   .   H   .   H   .   H   .   H
+      H   .   .   .   H   .   .   .   .   .   .   .   H   .   .   .   H   u   d   .   .   .   H   .   .   .   P   .   H   .   H   .   H   .   H
+      H   H   H   .   H   .   H   H   H   H   H   H   H   .   H   H   H   .   H   H   H   .   H   H   H   H   H   H   H   .   H   .   H   .   H
+      H   .   .   .   H   .   .   d   d   d   .   .   .   .   .   .   .   .   .   .   .   d/P .   .   .   g   .   .   .   .   H   .   .   .   H
+      H   H   H   H   H   d   H   d   H   H   H   .   H   H   H   H   H   H   H   d   H   H   H   .   H   .   H   H   H   .   H   .   H   .   H
+      H   .   .   .   .   d   d   .   d   d   .   .   .   .   .   .   .   .   .   d   d   d   d   .   H   .   .   .   .   .   .   .   .   .   H
+      H   .   H   .   H   H   H   H   H   H   H   H   H   .   W   W   W   D   W   W   W   H   H   .   H   .   H   d   H   H   H   H   H   H   H
+      H   .   .   .   .   .   .   .   .   P   .   .   .   .   W   .   .   .   .   d   W   d   .   .   .   .   d   d   .   .   .   .   .   .   H
+      H   .   H   .   H   .   H   H   H   H   H   .   H   H   W   .   g   u   g   .   W   .   H   H   H   .   H   H   H   H   H   H   H   .   H
+      H   .   .   .   H   .   .   .   .   .   H   d   d   d   W   .   .   .   .   .   W   .   .   .   H   .   .   .   .   .   .   P   H   .   H
+      H   H   H   .   H   H   H   .   H   .   H   d   H   d   W   W   W   W   W   W   W   H   H   .   H   H   H   .   H   .   H   .   H   .   H
+      H   .   H   .   H   .   .   .   H   .   .   d   d   P   d   .   .   u   .   .   .   .   .   .   .   .   .   .   H   .   H   .   .   .   H
+      H   .   H   .   H   .   H   H   H   H   H   H   H   H   H   .   H   H   H   H   H   d   H   .   H   H   H   .   H   .   H   .   H   .   H
+      H   .   H   .   .   .   H   .   .   g   .   .   .   .   .   .   .   .   d   .   d   d   d   .   .   .   .   .   H   .   .   .   .   .   H
+      H   .   H   .   H   .   H   .   H   .   H   H   H   .   H   .   H   d   H   H   H   H   H   .   H   .   H   .   H   H   H   .   H   H   H
+      H   .   H   .   .   .   .   P   H   .   .   .   .   .   H   .   .   d   d   d   d   .   H   P   H   .   .   .   .   .   .   .   .   .   H
+      H   .   H   .   H   H   H   H   H   .   H   .   H   H   H   H   H   H   H   H   H   u   H   .   H   .   H   .   H   H   H   .   H   .   H
+      H   g   .   .   .   .   .   .   .   .   H   .   .   .   .   .   .   .   d   .   .   .   .   .   H   .   .   .   H   .   .   .   .   K   H
       H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H   H
     # Spider Queen's Court | ☠ Nightmare: courtyards and narrow gates, hunters and brood nests that hatch more. The last gems wait behind the queen's door.
     - |

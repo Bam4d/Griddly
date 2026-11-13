@@ -33,7 +33,7 @@ WALK = set(".") | set(G.values())
 SOLIDS = HEDGE + TREE + STONE + ROCK + WATER
 
 
-def populate(m, a, butterflies, cocoons, spiders, region=None, hunters=0):
+def populate(m, a, butterflies, cocoons, spiders, region=None, hunters=0, hunter_dist=14):
     rows = K.grid_rows(m)
     r = C.reach(rows, a, lambda c, p: c in WALK or c in "fcS")
     for p in K.far_cells(m, a, butterflies, r, 4, region):
@@ -54,7 +54,7 @@ def populate(m, a, butterflies, cocoons, spiders, region=None, hunters=0):
         placed += 1
     for p in K.far_cells(m, a, spiders, r, 10, region):
         m.set(*p, "S")
-    for p in K.far_cells(m, a, hunters, C.reach(K.grid_rows(m), a, lambda c, p: c in WALK or c in "fcSH"), 14, region):
+    for p in K.far_cells(m, a, hunters, C.reach(K.grid_rows(m), a, lambda c, p: c in WALK or c in "fcSH"), hunter_dist, region):
         m.set(*p, "H")
 
 
@@ -195,17 +195,17 @@ def conservatory():
 
 
 def thorn_labyrinth():
-    """A braided hedge labyrinth with five hunters - and not much tall grass to hide in."""
+    """A braided hedge labyrinth with few loops, eight hunters close by - and hardly any tall grass to hide in."""
     m = C.Map(35, 21, seed=37, border=HEDGE)
     m.maze(0, 0, 34, 20, HEDGE, braid=1.0)
     for y in range(2, 19):
         for x in range(2, 33):
-            if (x + y) % 2 == 1 and m.get(x, y) == HEDGE and m.rng.random() < 0.4:
+            if (x + y) % 2 == 1 and m.get(x, y) == HEDGE and m.rng.random() < 0.3:
                 m.set(x, y, ".")
     a = (17, 9) if m.get(17, 9) == "." else (1, 1)
     m.set(*a, "A")
-    populate(m, a, 9, 5, 2, hunters=5)
-    return m, a, dict(grass=3, dirt=8, mush=5)
+    populate(m, a, 11, 5, 2, hunters=8, hunter_dist=9)
+    return m, a, dict(grass=1, dirt=8, mush=5)
 
 
 def spider_meadow():
@@ -229,7 +229,7 @@ LEVELS = [
     ("Orchard", "Rows of fruit trees, a stream and a walled yard.", orchard),
     ("The Marsh", "Islands of reeds joined by log bridges.", marsh),
     ("Conservatory", "Nine hedge rooms, each with its own cocoons - and a hunter on the prowl.", conservatory),
-    ("Thorn Labyrinth", "☠ Nightmare: five hunters stalk a looping hedge labyrinth. Little grass to hide in.",
+    ("Thorn Labyrinth", "☠ Nightmare: eight hunters stalk a hedge labyrinth with few loops. Almost no grass to hide in.",
      thorn_labyrinth),
     ("Bramble Thicket", "☠ Nightmare: eight hunters in a thicket of brambles. Keep moving and use the tall grass.",
      spider_meadow),

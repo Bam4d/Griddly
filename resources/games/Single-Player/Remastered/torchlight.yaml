@@ -178,26 +178,26 @@ Environment:
       w     t     .     w     +     .     :     :     .     .     .     .     .     #     ;     .     .     ;     .     .     .     .     .     .     .     .     ^     +     .     .     w     w
       w     w     w     w     .     .     :     :     .     .     .     .     .     .     c     .     .     .     .     .     .     .     .     +     w     w     w     t     w     w     w     w
       w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w
-    # Shadow Warrens | ☠ Nightmare: let your torch burn low and the shadow hunters come for you. Few torches, many tunnels.
+    # Shadow Warrens | ☠ Nightmare: let your torch burn low and six shadow hunters come for you. Only five torches, many tunnels.
     - |
       w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w
       w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     .     w     w     t     w     w     w     w     w     w     w
-      w     .     .     :     :     :     :     .     +     .     .     :     :     t     w     w     .     ^     .     .     c     .     .     .     .     ^     ^     w     w     w     w
-      w     .     A[R]  :     :     w     w     w     w     w     ^     :     :/c   :     :     .     .     w     w     w     .     .     .     .     w     w     .     .     .     .     w
-      w     .     .     :     w     w     w     w     w     w     :     :     :     w     w     w     w     w     w     .     +     .     w     w     w     w     w     +     .     .     w
+      w     .     .     :     :     :     :     .     +     .     .     :     :     t     w     w     .     ^     .     .     c     h     .     .     .     .     ^     w     w     w     w
+      w     ^     A[R]  :     :     w     w     w     w     w     .     ^     :/c   :     :     .     .     w     w     w     .     .     .     .     w     w     .     .     .     .     w
+      w     .     .     :     w     w     w     w     w     w     :     :     :     w     w     w     w     w     w     .     .     +     w     w     w     w     w     .     h     +     w
       w     w     .     w     w     w     w     w     w     w     .     :     w     w     w     w     w     w     .     .     w     w     w     w     w     w     w     .     .     w     w
       w     w     .     w     w     w     w     w     w     w     w     .     .     w     w     w     w     .     c     w     w     w     w     w     w     w     w     w     .     w     w
-      w     w     .     .     w     w     w     w     w     w     w     w     .     .     +     w     w     .     .     w     w     w     w     w     :     w     w     w     .     w     w
-      w     w     w     .     .     w     w     w     w     w     w     w     w     w     .     c     .     .     .     +     .     +     :     .     :     w     w     .     +     w     w
-      w     w     w     .     .     .     .     w     w     w     w     w     w     w     h     .     .     w     w     w     w     .     .     .     :     w     w     .     w     w     w
+      w     w     .     .     w     w     w     w     w     w     w     w     .     .     .     w     w     .     +     w     w     w     w     w     :     w     w     w     .     w     w
+      w     w     w     .     .     w     w     w     w     w     w     w     w     w     .     c     .     .     .     h     .     .     +     .     +     w     w     .     .     w     w
+      w     w     w     .     .     +     .     w     w     w     w     w     w     w     .     .     .     w     w     w     w     .     .     .     :     w     w     .     w     w     w
       w     w     w     w     .     .     .     .     .     .     .     .     .     .     .     .     v     t     w     w     w     w     w     :     :     :     :/c   .     w     w     w
-      w     w     w     w     c     .     w     w     w     w     w     w     w     w     w     .     .     w     w     w     w     w     ^     :     :     :     .     .     w     w     w
-      w     w     w     w     .     w     w     w     w     w     w     w     w     w     w     .     .     w     w     w     w     w     w     w     .     ^     .     w     w     w     w
-      w     w     w     .     :     w     w     w     w     w     w     w     w     w     w     *     .     w     w     w     w     w     w     w     w     .     .     w     w     w     w
+      w     w     w     w     c     .     w     w     w     w     w     w     w     w     w     .     .     w     w     w     w     w     .     :     ^     :     .     .     w     w     w
+      w     w     w     w     .     w     w     w     w     w     w     w     w     w     w     .     .     w     w     w     w     w     w     w     .     .     .     w     w     w     w
+      w     w     w     ^     :     w     w     w     w     w     w     w     w     w     w     h     .     w     w     w     w     w     w     w     w     .     *     w     w     w     w
       w     w     w     :     w     w     w     w     w     w     w     w     w     w     w     .     w     w     w     w     w     w     w     w     w     w     .     .     w     w     w
-      t     .     :     :/x   w     w     w     w     :     :     :     .     +     h     .     .     .     w     w     w     w     w     w     w     w     w     w     +     v     .     w
-      w     .     .     .     .     .     :     :     :     :     :/v   *     .     .     c     .     x     .     .     h     .     w     w     w     w     w     w     .     :     :     w
-      w     .     .     w     w     w     w     w     w     t     w     w     w     .     .     .     w     w     w     w     +     .     .     .     .     .     *     .     :     :     t
+      w     .     :     :/x   w     w     w     w     :     :     :     .     .     .     .     +     .     w     w     w     w     w     w     w     w     w     w     .     v     .     w
+      w     +     .     .     .     .     :     :     :     :     :/v   .     .     *     c     .     x     .     .     .     h     w     w     w     w     w     w     .     :     :     w
+      w     .     .     w     w     w     w     w     w     t     w     w     w     .     .     .     w     w     w     w     .     .     +     .     h     .     .     .     :     *     t
       w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w     w
     # The Long Dark | ☠ Nightmare: one brazier, six sconces and four shadow hunters in a deep cave.
     - |
