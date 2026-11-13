@@ -242,6 +242,8 @@ void SpriteObserver::appendObjectItems(const std::shared_ptr<ObjectRules>& objec
     auto tilingMode = spriteDefinition.tilingMode;
     auto isWallTiles = tilingMode != TilingMode::NONE;
 
+    // Wall tiling picks the sprite from the neighbours as they appear on screen (view frame), so walls
+    // still join up when an egocentric view rotates the grid around the avatar.
     auto spriteName = getSpriteName(objectName, tileName, location, globalOrientation_.getDirection());
     auto* texture = getSpriteTexture(spriteName);
     if (texture == nullptr) {
