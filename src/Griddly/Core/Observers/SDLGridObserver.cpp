@@ -45,10 +45,21 @@ glm::vec2 SDLGridObserver::getTilePixelCenter(glm::ivec2 location) const {
     auto avatarLocation = avatarObject_->getLocation();
     glm::vec2 v = tilePos - glm::vec2(avatarLocation);
     if (config_.rotateWithAvatar) {
-      float angle = -avatarObject_->getObjectOrientation().getAngleRadians();
-      float c = std::cos(angle);
-      float s = std::sin(angle);
-      v = glm::vec2(c * v.x - s * v.y, s * v.x + c * v.y);
+      // Exact quarter-turn rotation (orientations are discrete): float cos/sin of 90/270 degrees leave
+      // ~1e-8 residues that shift tiles by a pixel and open seams between them.
+      switch (avatarObject_->getObjectOrientation().getDirection()) {
+        case Direction::RIGHT:
+          v = glm::vec2(v.y, -v.x);
+          break;
+        case Direction::DOWN:
+          v = glm::vec2(-v.x, -v.y);
+          break;
+        case Direction::LEFT:
+          v = glm::vec2(-v.y, v.x);
+          break;
+        default:
+          break;
+      }
     }
     // OffsetX/Y are in cells in the (possibly rotated) view frame: getAvatarObservableGrid shifts the
     // visible window by -offset, so the avatar sits offset cells from the centre (e.g. OffsetY > 0 puts
@@ -64,13 +75,14 @@ double SDLGridObserver::getObjectAngle(std::shared_ptr<ObjectRules> object, Disc
   if (!config_.rotateAvatarImage) {
     return 0.0;
   }
-  if (object == avatarObject_ && config_.rotateWithAvatar) {
-    // The world is already rotated, the avatar sprite itself stays fixed
-    return 0.0;
-  }
-  float angleRadians = object->getObjectOrientation().getAngleRadians() - globalOrientation.getAngleRadians();
+  // A sprite is drawn at the same angle in every view: its orientation in global (map) space. In an
+  // egocentric view (RotateWithAvatar) only the grid positions rotate around the avatar, so objects look
+  // exactly as on the map. (Previously sprites were counter-rotated by the view orientation, so they
+  // spun with the camera, the avatar was forced upright, and the rotated resampling showed artifacts.)
+  // Orientations are discrete, so this is always an exact quarter turn.
+  (void)globalOrientation;
   // glm rotates CCW in y-up space which is clockwise on a y-down screen, matching SDL's convention
-  return glm::degrees(angleRadians);
+  return glm::degrees(object->getObjectOrientation().getAngleRadians());
 }
 
 std::vector<int32_t> SDLGridObserver::getExposedVariableValues(std::shared_ptr<ObjectRules> object) {

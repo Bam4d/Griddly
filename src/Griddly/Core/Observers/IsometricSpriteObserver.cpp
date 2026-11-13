@@ -45,10 +45,21 @@ glm::vec2 IsometricSpriteObserver::getTilePixelCenter(glm::ivec2 location) const
     auto avatarLocation = avatarObject_->getLocation();
     glm::vec2 v = tilePos - glm::vec2(avatarLocation);
     if (config_.rotateWithAvatar) {
-      float angle = -avatarObject_->getObjectOrientation().getAngleRadians();
-      float c = std::cos(angle);
-      float s = std::sin(angle);
-      v = glm::vec2(c * v.x - s * v.y, s * v.x + c * v.y);
+      // Exact quarter-turn rotation (orientations are discrete): float cos/sin of 90/270 degrees leave
+      // ~1e-8 residues that shift tiles by a pixel and open seams between them.
+      switch (avatarObject_->getObjectOrientation().getDirection()) {
+        case Direction::RIGHT:
+          v = glm::vec2(v.y, -v.x);
+          break;
+        case Direction::DOWN:
+          v = glm::vec2(-v.x, -v.y);
+          break;
+        case Direction::LEFT:
+          v = glm::vec2(-v.y, v.x);
+          break;
+        default:
+          break;
+      }
     }
     // OffsetX/Y are in cells in the (rotated) view frame, like SDLGridObserver::getTilePixelCenter
     tilePos = v + glm::vec2(gridWidth_ / 2.0f - 0.5f + config_.gridXOffset, gridHeight_ / 2.0f - 0.5f + config_.gridYOffset);
