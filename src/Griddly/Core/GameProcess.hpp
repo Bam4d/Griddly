@@ -1,6 +1,9 @@
 #pragma once
 
+#include <map>
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "GDY/GDYFactory.hpp"
@@ -15,6 +18,13 @@ class Player;
 struct ActionResult {
   std::unordered_map<uint32_t, TerminationState> playerStates;
   bool terminated;
+};
+
+// Result of running queued actions on the game clock
+struct TickResult {
+  uint32_t ticks = 0;           // ticks run by this call
+  uint32_t actions = 0;         // queued actions executed
+  ActionResult result{{}, false};
 };
 
 struct SortObjects {
@@ -98,6 +108,10 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   std::shared_ptr<Grid> getGrid();
   std::shared_ptr<Observer> getObserver();
 
+  // An extra named observer seen from a player's perspective (player ids start at 1), e.g. a
+  // fog-of-war mini-map next to the player's main view. Created on first use and reset with the game.
+  std::shared_ptr<Observer> getPlayerObserver(uint32_t playerId, const std::string& observerName);
+
   virtual std::unordered_map<glm::ivec2, std::unordered_set<std::string>>
   getAvailableActionNames(uint32_t playerId) const;
 
@@ -105,6 +119,42 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
       glm::ivec2 location, std::string actionName) const;
 
   virtual const GameState getGameState();
+
+  // The game state as one player may know it (Environment.Player.FogOfWar): their own objects,
+  // terrain and neutral objects on cells they have explored, other players' objects only while in
+  // sight, and only the per-player global variables of that player (other players' values are 0).
+  // Without fog of war this is the full state. No delayed actions are included.
+  virtual const GameState getPlayerGameState(uint32_t playerId);
+
+  // Fog of war cells of a player (0 unseen, 1 explored, 2 visible); empty without fog of war
+  const std::vector<uint8_t>& getPlayerVisibility(uint32_t playerId) const;
+
+  // ----- Game clock (Environment.TickRate) -----
+  // Players record their actions between ticks; each tick runs everything recorded since the last
+  // one (players take turns going first, actions within a player are shuffled by the grid) and then
+  // advances time once, so all players' orders land in the same tick.
+
+  // Record actions for the next tick (kept in order; the grid resolves them like any other step)
+  void queueActions(uint32_t playerId, const std::vector<std::shared_ptr<Action>>& actions);
+  // Drop everything recorded for a player (0 = all players)
+  void clearQueuedActions(uint32_t playerId = 0);
+  size_t getQueuedActionCount(uint32_t playerId = 0) const;
+
+  // Run one tick now with the recorded actions (works paused or with TickRate 0)
+  TickResult tick();
+
+  // Real-time play: let `seconds` of wall time pass and run the ticks that became due at the tick
+  // rate (none when paused, TickRate 0, or the game has ended). At most `maxTicks` per call: the
+  // default of 1 gives players a chance to record new actions between ticks (a late frame catches
+  // up over the next calls instead of running ticks with nobody's orders).
+  TickResult advanceTime(double seconds, uint32_t maxTicks = 1);
+
+  // Ticks per second; starts from Environment.TickRate (0 = no clock, tick() only)
+  void setTickRate(double ticksPerSecond);
+  double getTickRate() const { return tickRate_; }
+  void setPaused(bool paused);
+  bool isPaused() const { return paused_; }
+  bool isTerminated() const { return requiresReset_; }
   virtual const GameStateMapping& getGameStateMapping() const;
 
   virtual uint32_t getNumPlayers() const;
@@ -130,6 +180,9 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   std::string globalObserverName_;
   std::shared_ptr<Observer> observer_;
 
+  // extra per-player observers, keyed by (player id, observer name)
+  std::map<std::pair<uint32_t, std::string>, std::shared_ptr<Observer>> extraPlayerObservers_;
+
   // A level generator used to reset the environment
   std::shared_ptr<LevelGenerator> levelGenerator_;
 
@@ -144,6 +197,12 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   // Tracks the rewards currently accumulated per player
   std::unordered_map<uint32_t, int32_t> accumulatedRewards_;
+
+  // game clock
+  std::map<uint32_t, std::vector<std::shared_ptr<Action>>> queuedActions_;
+  double tickRate_ = 0.0;
+  double tickAccumulator_ = 0.0;
+  bool paused_ = false;
 
  private:
   void generateStateHash(GameState& gameState);

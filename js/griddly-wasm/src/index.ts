@@ -24,7 +24,9 @@ import type {
   GriddlyJSGameWrapper,
   GriddlyJSPlayerWrapper,
   GriddlyModule,
+  PlayerObserverState,
   StepResult,
+  TickResult,
 } from "./module.js";
 
 export * from "./module.js";
@@ -205,6 +207,69 @@ export class Griddly {
     }
   }
 
+  // ----- Game clock (GDY Environment.TickRate) -----------------------------------------------
+
+  /**
+   * Record actions for a player (0-based index) to run on the next game tick, in the same format as
+   * stepPlayer. Nothing runs now: every player's recorded actions run together when the engine's
+   * clock ticks (advanceTime / tick), and time advances once per tick.
+   */
+  queueActions(playerIdx: number, actions: number[][]): void {
+    try {
+      this.requireGame().queueActions(playerIdx, actions);
+    } catch (e) {
+      rethrow(this.griddlyjs, e);
+    }
+  }
+
+  /** Drop a player's recorded actions (no index = every player). */
+  clearQueuedActions(playerIdx = -1): void {
+    this.requireGame().clearQueuedActions(playerIdx);
+  }
+
+  getQueuedActionCount(playerIdx = -1): number {
+    return this.requireGame().getQueuedActionCount(playerIdx);
+  }
+
+  /** Run one tick now with everything recorded (also while paused or with no tick rate). */
+  tick(): TickResult {
+    try {
+      return this.requireGame().tick();
+    } catch (e) {
+      rethrow(this.griddlyjs, e);
+    }
+  }
+
+  /**
+   * Let `seconds` of real time pass on the engine's clock: runs the ticks that became due at the
+   * tick rate (none while paused), at most `maxTicks` (default 1, so players can record new actions
+   * between ticks). Call it from requestAnimationFrame with the frame's delta.
+   */
+  advanceTime(seconds: number, maxTicks = 1): TickResult {
+    try {
+      return this.requireGame().advanceTime(seconds, maxTicks);
+    } catch (e) {
+      rethrow(this.griddlyjs, e);
+    }
+  }
+
+  /** Ticks per second (starts from the GDY's Environment.TickRate; 0 = no clock). */
+  setTickRate(ticksPerSecond: number): void {
+    this.requireGame().setTickRate(ticksPerSecond);
+  }
+
+  getTickRate(): number {
+    return this.requireGame().getTickRate();
+  }
+
+  setPaused(paused: boolean): void {
+    this.requireGame().setPaused(paused);
+  }
+
+  isPaused(): boolean {
+    return this.requireGame().isPaused();
+  }
+
   /**
    * Actions each of a player's objects can currently perform, keyed by "x,y" (player ids are 1-based,
    * as in the GDY). Internal actions are excluded.
@@ -236,6 +301,33 @@ export class Griddly {
     return withShape(pixels, game.getGlobalObservationDescription());
   }
 
+  /**
+   * RGBA pixels of any named render observer from a player's perspective (player ids are 1-based):
+   * the observer's fog of war, camera and egocentric colours apply for that player. Use it for extra
+   * views next to the player's own observer, e.g. a fog-of-war mini-map.
+   */
+  observePlayerObserver(playerId: number, observerName: string): { pixels: Uint8Array; width: number; height: number } {
+    try {
+      const { pixels, shape } = this.requireGame().observePlayerObserverImage(playerId, observerName);
+      return withShape(pixels, { Shape: shape });
+    } catch (e) {
+      rethrow(this.griddlyjs, e);
+    }
+  }
+
+  /**
+   * Camera origin, view size and fog of war of a player's named observer as of its last render
+   * (call after observePlayerObserver). Lets a UI map clicks to cells and hide what the player
+   * cannot see, from the engine's own fog.
+   */
+  getPlayerObserverState(playerId: number, observerName: string): PlayerObserverState {
+    try {
+      return this.requireGame().getPlayerObserverState(playerId, observerName);
+    } catch (e) {
+      rethrow(this.griddlyjs, e);
+    }
+  }
+
   /** RGBA pixels of a player's observer render (e.g. an avatar-tracking camera), with width/height. */
   async observePlayerImage(playerIdx = 0): Promise<{ pixels: Uint8Array; width: number; height: number }> {
     this.requireGame();
@@ -255,6 +347,20 @@ export class Griddly {
 
   getState(): unknown {
     return this.requireGame().getState();
+  }
+
+  /**
+   * The game state as one player (1-based id) may know it when the GDY sets
+   * `Environment.Player.FogOfWar`: their own objects, terrain on explored cells, other players'
+   * objects only while in sight, only their own per-player global variables. `visibility` holds the
+   * player's fog cells (row major, 0 unseen / 1 explored / 2 visible), null without fog of war.
+   */
+  getPlayerState(playerId: number): unknown {
+    try {
+      return this.requireGame().getPlayerState(playerId);
+    } catch (e) {
+      rethrow(this.griddlyjs, e);
+    }
   }
 
   getGlobalVariables(): Record<string, unknown> {

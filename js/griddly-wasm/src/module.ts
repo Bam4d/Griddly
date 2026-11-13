@@ -73,11 +73,27 @@ export interface GriddlyJSGameWrapper {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   observe(): any;
   observeImage(): Promise<Uint8Array> | Uint8Array;
+  /** A named render observer from a player's perspective (1-based player id): fog of war, camera. */
+  observePlayerObserverImage(playerId: number, observerName: string): { pixels: Uint8Array; shape: number[] };
+  /** Camera origin, view size (cells) and fog of war state of that observer's last render. */
+  getPlayerObserverState(playerId: number, observerName: string): PlayerObserverState;
   stepParallel(playerActions: number[][]): number;
   /** Several actions for one player in one tick: [x, y, actionTypeIdx, actionId] (or [actionTypeIdx, actionId]). */
   stepPlayer(playerIdx: number, actions: number[][], updateTicks: boolean): StepResult;
+  queueActions(playerIdx: number, actions: number[][]): void;
+  clearQueuedActions(playerIdx: number): void;
+  getQueuedActionCount(playerIdx: number): number;
+  tick(): TickResult;
+  advanceTime(seconds: number, maxTicks: number): TickResult;
+  setTickRate(ticksPerSecond: number): void;
+  getTickRate(): number;
+  setPaused(paused: boolean): void;
+  isPaused(): boolean;
   /** {"x,y": [action names]} the player's objects can currently perform (internal actions excluded). */
   getAvailableActionNames(playerId: number): Record<string, string[]>;
+  /** The state as one player may know it under fog of war, with `visibility` (0/1/2 per cell or null). */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getPlayerState(playerId: number): any;
   /** {action name: [valid action ids]} for the object at (x, y). */
   getAvailableActionIds(x: number, y: number, actionNames: string[]): Record<string, number[]>;
   getWidth(): number;
@@ -95,6 +111,23 @@ export interface GriddlyJSGameWrapper {
   seedRandomGenerator(seed: number): void;
   delete(): void;
 }
+
+/** Result of running queued actions on the engine's game clock. */
+export type TickResult = StepResult & {
+  /** Ticks run by this call (0 when no tick was due). */
+  ticks: number;
+  /** Queued actions executed. */
+  actions: number;
+};
+
+export type PlayerObserverState = {
+  /** Top-left map cell of the view (camera observers; [0, 0] otherwise). */
+  origin: [number, number];
+  /** View size in cells. */
+  cells: [number, number];
+  /** Fog of war per map cell (row major): 0 never seen, 1 explored, 2 visible now; null without fog. */
+  fog: Uint8Array | null;
+};
 
 export type StepResult = {
   terminated: boolean;

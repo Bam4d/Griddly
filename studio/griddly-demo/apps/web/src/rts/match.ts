@@ -1,21 +1,41 @@
 /**
  * One RTS match on the Griddly engine: the human player's order book (or an AI, to spectate) as
- * player 1 and the scripted AI as player 2. Both players decide from the same state and every
- * action of both lands in the same tick: player actions go in with `stepPlayer(..., false)`, the
- * last call advances time. Camera pans are GDY actions too (move_camera) and never advance time.
+ * player 1 and the scripted AI as player 2.
+ *
+ * Time belongs to the engine: its game clock (GDY Environment.TickRate) runs the ticks. Between
+ * ticks each player records its actions with `queueActions`; on every tick the engine runs all of
+ * them together and advances time once. This class only decides what to queue: `plan()` asks both
+ * players (each from its own fog-filtered player state) for their next actions, and the page calls
+ * `advance(seconds)` every frame so the engine's clock can run whatever ticks are due.
+ * Camera pans are GDY actions too (move_camera), applied at once without advancing time.
  */
 import type { Griddly } from "@griddly/wasm";
 
 import { RTSPolicy, STRATEGIES } from "./ai";
 import type { Strategy } from "./ai";
 import { OrderBook } from "./orders";
+import type { TickPlan } from "./orders";
 import { DIRS, DOWN, LEFT, RIGHT, UNITS, UP, WorldView, manhattan } from "./world";
-import type { Cell, Dir, PlannedAction, RawGlobals, RawState } from "./world";
+import type { Cell, Dir, PlannedAction, RawState } from "./world";
 
 /** The subset of the engine API a match needs (lets tests swap in a fake). */
 export type Engine = Pick<
   Griddly,
-  "loadLevel" | "reset" | "seed" | "getState" | "getGlobalVariables" | "getActionNames" | "stepPlayer" | "getAvailableActionNames" | "getAvailableActionIds"
+  | "loadLevel"
+  | "reset"
+  | "seed"
+  | "getPlayerState"
+  | "getActionNames"
+  | "stepPlayer"
+  | "queueActions"
+  | "clearQueuedActions"
+  | "advanceTime"
+  | "tick"
+  | "setTickRate"
+  | "getTickRate"
+  | "setPaused"
+  | "getAvailableActionNames"
+  | "getAvailableActionIds"
 > & { readonly width: number; readonly height: number };
 
 export type MatchOptions = {
@@ -35,7 +55,10 @@ export class Match {
   readonly ai: RTSPolicy;
   autopilot: RTSPolicy | null;
   readonly actionNames: string[];
+  /** What player 1 (you) knows: the engine's fog-filtered player state. */
   world: WorldView;
+  /** What player 2 (the AI) knows; the AI never sees anything else. */
+  enemyWorld: WorldView;
   outcome: Outcome = "playing";
   lastAi: { actions: PlannedAction[]; caption: string[] } = { actions: [], caption: [] };
   lastHuman: PlannedAction[] = [];
@@ -59,12 +82,20 @@ export class Match {
     this.ai = new RTSPolicy(2, 1, { strategy: options.enemy ?? STRATEGIES.ARMOUR, attackSize: options.attackSize, seed: options.seed });
     this.autopilot = options.autopilot ? new RTSPolicy(1, 2, { strategy: options.autopilot, seed: options.seed }) : null;
     this.world = this.read();
+    this.enemyWorld = this.view(2);
+    // a new order is recorded for the very next tick
+    this.orders.onChange = () => this.replanHuman();
     this.known = new Set(this.world.objects.filter((o) => o.player === 1).map((o) => o.id));
   }
 
-  /** Re-read the engine state. */
+  /** A player's view of the game: only what that player can know (fog of war in the engine). */
+  view(playerId: number): WorldView {
+    return new WorldView(this.engine.getPlayerState(playerId) as unknown as RawState, this.engine.width, this.engine.height);
+  }
+
+  /** Re-read player 1's state. */
   read(): WorldView {
-    this.world = new WorldView(this.engine.getState() as RawState, this.engine.getGlobalVariables() as RawGlobals, this.engine.width, this.engine.height);
+    this.world = this.view(1);
     this.available = null;
     return this.world;
   }
@@ -82,9 +113,12 @@ export class Match {
     this.autopilot = strategy ? new RTSPolicy(1, 2, { strategy, seed: this.options.seed }) : null;
   }
 
-  /** Advance the game one tick with both players' actions. */
-  tick(): Outcome {
-    if (this.outcome !== "playing") return this.outcome;
+  /**
+   * Record both players' actions for the next engine tick (replacing anything recorded before).
+   * Each player decides from its own state: you from player 1's, the AI from player 2's.
+   */
+  plan(): void {
+    if (this.outcome !== "playing") return;
     const world = this.world;
     let human: PlannedAction[];
     if (this.autopilot) {
@@ -94,22 +128,79 @@ export class Match {
       const plan = this.orders.plan(world);
       human = plan.actions;
       this.unitStatus = plan.status;
+      this.pendingOrders = plan;
     }
-    this.lastAi = this.ai.act(world);
+    // the AI decides from its own player state only
+    this.enemyWorld = this.view(2);
+    this.lastAi = this.ai.act(this.enemyWorld);
     this.lastHuman = human;
-    const p1 = this.toEngine(human);
-    const p2 = this.toEngine(this.lastAi.actions);
-    // alternate who goes first inside the tick, like the Python runner
-    const [first, second]: [[number, number[][]], [number, number[][]]] = world.tick % 2 === 0 ? [[0, p1], [1, p2]] : [[1, p2], [0, p1]];
-    this.engine.stepPlayer(first[0], first[1], false);
-    const result = this.engine.stepPlayer(second[0], second[1], true);
+    this.planned = true;
+    this.engine.clearQueuedActions(-1);
+    this.engine.queueActions(0, this.toEngine(human));
+    this.engine.queueActions(1, this.toEngine(this.lastAi.actions));
+  }
+
+  /**
+   * Let `seconds` of real time pass on the engine's clock. When a tick ran, read the new state and
+   * record both players' next actions. Returns the number of ticks that ran.
+   */
+  advance(seconds: number): number {
+    if (this.outcome !== "playing") return 0;
+    const result = this.engine.advanceTime(seconds);
+    if (result.ticks > 0) this.afterTick(result);
+    return result.ticks;
+  }
+
+  /** Run one tick now (single-stepping, headless runs): plans first if nothing was recorded. */
+  tick(): Outcome {
+    if (this.outcome !== "playing") return this.outcome;
+    if (!this.planned) this.plan();
+    this.afterTick(this.engine.tick());
+    return this.outcome;
+  }
+
+  private planned = false;
+  /** Player 1's order queues once the recorded actions have run (committed after the tick). */
+  private pendingOrders: TickPlan | null = null;
+
+  private afterTick(result: { terminated: boolean; info?: { playerResults?: Record<string, string> } }): void {
+    if (this.pendingOrders) this.orders.commit(this.pendingOrders);
+    this.pendingOrders = null;
     this.read();
     this.sendToRally();
     if (result.terminated) {
       const r = result.info?.playerResults?.["1"];
       this.outcome = r === "Win" ? "won" : r === "Lose" ? "lost" : "draw";
+      return;
     }
-    return this.outcome;
+    // record the next tick's actions straight away; orders given before the tick replace them
+    this.plan();
+  }
+
+  /**
+   * Re-record player 1's actions after a new order, so the engine runs it on the next tick. The
+   * order book is planned on a copy so a unit that finishes an order early is not advanced twice.
+   */
+  private replanHuman(): void {
+    if (this.outcome !== "playing" || this.autopilot) return;
+    const plan = this.orders.plan(this.world);
+    this.unitStatus = plan.status;
+    this.lastHuman = plan.actions;
+    this.pendingOrders = plan;
+    this.engine.clearQueuedActions(0);
+    this.engine.queueActions(0, this.toEngine(plan.actions));
+  }
+
+  setTickRate(ticksPerSecond: number): void {
+    this.engine.setTickRate(ticksPerSecond);
+  }
+
+  get tickRate(): number {
+    return this.engine.getTickRate();
+  }
+
+  setPaused(paused: boolean): void {
+    this.engine.setPaused(paused);
   }
 
   /** New units walk to their building's rally point (a resource cell makes workers harvest it). */

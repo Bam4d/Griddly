@@ -49,6 +49,9 @@ std::string TiledCUDARenderer::unsupportedReason(const std::shared_ptr<GDYFactor
   if (config.tileSize.x != config.tileSize.y) return "non-square tile size";
   if (config.tileSize.x % 4 != 0) return "tile size must be a multiple of 4";
   if (config.highlightPlayers) return "HighlightPlayers is not supported";
+  if (config.fogOfWar.enabled || config.camera.enabled || config.cameraFrame.enabled || config.healthBars.enabled) {
+    return "FogOfWar / Camera / CameraFrame / HealthBars are not supported";
+  }
   if (config.globalObserverAvatarMode != GlobalObserverAvatarMode::NONE) return "global observer avatar modes are not supported";
   if (config.trackAvatar || config.rotateWithAvatar) return "avatar tracking is not supported";
   if (config.gridXOffset != 0 || config.gridYOffset != 0) return "grid offsets are not supported";

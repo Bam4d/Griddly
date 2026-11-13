@@ -62,6 +62,12 @@ class GDYFactory {
   virtual uint32_t getLevelCount() const;
   virtual uint32_t getPlayerCount() const;
 
+  // Environment.Player.FogOfWar: what each player can see and query
+  virtual const PlayerVisibilityConfig& getPlayerVisibilityConfig() const { return playerVisibilityConfig_; }
+
+  // Environment.TickRate: game ticks per second for real-time play (0 = no clock)
+  virtual double getTickRate() const { return tickRate_; }
+
   virtual std::vector<std::string> getExternalActionNames() const;
   virtual std::unordered_map<std::string, ActionInputsDefinition> getActionInputsDefinitions() const;
   virtual std::unordered_map<std::string, ActionTriggerDefinition> getActionTriggerDefinitions() const;
@@ -143,6 +149,8 @@ class GDYFactory {
   void parseCommonObserverConfig(ObserverConfig& observerConfig, YAML::Node observerConfigNode, bool isGlobalObserver);
 
   void parseNamedObserverShaderConfig(SDLObserverConfig& config, YAML::Node observerConfigNode);
+  // FogOfWar, Camera, CameraFrame and HealthBars (Sprite2D / Block2D observers)
+  void parseNamedObserverOverlayConfig(SDLObserverConfig& config, YAML::Node observerConfigNode);
   void parseNamedObserverResourceConfig(SDLObserverConfig& config, YAML::Node observerConfigNode);
 
   const std::string& getPlayerObserverName() const;
@@ -155,6 +163,8 @@ class GDYFactory {
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_ = 0;
   std::vector<glm::vec3> playerColors_{};
+  PlayerVisibilityConfig playerVisibilityConfig_{};
+  double tickRate_ = 0.0;
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
   std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;

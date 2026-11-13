@@ -18,6 +18,18 @@ Units       worker, scout (fast, cheap, weak), trooper (melee), gunner (shoots 2
 Research    Mining, Weapons (+1 damage), Armour (-1 damage taken), Gunnery (unlocks gunners),
             Vehicles (unlocks tanks), Fortify (towers hit harder and reload faster).
 Camera      each player's camera is the (cam_x, cam_y) global pair, moved with move_camera.
+Clock       Environment.TickRate (4 ticks/s): players queue actions between ticks and the engine's
+            clock runs them all together on each tick (the UI and AIs never step time themselves).
+Views       rendered by the engine from the observer config below, never drawn over by a client:
+              PlayerView  a VIEW_W x VIEW_H window on the player's camera, fog of war, health bars
+              CameraView  the same window without fog
+              MiniMap     the whole map from one player's side: fog of war + its camera outline
+              Overview    the whole map, no fog (spectators, videos)
+              GlobalMap   Block2D whole map with both players' camera outlines (spectators)
+            Fog of war (Environment.Player.FogOfWar): each owned object reveals the cells within its
+            `sight` variable. Cells seen before stay explored: terrain shown, no enemy units. The
+            engine enforces it for players, not just in pictures: get_player_state(id) returns only
+            what that player knows, and the AI / human UI read nothing else.
 Victory     destroy the enemy base.
 """
 import os
@@ -30,6 +42,12 @@ from fow_maps import build_all, level_text  # noqa: E402
 OUT = os.path.join(HERE, "GriddlyRTS-FoW.yaml")
 # the Studio demo's playable /rts page bundles its own copy (deploys only upload studio/griddly-demo)
 STUDIO_OUT = os.path.join(HERE, "..", "..", "..", "studio", "griddly-demo", "apps", "web", "src", "rts", "GriddlyRTS-FoW.yaml")
+
+# per-player camera window, in cells (PlayerView and the camera outlines on the mini-maps)
+VIEW_W, VIEW_H = 24, 15
+# sight radius (cells) of each owned object type, for fog of war
+SIGHT = {"worker": 4, "scout": 7, "combat": 4, "marine": 5, "medic": 4, "tank": 5,
+         "base": 6, "barracks": 4, "lab": 3, "tower": 6, "wall": 1, "relay_owned": 4}
 
 MON = "oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_"
 WF = "oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/"
@@ -129,20 +147,33 @@ def build_action(name, desc, key, src, obj, cost, requires=None):
 """
 
 
-def owned_object(name, char, variables, sprite, shape, scale, initial=""):
+def owned_object(name, char, variables, sprite, shape, scale, initial="", tiles=None):
+    """An object owned by a player. `tiles` are extra Sprite2D render tiles (set_tile 1, 2, ...)."""
+    variables = list(variables) + [("sight", SIGHT[name])]
     vs = "".join(f"      - Name: {k}\n        InitialValue: {v}\n" for k, v in variables)
     var_block = f"    Variables:\n{vs}" if vs else ""
+    sprites = [sprite] + list(tiles or [])
+    sp = "".join(f"        - Image: {s}\n" for s in sprites)
+    bl = "".join(f"        - Shape: {shape}\n          Color: PLAYER\n          Scale: {scale}\n" for _ in sprites)
     return f"""  - Name: {name}
     MapCharacter: {char}
     Z: 1
 {var_block}{initial}    Observers:
-      Sprite2D:
-        - Image: {sprite}
-      Block2D:
-        - Shape: {shape}
-          Color: PLAYER
-          Scale: {scale}
-"""
+{observer_blocks(sp, bl)}"""
+
+
+# every Sprite2D-style observer uses the same sprites, every Block2D-style one the same shapes
+SPRITE_OBSERVERS = ["Sprite2D", "PlayerView", "CameraView", "Overview"]
+BLOCK_OBSERVERS = ["Block2D", "MiniMap", "GlobalMap"]
+
+
+def observer_blocks(sprites, blocks):
+    out = ""
+    for name in SPRITE_OBSERVERS:
+        out += f"      {name}:\n{sprites}"
+    for name in BLOCK_OBSERVERS:
+        out += f"      {name}:\n{blocks}"
+    return out
 
 
 def scenery(name, char, sprite, color, z=0, shape="square", scale=1.0, variables=(), tiles=None):
@@ -155,9 +186,7 @@ def scenery(name, char, sprite, color, z=0, shape="square", scale=1.0, variables
     MapCharacter: "{char}"
     Z: {z}
 {var_block}    Observers:
-      Sprite2D:
-{sp}      Block2D:
-{bl}"""
+{observer_blocks(sp, bl)}"""
 
 
 def generate():
@@ -183,6 +212,7 @@ def generate():
             - sub: [ player_resources, {cost} ]
             - set: [ {var}, 1 ]
             - set: [ src.busy, {i} ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: {ticks}
@@ -207,8 +237,11 @@ def generate():
                      {"barracks": "b", "lab": "l", "tower": "o", "wall": "x"}[b], "worker", b, cost) + "\n"
         for b, (char, hp, cost, sprite, shape) in BUILDING_DEFS.items() if cost is not None)
 
+    # workers show their load (render tiles: 1 mineral, 2 wood, 3 gems), set by the gather action
+    unit_tiles = {"worker": [MON + "jelly_d2.png", MON + "jelly_l1.png", MON + "jelly_r1.png"]}
     unit_objects = "".join(
-        owned_object(u, char, [("health", hp), ("max_health", hp), ("damage", dmg)] + extra, sprite, shape, scale)
+        owned_object(u, char, [("health", hp), ("max_health", hp), ("damage", dmg)] + extra, sprite, shape, scale,
+                     tiles=unit_tiles.get(u))
         for u, (char, hp, dmg, cost, src, req, extra, sprite, shape, scale) in UNIT_DEFS.items())
     building_objects = ""
     for b, (char, hp, cost, sprite, shape) in BUILDING_DEFS.items():
@@ -220,7 +253,9 @@ def generate():
             variables.append(("busy", 0))
         if b == "tower":
             variables.append(("loaded", 1))
-        building_objects += owned_object(b, char, variables, sprite, shape, 1.0, initial)
+        # a lab shows a blue beaker while it researches (render tile 1)
+        tiles = [ITEMS + "beaker_blue.png"] if b == "lab" else None
+        building_objects += owned_object(b, char, variables, sprite, shape, 1.0, initial, tiles=tiles)
 
     gdy = f'''Version: "0.1"
 Environment:
@@ -243,18 +278,73 @@ Environment:
     Research  Mining, Weapons, Armour, Gunnery (needs Weapons), Vehicles (needs Armour),
               Fortify (needs Armour): stronger towers.
     Victory   destroy the enemy base.
+  # Game clock: real-time play runs this many ticks per second. Players record their actions
+  # between ticks (queue_actions / queueActions); each tick runs every player's recorded actions
+  # together, then time advances once.
+  TickRate: 4
+  # Every view is rendered by the engine. Colours are egocentric in a player's views (their objects
+  # use Colors[0], green; the enemy Colors[1], red); the global views use player 1 / player 2.
   Observers:
     Block2D:
       TileSize: 6
       BackgroundColor: [ 0.12, 0.13, 0.11 ]
     Sprite2D:
       TileSize: 16
-      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
-      # a soft player-coloured shadow under every owned object. Colours are egocentric:
-      # in a player's own view their objects use Colors[0] (green), the enemy Colors[1].
+      BackgroundTile: {TW}floor_regolith_a.png
       HighlightPlayers: true
       HighlightStyle: SHADOW
       HighlightScale: 1.6
+      HealthBars: true
+    # a player's main view: a {VIEW_W}x{VIEW_H} cell window on their camera (cam_x, cam_y), under fog of war
+    PlayerView:
+      Type: SPRITE_2D
+      TileSize: 16
+      Width: {VIEW_W}
+      Height: {VIEW_H}
+      BackgroundTile: {TW}floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+      Camera: {{ X: cam_x, Y: cam_y }}
+      FogOfWar:
+        SightVariable: sight
+        ExploredOpacity: 0.55
+    # the same camera window without fog (spectating, or playing with fog off)
+    CameraView:
+      Type: SPRITE_2D
+      TileSize: 16
+      Width: {VIEW_W}
+      Height: {VIEW_H}
+      BackgroundTile: {TW}floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+      Camera: {{ X: cam_x, Y: cam_y }}
+    # a player's mini-map: the whole map under their fog of war, with their camera window outlined
+    MiniMap:
+      Type: BLOCK_2D
+      TileSize: 4
+      BackgroundColor: [ 0.12, 0.13, 0.11 ]
+      FogOfWar:
+        SightVariable: sight
+        ExploredOpacity: 0.5
+      CameraFrame: {{ X: cam_x, Y: cam_y, Width: {VIEW_W}, Height: {VIEW_H} }}
+    # spectators: the whole map without fog
+    Overview:
+      Type: SPRITE_2D
+      TileSize: 16
+      BackgroundTile: {TW}floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+    GlobalMap:
+      Type: BLOCK_2D
+      TileSize: 6
+      BackgroundColor: [ 0.12, 0.13, 0.11 ]
+      CameraFrame: {{ X: cam_x, Y: cam_y, Width: {VIEW_W}, Height: {VIEW_H} }}
     Vector:
       IncludePlayerId: true
       IncludeVariables: true
@@ -276,6 +366,10 @@ Environment:
     # research state per player: 0 = not researched, 1 = in progress, 2 = done
 {tech_vars}  Player:
     Count: 2
+    # each player only knows what their objects can see: the engine filters every player's state
+    # query (get_player_state / getPlayerState) and their fog-of-war views with this
+    FogOfWar:
+      SightVariable: sight
     # egocentric player colours: each player sees itself as the first colour (green) and the
     # enemy as the second. The global mini-map uses player 1 / player 2 directly.
     Colors:
@@ -377,6 +471,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 1 ]
+            - set_tile: 1
         Dst:
           ObjectRules: minerals
           Commands:
@@ -390,6 +485,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 3 ]
+            - set_tile: 3
         Dst:
           ObjectRules: gems
           Commands:
@@ -401,6 +497,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 2 ]
+            - set_tile: 2
         Dst:
           ObjectRules: forest
           Commands:
@@ -419,6 +516,7 @@ Actions:
             - eq: {{ Arguments: [ src.carrying, 2 ], Commands: [ {{ incr: player_resources }} ] }}
             - eq: {{ Arguments: [ src.carrying, 3 ], Commands: [ {{ add: [ player_resources, 3 ] }} ] }}
             - set: [ src.carrying, 0 ]
+            - set_tile: 0
             - reward: 1
         Dst:
           ObjectRules: base
@@ -507,6 +605,7 @@ Actions:
           ObjectRules: lab
           Commands:
 {done_cmds}            - set: [ src.busy, 0 ]
+            - set_tile: 0
         Dst:
           ObjectRules: lab
 
@@ -639,14 +738,8 @@ Objects:
       - Action: init_map
         ActionId: 1
     Observers:
-      Sprite2D:
-        - Image: {TW}floor_regolith_a.png
-      Block2D:
-        - Shape: square
-          Color: [ 0.12, 0.13, 0.11 ]
-          Scale: 0.0
-{unit_objects}{building_objects}'''
-    # minerals use 3 render tiles (full / half / nearly gone)
+{observer_blocks(f"        - Image: {TW}floor_regolith_a.png" + chr(10), "        - Shape: square" + chr(10) + "          Color: [ 0.12, 0.13, 0.11 ]" + chr(10) + "          Scale: 0.0" + chr(10))}{unit_objects}{building_objects}'''
+    # minerals use 3 render tiles (full / half / nearly gone), in every sprite observer
     gdy = gdy.replace(
         f"        - Image: {ITEMS}crystal_green.png\n        - Image: {ITEMS}crystal_green.png\n        - Image: {ITEMS}crystal_green.png\n",
         f"        - Image: {ITEMS}crystal_green.png\n          Scale: 1.0\n        - Image: {ITEMS}crystal_green.png\n          Scale: 0.75\n        - Image: {ITEMS}crystal_green.png\n          Scale: 0.5\n")

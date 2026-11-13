@@ -50,6 +50,10 @@ void BlockObserver::appendObjectItems(const std::shared_ptr<ObjectRules>& object
   auto objectPlayerId = object->getPlayerId();
   auto zIdx = object->getZIdx();
 
+  if (fogHides(object)) {
+    return;
+  }
+
   const auto& blockDefinition = blockDefinitions_.at(tileName);
 
   auto center = getTilePixelCenter(location);
@@ -82,6 +86,7 @@ void BlockObserver::appendObjectItems(const std::shared_ptr<ObjectRules>& object
   applyAvatarMode(item, location, objectPlayerId);
 
   out.push_back(item);
+  appendHealthBar(object, center, out);
 }
 
 }  // namespace griddly

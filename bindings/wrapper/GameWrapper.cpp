@@ -202,6 +202,59 @@ class Py_GameWrapper {
     return wrapObservationRaw(raw);
   }
 
+  // ----- Game clock (Environment.TickRate) -----
+  py::dict tickResultDict(const TickResult& result) {
+    py::dict out;
+    out["Ticks"] = result.ticks;
+    out["Actions"] = result.actions;
+    out["Terminated"] = result.result.terminated;
+    out["Info"] = buildActionResultInfo(result.result);
+    py::list rewards;
+    for (uint32_t p = 0; p < playerCount_; p++) rewards.append(gameProcess_->getAccumulatedRewards(p + 1));
+    out["Rewards"] = rewards;
+    return out;
+  }
+
+  // Run one tick now with every player's recorded actions
+  py::dict tick() {
+    TickResult result;
+    {
+      py::gil_scoped_release release;
+      std::lock_guard<std::recursive_mutex> lock(*mutex_);
+      result = gameProcess_->tick();
+    }
+    return tickResultDict(result);
+  }
+
+  // Let `seconds` of wall time pass: runs every tick that became due at the tick rate
+  py::dict advanceTime(double seconds, uint32_t maxTicks) {
+    TickResult result;
+    {
+      py::gil_scoped_release release;
+      std::lock_guard<std::recursive_mutex> lock(*mutex_);
+      result = gameProcess_->advanceTime(seconds, maxTicks);
+    }
+    return tickResultDict(result);
+  }
+
+  void clearQueuedActions(uint32_t playerId) { gameProcess_->clearQueuedActions(playerId); }
+  size_t getQueuedActionCount(uint32_t playerId) const { return gameProcess_->getQueuedActionCount(playerId); }
+  void setTickRate(double ticksPerSecond) { gameProcess_->setTickRate(ticksPerSecond); }
+  double getTickRate() const { return gameProcess_->getTickRate(); }
+  void setPaused(bool paused) { gameProcess_->setPaused(paused); }
+  bool isPaused() const { return gameProcess_->isPaused(); }
+
+  // A named observer seen from a player's perspective (player ids start at 1), e.g. a fog-of-war mini-map
+  py::object observePlayer(uint32_t playerId, std::string observerName) {
+    RawObservation raw;
+    {
+      py::gil_scoped_release release;
+      std::lock_guard<std::recursive_mutex> lock(*mutex_);
+      raw = updateObservationRaw(gameProcess_->getPlayerObserver(playerId, observerName));
+    }
+    return wrapObservationRaw(raw);
+  }
+
   py::tuple stepParallel(py::ndarray<int32_t, py::ndim<2>> stepArray) {
     auto& stepArrayInfo = stepArray;
     if (stepArrayInfo.dtype() != py::dtype<int32_t>() && stepArrayInfo.dtype() != py::dtype<int64_t>()) {
@@ -429,8 +482,24 @@ class Py_GameWrapper {
   }
 
   py::dict getState() const {
+    return serializeState(gameProcess_->getGameState());
+  }
+
+  // The state as one player may know it under Environment.Player.FogOfWar, plus "Visibility"
+  // (flat list, map width x height: 0 unseen / 1 explored / 2 visible; None without fog)
+  py::dict getPlayerState(uint32_t playerId) const {
+    auto py_state = serializeState(gameProcess_->getPlayerGameState(playerId));
+    const auto& visibility = gameProcess_->getPlayerVisibility(playerId);
+    if (visibility.empty()) {
+      py_state["Visibility"] = py::none();
+    } else {
+      py_state["Visibility"] = py::cast(std::vector<int32_t>(visibility.begin(), visibility.end()));
+    }
+    return py_state;
+  }
+
+  py::dict serializeState(const GameState& gameState) const {
     py::dict py_state;
-    const auto& gameState = gameProcess_->getGameState();
     const auto& stateMapping = gdyFactory_->getObjectGenerator()->getStateMapping();
 
     py_state["GameTicks"] = gameState.tickCount;

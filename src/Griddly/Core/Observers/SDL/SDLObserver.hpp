@@ -41,9 +41,53 @@ enum class HighlightStyle {
   SHADOW,
 };
 
+// Fog of war for player observers: a player only sees cells within the sight radius of its own
+// objects. Cells seen before stay "explored": terrain and neutral objects are drawn dimmed, other
+// players' objects are hidden. Never-seen cells are covered completely.
+struct FogOfWarConfig {
+  bool enabled = false;
+  // object variable holding an object's sight radius (cells); objects without it use defaultSight
+  std::string sightVariable = "sight";
+  int32_t defaultSight = 0;
+  glm::vec3 color{0.0f, 0.0f, 0.0f};
+  float exploredOpacity = 0.55f;
+  float unexploredOpacity = 1.0f;
+};
+
+// A movable camera: the view (Width x Height cells) is centred on the cell held in two global
+// variables (per-player variables are read for the observer's player) and clamped to the map.
+struct CameraConfig {
+  bool enabled = false;
+  std::string xVariable;
+  std::string yVariable;
+};
+
+// Outline of the players' camera windows (Width x Height cells centred on two global variables),
+// drawn in the player's colour, e.g. on a mini-map. A player observer only draws its own camera.
+struct CameraFrameConfig {
+  bool enabled = false;
+  std::string xVariable;
+  std::string yVariable;
+  uint32_t width = 0;
+  uint32_t height = 0;
+};
+
+// Health bars over damaged objects that have both variables
+struct HealthBarConfig {
+  bool enabled = false;
+  std::string healthVariable = "health";
+  std::string maxHealthVariable = "max_health";
+  bool always = false;  // also draw bars at full health
+};
+
 struct SDLObserverConfig : ObserverConfig {
   ResourceConfig resourceConfig{};
   ShaderVariableConfig shaderVariableConfig{};
+
+  FogOfWarConfig fogOfWar{};
+  CameraConfig camera{};
+  CameraFrameConfig cameraFrame{};
+  HealthBarConfig healthBars{};
 
   bool highlightPlayers = false;
   // OUTLINE: a solid player-coloured copy of the sprite drawn behind it.
@@ -100,6 +144,8 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   // White radial glow (opaque centre, fast fall-off), tinted per player with the item colour
   SDL_Texture* loadGlowTexture(const std::string& spriteName, glm::ivec2 tileSize);
   static std::vector<uint8_t> makeGlowImage(glm::ivec2 tileSize);
+  // 4x4 opaque white texture, tinted per item (fog, health bars, frames)
+  SDL_Texture* loadSolidTexture(const std::string& spriteName);
 
   bool isUsingGPU() const { return usingGPU_; }
   SDL_Texture* getTargetTexture() const { return usingGPU_ ? targetTexture_ : nullptr; }

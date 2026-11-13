@@ -283,6 +283,18 @@ SDL_Texture* SDLObserver::loadGlowTexture(const std::string& spriteName, glm::iv
   return createSpriteTexture(spriteName, makeGlowImage(tileSize), tileSize, spriteName);
 }
 
+SDL_Texture* SDLObserver::loadSolidTexture(const std::string& spriteName) {
+  auto& textures = sprites();
+  auto existing = textures.find(spriteName);
+  if (existing != textures.end() && sharedSprites_ != nullptr) {
+    return existing->second;
+  }
+  auto* texture = createSpriteTexture(spriteName, std::vector<uint8_t>(4 * 4 * 4, 255), {4, 4}, spriteName);
+  // nearest sampling keeps the edges of fog cells and bars crisp
+  SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+  return texture;
+}
+
 std::vector<uint8_t> SDLObserver::makeGlowImage(glm::ivec2 tileSize) {
   // White disc with a small solid centre whose alpha falls off quickly towards the edge,
   // so the tinted glow reads as one colour around the object without swamping it

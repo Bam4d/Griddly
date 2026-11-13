@@ -14,6 +14,7 @@
 #include "GDY/Actions/Action.hpp"
 #include "GDY/Objects/ObjectRules.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
+#include "PlayerVisibility.hpp"
 #include "Util/RandomGenerator.hpp"
 #include "Util/util.hpp"
 
@@ -203,6 +204,13 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::shared_ptr<RandomGenerator> getRandomGenerator() const;
 
+  // ----- Fog of war (Environment.Player.FogOfWar) -----
+  // Set up per-player visibility for the current map size; recomputed every tick by update() and
+  // on demand by updateVisibility() (e.g. after a reset).
+  void configureVisibility(const PlayerVisibilityConfig& config);
+  void updateVisibility();
+  const PlayerVisibility& getVisibility() const { return visibility_; }
+
   // ----- ECS state block -----
   // The ECSWorld arena mirrors all mutable game state (entities, locations,
   // variables, tick, delayed actions) in one fixed-capacity block of bytes.
@@ -251,6 +259,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // Locations invalidated during the current tick (moves/spawns/removals).
   // Used to skip collision checks for sources whose search area is untouched.
   std::unordered_set<glm::ivec2> tickDirtyLocations_;
+
+  PlayerVisibility visibility_;
 
   std::vector<std::unordered_set<glm::ivec2>*> changeListeners_;
   uint64_t stateGeneration_ = 0;

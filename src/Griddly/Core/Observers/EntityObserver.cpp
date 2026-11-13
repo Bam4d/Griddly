@@ -152,6 +152,8 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
   }
 
   for (const auto& object : grid_->getObjects()) {
+    // fog of war: hidden objects are not entities of this player's observation
+    if (!playerCanSee(object)) continue;
     const auto& name = object->getObjectName();
     auto location = object->getLocation();
 

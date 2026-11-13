@@ -1,0 +1,158 @@
+Version: "0.1"
+# Fixture for FogOfWarTest: two players, a camera per player (global variables), fog of war with a
+# per-object sight radius, health bars and a mini-map that outlines each player's camera window.
+Environment:
+  Name: FogOfWar
+  # game clock: 4 ticks per second for real-time play
+  TickRate: 4
+  Observers:
+    # every player's full-map view with fog
+    Map:
+      Type: SPRITE_2D
+      TileSize: 10
+      FogOfWar:
+        SightVariable: sight
+        ExploredOpacity: 0.5
+      HealthBars: true
+    # the full map with everything that could give a hidden unit away: ownership shadows (bigger
+    # than a tile) and health bars, in both renderers
+    MapShadow:
+      Type: SPRITE_2D
+      TileSize: 10
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: { Always: true }
+      FogOfWar: true
+    BlockFog:
+      Type: BLOCK_2D
+      TileSize: 10
+      HighlightPlayers: true
+      HealthBars: { Always: true }
+      FogOfWar: true
+    # agent observations under the same player fog
+    Vec:
+      Type: VECTOR
+    Text:
+      Type: ASCII
+    Ent:
+      Type: ENTITY
+    # a 4x3 cell camera window centred on (cam_x, cam_y), with fog
+    Cam:
+      Type: BLOCK_2D
+      TileSize: 10
+      Width: 4
+      Height: 3
+      Camera: { X: cam_x, Y: cam_y }
+      FogOfWar: true
+    # the whole map with every player's 4x3 camera window outlined
+    MiniMap:
+      Type: BLOCK_2D
+      TileSize: 10
+      CameraFrame: { X: cam_x, Y: cam_y, Width: 4, Height: 3 }
+  Variables:
+    - Name: cam_x
+      InitialValue: 0
+      PerPlayer: true
+    - Name: cam_y
+      InitialValue: 0
+      PerPlayer: true
+    - Name: secret
+      InitialValue: 7
+      PerPlayer: true
+  Player:
+    Count: 2
+    FogOfWar:
+      SightVariable: sight
+    Colors:
+      - [ 0.0, 1.0, 0.0 ]
+      - [ 1.0, 0.0, 0.0 ]
+  Levels:
+    - |
+      .  .  .  .  .  .  .  .  .  .  .  .
+      .  u1 .  .  .  .  .  .  .  .  .  .
+      .  .  .  .  .  .  .  .  .  .  .  .
+      .  .  .  .  .  .  .  r  .  .  .  .
+      .  .  .  .  .  .  .  .  .  .  u2 .
+      .  .  .  .  .  .  .  .  .  .  .  .
+
+Actions:
+  - Name: move
+    InputMapping:
+      Inputs:
+        1: { VectorToDest: [ -1, 0 ] }
+        2: { VectorToDest: [ 0, -1 ] }
+        3: { VectorToDest: [ 1, 0 ] }
+        4: { VectorToDest: [ 0, 1 ] }
+    Behaviours:
+      - Src:
+          Object: unit
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+  - Name: pan
+    InputMapping:
+      Inputs:
+        1: { VectorToDest: [ 0, 0 ], MetaData: { dx: 1, dy: 0 } }
+        2: { VectorToDest: [ 0, 0 ], MetaData: { dx: 0, dy: 1 } }
+    Behaviours:
+      - Src:
+          Object: unit
+          Commands:
+            - add: [ cam_x, meta.dx ]
+            - add: [ cam_y, meta.dy ]
+        Dst:
+          Object: unit
+  - Name: hurt
+    InputMapping:
+      Inputs:
+        1: { VectorToDest: [ 0, 0 ] }
+    Behaviours:
+      - Src:
+          Object: unit
+          Commands:
+            - sub: [ health, 5 ]
+        Dst:
+          Object: unit
+
+Objects:
+  - Name: unit
+    MapCharacter: u
+    Variables:
+      - Name: sight
+        InitialValue: 2
+      - Name: health
+        InitialValue: 10
+      - Name: max_health
+        InitialValue: 10
+    Observers:
+      Map:
+        - Image: gvgai/oryx/knight1.png
+      MapShadow:
+        - Image: gvgai/oryx/knight1.png
+      BlockFog:
+        - Shape: square
+          Color: PLAYER
+      Cam:
+        - Shape: square
+          Color: PLAYER
+      MiniMap:
+        - Shape: square
+          Color: PLAYER
+  - Name: rock
+    MapCharacter: r
+    Observers:
+      Map:
+        - Image: gvgai/oryx/wall3_0.png
+      MapShadow:
+        - Image: gvgai/oryx/wall3_0.png
+      BlockFog:
+        - Shape: triangle
+          Color: [ 0.0, 0.0, 1.0 ]
+      Cam:
+        - Shape: triangle
+          Color: [ 0.0, 0.0, 1.0 ]
+      MiniMap:
+        - Shape: triangle
+          Color: [ 0.0, 0.0, 1.0 ]

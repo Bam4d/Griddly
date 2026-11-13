@@ -14,8 +14,13 @@ Plan, per player:
     army       the barracks trains the strategy's units; medics follow and heal; the army gathers
                at a rally point and attacks once it is big enough (or the economy runs dry)
 
-`Match` runs two policies against each other: both decide from the same state, then every action
-of both players is submitted for the same tick.
+Fog of war: a policy only ever reads its own player's view of the game, ``game.get_player_state(pid)``
+(the engine filters it by Environment.Player.FogOfWar): its own objects, terrain it has explored, and
+enemy objects only while they are in sight. It remembers the enemy buildings it has seen, guesses the
+enemy base from the map's point symmetry until it finds it, and sends its scout to explore.
+
+`Match` runs two policies against each other on the engine's game clock: each records its actions
+from its own player state (``player.queue``), and every recorded action runs together on the tick.
 """
 import random
 from collections import deque
@@ -77,13 +82,21 @@ def manhattan(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-class WorldView:
-    """Snapshot of the game state (``game.get_state()`` + globals) for one tick."""
+UNSEEN, EXPLORED, VISIBLE = 0, 1, 2
 
-    def __init__(self, state, globals_, width, height):
+
+class WorldView:
+    """One player's view of the game for one tick: ``game.get_player_state(pid)``.
+
+    ``visibility`` is the player's fog (row major, UNSEEN / EXPLORED / VISIBLE); None without fog.
+    Global variables come from the state, which only holds the viewing player's per-player values.
+    """
+
+    def __init__(self, state, width, height):
         self.width, self.height = width, height
         self.tick = state["GameTicks"]
-        self.globals = globals_
+        self.globals = state["GlobalVariables"]
+        self.visibility = state.get("Visibility")
         self.objects = []
         self.at = {}
         for o in state["Objects"]:
@@ -102,14 +115,25 @@ class WorldView:
     def of(self, name, player=None):
         return [o for o in self.by_name.get(name, []) if player is None or o["player"] == player]
 
+    def global_value(self, name, player):
+        values = self.globals.get(name, [])
+        return int(values[player]) if player < len(values) else 0
+
     def resources(self, player):
-        return int(self.globals["player_resources"].get(player, 0))
+        return self.global_value("player_resources", player)
 
     def tech(self, var, player):
-        return int(self.globals[var].get(player, 0))
+        return self.global_value(var, player)
 
     def camera(self, player):
-        return int(self.globals["cam_x"].get(player, 0)), int(self.globals["cam_y"].get(player, 0))
+        return self.global_value("cam_x", player), self.global_value("cam_y", player)
+
+    def visible(self, c):
+        """Does the viewing player see cell c right now?"""
+        return self.visibility is None or (self.inside(c) and self.visibility[c[1] * self.width + c[0]] == VISIBLE)
+
+    def unseen(self, c):
+        return self.visibility is not None and self.inside(c) and self.visibility[c[1] * self.width + c[0]] == UNSEEN
 
     def inside(self, c):
         return 0 <= c[0] < self.width and 0 <= c[1] < self.height
@@ -184,6 +208,8 @@ class RTSPolicy:
         self.events = []
         self._last_tech = {}
         self.sites = {}  # building -> chosen site, kept until built or blocked by terrain/buildings
+        self.known_enemy = {}  # pos -> name of enemy buildings seen, until seen gone
+        self.explore_goals = {}  # unit position-independent: one goal per role label
 
     # ------------------------------------------------------------------ helpers
     def _emit(self, actions, name, pos, action_id, label):
@@ -269,6 +295,38 @@ class RTSPolicy:
                 best = (ratio, unit)
         return best[1] if best else "combat"
 
+    def _remember(self, world):
+        """Keep the enemy buildings we have seen; forget them once we see their cell empty."""
+        for o in world.objects:
+            if o["player"] == self.enemy and o["name"] in BUILDINGS:
+                self.known_enemy[o["pos"]] = o["name"]
+        for pos in list(self.known_enemy):
+            o = world.at.get(pos)
+            if world.visible(pos) and (o is None or o["player"] != self.enemy):
+                del self.known_enemy[pos]
+
+    def _enemy_base_guess(self, world, base):
+        """Where the enemy base is: seen, remembered, or the mirror of ours (the maps are point-symmetric)."""
+        seen = world.of("base", self.enemy)
+        if seen:
+            return seen[0]["pos"]
+        known = [p for p, n in self.known_enemy.items() if n == "base"]
+        if known:
+            return known[0]
+        return (world.width - 1 - base[0], world.height - 1 - base[1])
+
+    def _explore(self, world, plan, actions, u, label="explore"):
+        """Walk towards the nearest reachable unexplored cell (sampled every 3 cells)."""
+        goal = self.explore_goals.get(label)
+        if goal is None or not world.unseen(goal) or manhattan(u["pos"], goal) <= 2 or self.rng.random() < 0.02:
+            cells = [(x, y) for y in range(1, world.height - 1, 3) for x in range(1, world.width - 1, 3) if world.unseen((x, y))]
+            # unseen cells may be water or rock: walk to the nearest one a path reaches
+            step = plan.bfs(u["pos"], cells, ignore_units=True, limit=8000) if cells else None
+            goal = self.explore_goals[label] = step[2] if step else None
+        if goal is not None:
+            return self._walk(plan, actions, u, [goal] + neighbours(goal), label)
+        return False
+
     # --------------------------------------------------------------------- policy
     def act(self, world):
         self.counts = {}
@@ -278,8 +336,9 @@ class RTSPolicy:
         res = world.resources(pid)
         bases = world.of("base", pid)
         base = bases[0]["pos"] if bases else None
-        enemy_bases = world.of("base", self.enemy)
-        enemy_base = enemy_bases[0]["pos"] if enemy_bases else None
+        self._remember(world)
+        # the enemy base as far as we know: seen, remembered, or guessed from the map's symmetry
+        enemy_base = self._enemy_base_guess(world, base) if base else None
         mine = [o for o in world.objects if o["player"] == pid]
         workers = [o for o in mine if o["name"] == "worker"]
         army = [o for o in mine if o["name"] in ARMY]
@@ -287,6 +346,10 @@ class RTSPolicy:
         labs = [o for o in mine if o["name"] == "lab"]
         towers = [o for o in mine if o["name"] == "tower"]
         enemies = [o for o in world.objects if o["player"] == self.enemy and o["name"] in TARGET_PRIORITY]
+        # remembered buildings that are out of sight right now are still worth marching to
+        seen_pos = {o["pos"] for o in enemies}
+        remembered = [{"name": n, "pos": p, "player": self.enemy, "vars": {}} for p, n in self.known_enemy.items()
+                      if p not in seen_pos and n in TARGET_PRIORITY]
         enemy_at = {o["pos"]: o for o in enemies}
         resources = world.of("minerals") + world.of("gems")
         relays = [o for o in world.objects if o["name"] == "relay" or (o["name"] == "relay_owned" and o["player"] != pid)]
@@ -353,9 +416,10 @@ class RTSPolicy:
                 self._emit(actions, f"build_{unit}", b["pos"], d, f"train {DISPLAY[unit]}")
                 plan.spawn((b["pos"][0] + DIRS[d][0], b["pos"][1] + DIRS[d][1]))
                 res -= COSTS[unit]
-        # an early scout grabs relays
-        if barracks and not any(u["name"] == "scout" for u in army) and relays and res >= COSTS["scout"] + keep \
-                and world.tick < 400:
+        # a scout grabs relays and explores the fog (relays and minerals out of sight are unknown)
+        unexplored = world.visibility is not None and world.visibility.count(UNSEEN) > len(world.visibility) // 3
+        if barracks and not any(u["name"] == "scout" for u in army) and (relays or unexplored or not resources) \
+                and res >= COSTS["scout"] + keep and world.tick < 900:
             b = barracks[0]["pos"]
             for d in (RIGHT, DOWN, LEFT, UP):
                 c = (b[0] + DIRS[d][0], b[1] + DIRS[d][1])
@@ -370,7 +434,11 @@ class RTSPolicy:
 
         # --------------------------------------------------------------------- army
         fighters = [u for u in army if u["name"] in FIGHTERS]
-        if not self.offensive and (len(fighters) >= ATTACK_SIZE or (not resources and fighters and res < 5)):
+        # attack with a full army, or with whatever we have once there is nothing known left to mine
+        # (and no money to spend), or when the barracks is boxed in by idle units
+        boxed_in = barracks and all(not plan.free(n) for b in barracks for n in neighbours(b["pos"]))
+        if not self.offensive and (len(fighters) >= ATTACK_SIZE or (not resources and fighters and (res < 5 or boxed_in))
+                                   or (boxed_in and len(fighters) >= 3)):
             self.offensive = True
         if self.offensive and len(fighters) < 2 and enemy_base and not threat:
             self.offensive = False  # regroup
@@ -384,7 +452,7 @@ class RTSPolicy:
             elif u["name"] == "medic":
                 self._medic(world, plan, actions, u, army, rally)
             else:
-                self._fight(world, plan, actions, u, enemies, enemy_at, enemy_base, rally, threat)
+                self._fight(world, plan, actions, u, enemies, enemy_at, enemy_base, rally, threat, remembered)
 
         # -------------------------------------------------------------------- camera
         focus = self._camera_focus(base, workers, fighters, enemy_base)
@@ -413,8 +481,7 @@ class RTSPolicy:
     def _workers(self, world, plan, actions, workers, builders, base, resources, enemy_at, threat):
         res_cells = {r["pos"]: r for r in resources}
         # mine what is closer to us than to the enemy (or anything once ours is gone)
-        enemy_bases = world.of("base", self.enemy)
-        eb = enemy_bases[0]["pos"] if enemy_bases else None
+        eb = self._enemy_base_guess(world, base)
         ours = {p for p in res_cells if eb is None or manhattan(p, base) <= manhattan(p, eb) + 4}
         targets = ours or set(res_cells)
         drop = [n for n in neighbours(base)]
@@ -465,10 +532,16 @@ class RTSPolicy:
             if step is not None:
                 plan.reserved.add(step[2])
                 self._walk(plan, actions, w, [step[2]], "to forest")
+            elif not resources and w is order[0]:
+                # nothing known to mine: one worker looks for more (fog hides the rest of the map)
+                self._explore(world, plan, actions, w, "worker explores")
 
     def _scout(self, world, plan, actions, u, relays, enemy_at):
         pos = u["pos"]
         if not relays:
+            # no relay known: find more of the map (and the enemy)
+            if not any(n in neighbours(pos) for n in enemy_at) and self._explore(world, plan, actions, u, "scout explores"):
+                return
             return self._fight(world, plan, actions, u, list(enemy_at.values()), enemy_at, None, pos, [])
         target = min(relays, key=lambda r: manhattan(r["pos"], pos))
         if manhattan(target["pos"], pos) == 1:
@@ -495,7 +568,7 @@ class RTSPolicy:
         else:
             self._make_room(world, plan, actions, u)
 
-    def _fight(self, world, plan, actions, u, enemies, enemy_at, enemy_base, rally, threat):
+    def _fight(self, world, plan, actions, u, enemies, enemy_at, enemy_base, rally, threat, remembered=()):
         pos, kind = u["pos"], u["name"]
         if kind == "tank" and u["vars"].get("cooldown") == 1:
             adj = [n for n in neighbours(pos) if n in enemy_at]
@@ -524,10 +597,15 @@ class RTSPolicy:
                 tgt = min(close, key=lambda e: (manhattan(e["pos"], pos), TARGET_PRIORITY[e["name"]]))
                 label = "engage"
             else:
-                towers = [e for e in enemies if e["name"] == "tower"]
+                known = list(enemies) + list(remembered)
+                towers = [e for e in known if e["name"] == "tower"]
                 near_tower = [t for t in towers if manhattan(t["pos"], pos) <= 6]
-                pool = near_tower or ([enemy_at[enemy_base]] if enemy_base in enemy_at else enemies)
+                bases = [e for e in known if e["name"] == "base"]
+                pool = near_tower or bases or known
                 if not pool:
+                    # nothing known: head for where the enemy base should be
+                    if enemy_base is not None:
+                        self._walk(plan, actions, u, [enemy_base] + neighbours(enemy_base), "search")
                     return
                 tgt = min(pool, key=lambda e: manhattan(e["pos"], pos))
                 label = "march"
@@ -622,23 +700,22 @@ class Match:
         self.width, self.height = game.get_width(), game.get_height()
         self.terminated = False
 
-    def world(self):
-        g = self.game.get_global_variable(["player_resources", "cam_x", "cam_y"] + TECH_VARS)
-        return WorldView(self.game.get_state(), g, self.width, self.height)
+    def world(self, pid):
+        """What player `pid` knows: the engine's fog-filtered state for that player."""
+        return WorldView(self.game.get_player_state(pid), self.width, self.height)
 
     def step(self):
-        """Both policies decide from the same state; all actions land in the same tick."""
-        world = self.world()
-        plans = {pid: self.policies[pid].act(world) for pid in (1, 2)}
-        order = (1, 2) if world.tick % 2 == 0 else (2, 1)
-        queue = [(self.players[pid], a) for pid in order for a in plans[pid][0]]
-        if not queue:
-            queue = [(self.players[1], ("move", 0, 0, 0))]
-        info = {}
-        for i, (player, (name, x, y, d)) in enumerate(queue):
-            terminated, info = player.step(name, [x, y, d], i == len(queue) - 1)
-            if terminated:
-                self.terminated = True
+        """One game tick on the engine's clock: each policy records its actions from its own player
+        state (``player.queue``), then the engine runs every recorded action together and advances
+        time once (``game.tick()``; a real-time loop would call ``game.advance_time(dt)`` instead)."""
+        plans = {pid: self.policies[pid].act(self.world(pid)) for pid in (1, 2)}
+        for pid in (1, 2):
+            for name, x, y, d in plans[pid][0]:
+                self.players[pid].queue(name, [x, y, d])
+        result = self.game.tick()
+        info = result["Info"]
+        if result["Terminated"]:
+            self.terminated = True
         return {pid: plans[pid][1] for pid in (1, 2)}, {pid: plans[pid][0] for pid in (1, 2)}, info
 
 
@@ -653,7 +730,8 @@ def run_match(game, p1, p2, level, seed=0, max_ticks=1500, verbose=False):
             print(t, "|", " / ".join(captions[1]), "||", " / ".join(captions[2]))
         if match.terminated:
             break
-    world = match.world()
+    # the full state, for the summary only (no policy reads it)
+    world = WorldView(game.get_state(), match.width, match.height)
     winner = info.get("PlayerResults", {})
     summary = {pid: {"workers": len(world.of("worker", pid)), "army": len([o for o in world.objects if o["player"] == pid and o["name"] in ARMY]),
                      "relays": len(world.of("relay_owned", pid)), "res": world.resources(pid)} for pid in (1, 2)}

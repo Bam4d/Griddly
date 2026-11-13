@@ -50,6 +50,10 @@ void SpriteObserver::lazyInit() {
   if (config_.highlightPlayers && config_.highlightStyle != HighlightStyle::OUTLINE) {
     loadGlowTexture(kHighlightGlowSprite, {kHighlightGlowSize, kHighlightGlowSize});
   }
+
+  if (needsSolidTexture()) {
+    loadSolidTexture(kSolidSprite);
+  }
 }
 
 std::string SpriteObserver::getSpriteName(const std::string& objectName, const std::string& tileName, const glm::ivec2& location, Direction orientation) const {
@@ -228,6 +232,9 @@ void SpriteObserver::updateObjectRenderItems(PartialObservableGrid& observableGr
 void SpriteObserver::appendObjectItems(const std::shared_ptr<ObjectRules>& object, std::vector<SDLRenderItem>& out) {
   auto tileSize = config_.tileSize;
   const auto& location = object->getLocation();
+  if (fogHides(object)) {
+    return;
+  }
   {
     const auto& objectName = object->getObjectName();
     const auto& tileName = object->getObjectRenderTileName();
@@ -308,6 +315,7 @@ void SpriteObserver::appendObjectItems(const std::shared_ptr<ObjectRules>& objec
     applyAvatarMode(item, location, objectPlayerId);
 
     out.push_back(item);
+    appendHealthBar(object, center, out);
   }
 }
 

@@ -43,7 +43,11 @@ export const describeOrder = (o: Order): string => {
   }
 };
 
-export type TickPlan = { actions: PlannedAction[]; status: Map<number, string> };
+/**
+ * One tick's plan: the actions to record, each unit's status, and the order queues as they will be
+ * once those actions have run (finished orders removed). Commit `queues` only after the tick ran.
+ */
+export type TickPlan = { actions: PlannedAction[]; status: Map<number, string>; queues: Map<number, Order[]> };
 
 /**
  * `n` distinct walkable cells closest to `cell` (breadth-first through non-static cells), so a
@@ -76,8 +80,10 @@ export function formation(world: WorldView, cell: Cell, n: number, movers: Set<n
 
 /** Turns order queues into this tick's actions for one player. */
 export class OrderBook {
-  readonly queues = new Map<number, Order[]>();
+  queues = new Map<number, Order[]>();
   autoFight = true;
+  /** Called when orders change, so the next tick's actions can be recorded again. */
+  onChange: (() => void) | null = null;
 
   constructor(readonly pid: number) {}
 
@@ -85,10 +91,12 @@ export class OrderBook {
     const q = append ? (this.queues.get(unit) ?? []) : [];
     q.push(order);
     this.queues.set(unit, q);
+    this.onChange?.();
   }
 
   clear(unit: number): void {
     this.queues.delete(unit);
+    this.onChange?.();
   }
 
   current(unit: number): Order | undefined {
@@ -111,8 +119,26 @@ export class OrderBook {
     return { kind: "move", to: cell };
   }
 
-  /** Plan this tick's actions for every unit with an order (plus idle self-defence). */
+  /**
+   * Plan this tick's actions for every unit with an order (plus idle self-defence). Works on a copy
+   * of the order queues, so planning again before the tick (after a new order) loses nothing.
+   */
   plan(world: WorldView): TickPlan {
+    const real = this.queues;
+    this.queues = structuredClone(real);
+    try {
+      return { ...this.planOn(world), queues: this.queues };
+    } finally {
+      this.queues = real;
+    }
+  }
+
+  /** The tick ran: the planned queues become the real ones (orders given since were re-planned). */
+  commit(plan: TickPlan): void {
+    this.queues = plan.queues;
+  }
+
+  private planOn(world: WorldView): { actions: PlannedAction[]; status: Map<number, string> } {
     const plan = new Planner(world);
     const actions: PlannedAction[] = [];
     const status = new Map<number, string>();

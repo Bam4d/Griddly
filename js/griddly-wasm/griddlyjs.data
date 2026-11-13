@@ -1014,6 +1014,12 @@ Environment:
     Research  Mining, Weapons, Armour, Gunnery (needs Weapons), Vehicles (needs Armour),
               Fortify (needs Armour): stronger towers.
     Victory   destroy the enemy base.
+  # Game clock: real-time play runs this many ticks per second. Players record their actions
+  # between ticks (queue_actions / queueActions); each tick runs every player's recorded actions
+  # together, then time advances once.
+  TickRate: 4
+  # Every view is rendered by the engine. Colours are egocentric in a player's views (their objects
+  # use Colors[0], green; the enemy Colors[1], red); the global views use player 1 / player 2.
   Observers:
     Block2D:
       TileSize: 6
@@ -1021,11 +1027,60 @@ Environment:
     Sprite2D:
       TileSize: 16
       BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
-      # a soft player-coloured shadow under every owned object. Colours are egocentric:
-      # in a player's own view their objects use Colors[0] (green), the enemy Colors[1].
       HighlightPlayers: true
       HighlightStyle: SHADOW
       HighlightScale: 1.6
+      HealthBars: true
+    # a player's main view: a 24x15 cell window on their camera (cam_x, cam_y), under fog of war
+    PlayerView:
+      Type: SPRITE_2D
+      TileSize: 16
+      Width: 24
+      Height: 15
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+      Camera: { X: cam_x, Y: cam_y }
+      FogOfWar:
+        SightVariable: sight
+        ExploredOpacity: 0.55
+    # the same camera window without fog (spectating, or playing with fog off)
+    CameraView:
+      Type: SPRITE_2D
+      TileSize: 16
+      Width: 24
+      Height: 15
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+      Camera: { X: cam_x, Y: cam_y }
+    # a player's mini-map: the whole map under their fog of war, with their camera window outlined
+    MiniMap:
+      Type: BLOCK_2D
+      TileSize: 4
+      BackgroundColor: [ 0.12, 0.13, 0.11 ]
+      FogOfWar:
+        SightVariable: sight
+        ExploredOpacity: 0.5
+      CameraFrame: { X: cam_x, Y: cam_y, Width: 24, Height: 15 }
+    # spectators: the whole map without fog
+    Overview:
+      Type: SPRITE_2D
+      TileSize: 16
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+    GlobalMap:
+      Type: BLOCK_2D
+      TileSize: 6
+      BackgroundColor: [ 0.12, 0.13, 0.11 ]
+      CameraFrame: { X: cam_x, Y: cam_y, Width: 24, Height: 15 }
     Vector:
       IncludePlayerId: true
       IncludeVariables: true
@@ -1065,6 +1120,10 @@ Environment:
       PerPlayer: true
   Player:
     Count: 2
+    # each player only knows what their objects can see: the engine filters every player's state
+    # query (get_player_state / getPlayerState) and their fog-of-war views with this
+    FogOfWar:
+      SightVariable: sight
     # egocentric player colours: each player sees itself as the first colour (green) and the
     # enemy as the second. The global mini-map uses player 1 / player 2 directly.
     Colors:
@@ -1439,6 +1498,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 1 ]
+            - set_tile: 1
         Dst:
           ObjectRules: minerals
           Commands:
@@ -1452,6 +1512,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 3 ]
+            - set_tile: 3
         Dst:
           ObjectRules: gems
           Commands:
@@ -1463,6 +1524,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 2 ]
+            - set_tile: 2
         Dst:
           ObjectRules: forest
           Commands:
@@ -1481,6 +1543,7 @@ Actions:
             - eq: { Arguments: [ src.carrying, 2 ], Commands: [ { incr: player_resources } ] }
             - eq: { Arguments: [ src.carrying, 3 ], Commands: [ { add: [ player_resources, 3 ] } ] }
             - set: [ src.carrying, 0 ]
+            - set_tile: 0
             - reward: 1
         Dst:
           ObjectRules: base
@@ -1797,6 +1860,7 @@ Actions:
             - sub: [ player_resources, 8 ]
             - set: [ res_mining, 1 ]
             - set: [ src.busy, 1 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 8
@@ -1814,6 +1878,7 @@ Actions:
             - sub: [ player_resources, 10 ]
             - set: [ res_weapons, 1 ]
             - set: [ src.busy, 2 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 8
@@ -1831,6 +1896,7 @@ Actions:
             - sub: [ player_resources, 10 ]
             - set: [ res_armor, 1 ]
             - set: [ src.busy, 3 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 8
@@ -1849,6 +1915,7 @@ Actions:
             - sub: [ player_resources, 12 ]
             - set: [ res_gunnery, 1 ]
             - set: [ src.busy, 4 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 10
@@ -1867,6 +1934,7 @@ Actions:
             - sub: [ player_resources, 12 ]
             - set: [ res_vehicles, 1 ]
             - set: [ src.busy, 5 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 10
@@ -1885,6 +1953,7 @@ Actions:
             - sub: [ player_resources, 10 ]
             - set: [ res_fortify, 1 ]
             - set: [ src.busy, 6 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 8
@@ -1927,6 +1996,7 @@ Actions:
                 Commands:
                   - set: [ res_fortify, 2 ]
             - set: [ src.busy, 0 ]
+            - set_tile: 0
         Dst:
           ObjectRules: lab
 
@@ -2066,7 +2136,48 @@ Objects:
           Scale: 0.75
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
           Scale: 0.5
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 1.0
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.75
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.5
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 1.0
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.75
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.5
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 1.0
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.75
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.5
       Block2D:
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+      MiniMap:
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+      GlobalMap:
         - Shape: triangle
           Color: [ 0.2, 0.9, 0.4 ]
           Scale: 1.0
@@ -2086,7 +2197,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_purple.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_purple.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_purple.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_purple.png
       Block2D:
+        - Shape: triangle
+          Color: [ 0.8, 0.4, 1.0 ]
+          Scale: 1.0
+      MiniMap:
+        - Shape: triangle
+          Color: [ 0.8, 0.4, 1.0 ]
+          Scale: 1.0
+      GlobalMap:
         - Shape: triangle
           Color: [ 0.8, 0.4, 1.0 ]
           Scale: 1.0
@@ -2097,7 +2222,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: gvgai/oryx/tree2.png
+      PlayerView:
+        - Image: gvgai/oryx/tree2.png
+      CameraView:
+        - Image: gvgai/oryx/tree2.png
+      Overview:
+        - Image: gvgai/oryx/tree2.png
       Block2D:
+        - Shape: square
+          Color: [ 0.1, 0.35, 0.15 ]
+          Scale: 0.9
+      MiniMap:
+        - Shape: square
+          Color: [ 0.1, 0.35, 0.15 ]
+          Scale: 0.9
+      GlobalMap:
         - Shape: square
           Color: [ 0.1, 0.35, 0.15 ]
           Scale: 0.9
@@ -2108,7 +2247,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_rubble_a.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_rubble_a.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_rubble_a.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_rubble_a.png
       Block2D:
+        - Shape: square
+          Color: [ 0.45, 0.42, 0.4 ]
+          Scale: 1.0
+      MiniMap:
+        - Shape: square
+          Color: [ 0.45, 0.42, 0.4 ]
+          Scale: 1.0
+      GlobalMap:
         - Shape: square
           Color: [ 0.45, 0.42, 0.4 ]
           Scale: 1.0
@@ -2119,7 +2272,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
       Block2D:
+        - Shape: square
+          Color: [ 0.15, 0.35, 0.7 ]
+          Scale: 1.0
+      MiniMap:
+        - Shape: square
+          Color: [ 0.15, 0.35, 0.7 ]
+          Scale: 1.0
+      GlobalMap:
         - Shape: square
           Color: [ 0.15, 0.35, 0.7 ]
           Scale: 1.0
@@ -2130,7 +2297,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: gvgai/newset/logm.png
+      PlayerView:
+        - Image: gvgai/newset/logm.png
+      CameraView:
+        - Image: gvgai/newset/logm.png
+      Overview:
+        - Image: gvgai/newset/logm.png
       Block2D:
+        - Shape: square
+          Color: [ 0.55, 0.4, 0.25 ]
+          Scale: 0.9
+      MiniMap:
+        - Shape: square
+          Color: [ 0.55, 0.4, 0.25 ]
+          Scale: 0.9
+      GlobalMap:
         - Shape: square
           Color: [ 0.55, 0.4, 0.25 ]
           Scale: 0.9
@@ -2141,7 +2322,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_off.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_off.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_off.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_off.png
       Block2D:
+        - Shape: hexagon
+          Color: [ 0.85, 0.85, 0.85 ]
+          Scale: 0.8
+      MiniMap:
+        - Shape: hexagon
+          Color: [ 0.85, 0.85, 0.85 ]
+          Scale: 0.8
+      GlobalMap:
         - Shape: hexagon
           Color: [ 0.85, 0.85, 0.85 ]
           Scale: 0.8
@@ -2149,6 +2344,9 @@ Objects:
   - Name: relay_owned
     MapCharacter: r
     Z: 1
+    Variables:
+      - Name: sight
+        InitialValue: 4
     InitialActions:
       - Action: relay_income
         ActionId: 1
@@ -2156,7 +2354,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_on.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_on.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_on.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_on.png
       Block2D:
+        - Shape: hexagon
+          Color: PLAYER
+          Scale: 0.8
+      MiniMap:
+        - Shape: hexagon
+          Color: PLAYER
+          Scale: 0.8
+      GlobalMap:
         - Shape: hexagon
           Color: PLAYER
           Scale: 0.8
@@ -2170,7 +2382,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
       Block2D:
+        - Shape: square
+          Color: [ 0.12, 0.13, 0.11 ]
+          Scale: 0.0
+      MiniMap:
+        - Shape: square
+          Color: [ 0.12, 0.13, 0.11 ]
+          Scale: 0.0
+      GlobalMap:
         - Shape: square
           Color: [ 0.12, 0.13, 0.11 ]
           Scale: 0.0
@@ -2186,10 +2412,65 @@ Objects:
         InitialValue: 1
       - Name: carrying
         InitialValue: 0
+      - Name: sight
+        InitialValue: 4
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d2.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_l1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_r1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d2.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_l1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_r1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d2.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_l1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_r1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d2.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_l1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_r1.png
       Block2D:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+      MiniMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+      GlobalMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
         - Shape: circle
           Color: PLAYER
           Scale: 0.5
@@ -2203,10 +2484,26 @@ Objects:
         InitialValue: 5
       - Name: damage
         InitialValue: 1
+      - Name: sight
+        InitialValue: 7
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_drone_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_drone_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_drone_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_drone_d1.png
       Block2D:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.7
+      MiniMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.7
+      GlobalMap:
         - Shape: circle
           Color: PLAYER
           Scale: 0.7
@@ -2220,10 +2517,26 @@ Objects:
         InitialValue: 12
       - Name: damage
         InitialValue: 3
+      - Name: sight
+        InitialValue: 4
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
       Block2D:
+        - Shape: pentagon
+          Color: PLAYER
+          Scale: 0.85
+      MiniMap:
+        - Shape: pentagon
+          Color: PLAYER
+          Scale: 0.85
+      GlobalMap:
         - Shape: pentagon
           Color: PLAYER
           Scale: 0.85
@@ -2237,10 +2550,26 @@ Objects:
         InitialValue: 8
       - Name: damage
         InitialValue: 2
+      - Name: sight
+        InitialValue: 5
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_marine_m_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_marine_m_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_marine_m_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_marine_m_d1.png
       Block2D:
+        - Shape: triangle
+          Color: PLAYER
+          Scale: 0.8
+      MiniMap:
+        - Shape: triangle
+          Color: PLAYER
+          Scale: 0.8
+      GlobalMap:
         - Shape: triangle
           Color: PLAYER
           Scale: 0.8
@@ -2254,10 +2583,26 @@ Objects:
         InitialValue: 7
       - Name: damage
         InitialValue: 1
+      - Name: sight
+        InitialValue: 4
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_scientist_f_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_scientist_f_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_scientist_f_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_scientist_f_d1.png
       Block2D:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.8
+      MiniMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.8
+      GlobalMap:
         - Shape: circle
           Color: PLAYER
           Scale: 0.8
@@ -2273,10 +2618,26 @@ Objects:
         InitialValue: 5
       - Name: cooldown
         InitialValue: 0
+      - Name: sight
+        InitialValue: 5
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_robot_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_robot_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_robot_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_robot_d1.png
       Block2D:
+        - Shape: fill
+          Color: PLAYER
+          Scale: 0.75
+      MiniMap:
+        - Shape: fill
+          Color: PLAYER
+          Scale: 0.75
+      GlobalMap:
         - Shape: fill
           Color: PLAYER
           Scale: 0.75
@@ -2288,13 +2649,29 @@ Objects:
         InitialValue: 50
       - Name: max_health
         InitialValue: 50
+      - Name: sight
+        InitialValue: 6
     InitialActions:
       - Action: init_camera
         ActionId: 1
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
       Block2D:
+        - Shape: hexagon
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: hexagon
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
         - Shape: hexagon
           Color: PLAYER
           Scale: 1.0
@@ -2306,10 +2683,26 @@ Objects:
         InitialValue: 25
       - Name: max_health
         InitialValue: 25
+      - Name: sight
+        InitialValue: 4
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img320.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img320.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img320.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img320.png
       Block2D:
+        - Shape: square
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: square
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
         - Shape: square
           Color: PLAYER
           Scale: 1.0
@@ -2323,10 +2716,39 @@ Objects:
         InitialValue: 20
       - Name: busy
         InitialValue: 0
+      - Name: sight
+        InitialValue: 3
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_green.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_blue.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_green.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_blue.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_green.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_blue.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_green.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_blue.png
       Block2D:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
         - Shape: circle
           Color: PLAYER
           Scale: 1.0
@@ -2340,10 +2762,26 @@ Objects:
         InitialValue: 20
       - Name: loaded
         InitialValue: 1
+      - Name: sight
+        InitialValue: 6
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_sentry_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_sentry_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_sentry_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_sentry_d1.png
       Block2D:
+        - Shape: triangle
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: triangle
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
         - Shape: triangle
           Color: PLAYER
           Scale: 1.0
@@ -2355,10 +2793,26 @@ Objects:
         InitialValue: 15
       - Name: max_health
         InitialValue: 15
+      - Name: sight
+        InitialValue: 1
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
       Block2D:
+        - Shape: square
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: square
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
         - Shape: square
           Color: PLAYER
           Scale: 1.0
@@ -4022,8 +4476,13 @@ Plan, per player:
     army       the barracks trains the strategy's units; medics follow and heal; the army gathers
                at a rally point and attacks once it is big enough (or the economy runs dry)
 
-`Match` runs two policies against each other: both decide from the same state, then every action
-of both players is submitted for the same tick.
+Fog of war: a policy only ever reads its own player's view of the game, ``game.get_player_state(pid)``
+(the engine filters it by Environment.Player.FogOfWar): its own objects, terrain it has explored, and
+enemy objects only while they are in sight. It remembers the enemy buildings it has seen, guesses the
+enemy base from the map's point symmetry until it finds it, and sends its scout to explore.
+
+`Match` runs two policies against each other on the engine's game clock: each records its actions
+from its own player state (``player.queue``), and every recorded action runs together on the tick.
 """
 import random
 from collections import deque
@@ -4085,13 +4544,21 @@ def manhattan(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-class WorldView:
-    """Snapshot of the game state (``game.get_state()`` + globals) for one tick."""
+UNSEEN, EXPLORED, VISIBLE = 0, 1, 2
 
-    def __init__(self, state, globals_, width, height):
+
+class WorldView:
+    """One player's view of the game for one tick: ``game.get_player_state(pid)``.
+
+    ``visibility`` is the player's fog (row major, UNSEEN / EXPLORED / VISIBLE); None without fog.
+    Global variables come from the state, which only holds the viewing player's per-player values.
+    """
+
+    def __init__(self, state, width, height):
         self.width, self.height = width, height
         self.tick = state["GameTicks"]
-        self.globals = globals_
+        self.globals = state["GlobalVariables"]
+        self.visibility = state.get("Visibility")
         self.objects = []
         self.at = {}
         for o in state["Objects"]:
@@ -4110,14 +4577,25 @@ class WorldView:
     def of(self, name, player=None):
         return [o for o in self.by_name.get(name, []) if player is None or o["player"] == player]
 
+    def global_value(self, name, player):
+        values = self.globals.get(name, [])
+        return int(values[player]) if player < len(values) else 0
+
     def resources(self, player):
-        return int(self.globals["player_resources"].get(player, 0))
+        return self.global_value("player_resources", player)
 
     def tech(self, var, player):
-        return int(self.globals[var].get(player, 0))
+        return self.global_value(var, player)
 
     def camera(self, player):
-        return int(self.globals["cam_x"].get(player, 0)), int(self.globals["cam_y"].get(player, 0))
+        return self.global_value("cam_x", player), self.global_value("cam_y", player)
+
+    def visible(self, c):
+        """Does the viewing player see cell c right now?"""
+        return self.visibility is None or (self.inside(c) and self.visibility[c[1] * self.width + c[0]] == VISIBLE)
+
+    def unseen(self, c):
+        return self.visibility is not None and self.inside(c) and self.visibility[c[1] * self.width + c[0]] == UNSEEN
 
     def inside(self, c):
         return 0 <= c[0] < self.width and 0 <= c[1] < self.height
@@ -4192,6 +4670,8 @@ class RTSPolicy:
         self.events = []
         self._last_tech = {}
         self.sites = {}  # building -> chosen site, kept until built or blocked by terrain/buildings
+        self.known_enemy = {}  # pos -> name of enemy buildings seen, until seen gone
+        self.explore_goals = {}  # unit position-independent: one goal per role label
 
     # ------------------------------------------------------------------ helpers
     def _emit(self, actions, name, pos, action_id, label):
@@ -4277,6 +4757,38 @@ class RTSPolicy:
                 best = (ratio, unit)
         return best[1] if best else "combat"
 
+    def _remember(self, world):
+        """Keep the enemy buildings we have seen; forget them once we see their cell empty."""
+        for o in world.objects:
+            if o["player"] == self.enemy and o["name"] in BUILDINGS:
+                self.known_enemy[o["pos"]] = o["name"]
+        for pos in list(self.known_enemy):
+            o = world.at.get(pos)
+            if world.visible(pos) and (o is None or o["player"] != self.enemy):
+                del self.known_enemy[pos]
+
+    def _enemy_base_guess(self, world, base):
+        """Where the enemy base is: seen, remembered, or the mirror of ours (the maps are point-symmetric)."""
+        seen = world.of("base", self.enemy)
+        if seen:
+            return seen[0]["pos"]
+        known = [p for p, n in self.known_enemy.items() if n == "base"]
+        if known:
+            return known[0]
+        return (world.width - 1 - base[0], world.height - 1 - base[1])
+
+    def _explore(self, world, plan, actions, u, label="explore"):
+        """Walk towards the nearest reachable unexplored cell (sampled every 3 cells)."""
+        goal = self.explore_goals.get(label)
+        if goal is None or not world.unseen(goal) or manhattan(u["pos"], goal) <= 2 or self.rng.random() < 0.02:
+            cells = [(x, y) for y in range(1, world.height - 1, 3) for x in range(1, world.width - 1, 3) if world.unseen((x, y))]
+            # unseen cells may be water or rock: walk to the nearest one a path reaches
+            step = plan.bfs(u["pos"], cells, ignore_units=True, limit=8000) if cells else None
+            goal = self.explore_goals[label] = step[2] if step else None
+        if goal is not None:
+            return self._walk(plan, actions, u, [goal] + neighbours(goal), label)
+        return False
+
     # --------------------------------------------------------------------- policy
     def act(self, world):
         self.counts = {}
@@ -4286,8 +4798,9 @@ class RTSPolicy:
         res = world.resources(pid)
         bases = world.of("base", pid)
         base = bases[0]["pos"] if bases else None
-        enemy_bases = world.of("base", self.enemy)
-        enemy_base = enemy_bases[0]["pos"] if enemy_bases else None
+        self._remember(world)
+        # the enemy base as far as we know: seen, remembered, or guessed from the map's symmetry
+        enemy_base = self._enemy_base_guess(world, base) if base else None
         mine = [o for o in world.objects if o["player"] == pid]
         workers = [o for o in mine if o["name"] == "worker"]
         army = [o for o in mine if o["name"] in ARMY]
@@ -4295,6 +4808,10 @@ class RTSPolicy:
         labs = [o for o in mine if o["name"] == "lab"]
         towers = [o for o in mine if o["name"] == "tower"]
         enemies = [o for o in world.objects if o["player"] == self.enemy and o["name"] in TARGET_PRIORITY]
+        # remembered buildings that are out of sight right now are still worth marching to
+        seen_pos = {o["pos"] for o in enemies}
+        remembered = [{"name": n, "pos": p, "player": self.enemy, "vars": {}} for p, n in self.known_enemy.items()
+                      if p not in seen_pos and n in TARGET_PRIORITY]
         enemy_at = {o["pos"]: o for o in enemies}
         resources = world.of("minerals") + world.of("gems")
         relays = [o for o in world.objects if o["name"] == "relay" or (o["name"] == "relay_owned" and o["player"] != pid)]
@@ -4361,9 +4878,10 @@ class RTSPolicy:
                 self._emit(actions, f"build_{unit}", b["pos"], d, f"train {DISPLAY[unit]}")
                 plan.spawn((b["pos"][0] + DIRS[d][0], b["pos"][1] + DIRS[d][1]))
                 res -= COSTS[unit]
-        # an early scout grabs relays
-        if barracks and not any(u["name"] == "scout" for u in army) and relays and res >= COSTS["scout"] + keep \
-                and world.tick < 400:
+        # a scout grabs relays and explores the fog (relays and minerals out of sight are unknown)
+        unexplored = world.visibility is not None and world.visibility.count(UNSEEN) > len(world.visibility) // 3
+        if barracks and not any(u["name"] == "scout" for u in army) and (relays or unexplored or not resources) \
+                and res >= COSTS["scout"] + keep and world.tick < 900:
             b = barracks[0]["pos"]
             for d in (RIGHT, DOWN, LEFT, UP):
                 c = (b[0] + DIRS[d][0], b[1] + DIRS[d][1])
@@ -4378,7 +4896,11 @@ class RTSPolicy:
 
         # --------------------------------------------------------------------- army
         fighters = [u for u in army if u["name"] in FIGHTERS]
-        if not self.offensive and (len(fighters) >= ATTACK_SIZE or (not resources and fighters and res < 5)):
+        # attack with a full army, or with whatever we have once there is nothing known left to mine
+        # (and no money to spend), or when the barracks is boxed in by idle units
+        boxed_in = barracks and all(not plan.free(n) for b in barracks for n in neighbours(b["pos"]))
+        if not self.offensive and (len(fighters) >= ATTACK_SIZE or (not resources and fighters and (res < 5 or boxed_in))
+                                   or (boxed_in and len(fighters) >= 3)):
             self.offensive = True
         if self.offensive and len(fighters) < 2 and enemy_base and not threat:
             self.offensive = False  # regroup
@@ -4392,7 +4914,7 @@ class RTSPolicy:
             elif u["name"] == "medic":
                 self._medic(world, plan, actions, u, army, rally)
             else:
-                self._fight(world, plan, actions, u, enemies, enemy_at, enemy_base, rally, threat)
+                self._fight(world, plan, actions, u, enemies, enemy_at, enemy_base, rally, threat, remembered)
 
         # -------------------------------------------------------------------- camera
         focus = self._camera_focus(base, workers, fighters, enemy_base)
@@ -4421,8 +4943,7 @@ class RTSPolicy:
     def _workers(self, world, plan, actions, workers, builders, base, resources, enemy_at, threat):
         res_cells = {r["pos"]: r for r in resources}
         # mine what is closer to us than to the enemy (or anything once ours is gone)
-        enemy_bases = world.of("base", self.enemy)
-        eb = enemy_bases[0]["pos"] if enemy_bases else None
+        eb = self._enemy_base_guess(world, base)
         ours = {p for p in res_cells if eb is None or manhattan(p, base) <= manhattan(p, eb) + 4}
         targets = ours or set(res_cells)
         drop = [n for n in neighbours(base)]
@@ -4473,10 +4994,16 @@ class RTSPolicy:
             if step is not None:
                 plan.reserved.add(step[2])
                 self._walk(plan, actions, w, [step[2]], "to forest")
+            elif not resources and w is order[0]:
+                # nothing known to mine: one worker looks for more (fog hides the rest of the map)
+                self._explore(world, plan, actions, w, "worker explores")
 
     def _scout(self, world, plan, actions, u, relays, enemy_at):
         pos = u["pos"]
         if not relays:
+            # no relay known: find more of the map (and the enemy)
+            if not any(n in neighbours(pos) for n in enemy_at) and self._explore(world, plan, actions, u, "scout explores"):
+                return
             return self._fight(world, plan, actions, u, list(enemy_at.values()), enemy_at, None, pos, [])
         target = min(relays, key=lambda r: manhattan(r["pos"], pos))
         if manhattan(target["pos"], pos) == 1:
@@ -4503,7 +5030,7 @@ class RTSPolicy:
         else:
             self._make_room(world, plan, actions, u)
 
-    def _fight(self, world, plan, actions, u, enemies, enemy_at, enemy_base, rally, threat):
+    def _fight(self, world, plan, actions, u, enemies, enemy_at, enemy_base, rally, threat, remembered=()):
         pos, kind = u["pos"], u["name"]
         if kind == "tank" and u["vars"].get("cooldown") == 1:
             adj = [n for n in neighbours(pos) if n in enemy_at]
@@ -4532,10 +5059,15 @@ class RTSPolicy:
                 tgt = min(close, key=lambda e: (manhattan(e["pos"], pos), TARGET_PRIORITY[e["name"]]))
                 label = "engage"
             else:
-                towers = [e for e in enemies if e["name"] == "tower"]
+                known = list(enemies) + list(remembered)
+                towers = [e for e in known if e["name"] == "tower"]
                 near_tower = [t for t in towers if manhattan(t["pos"], pos) <= 6]
-                pool = near_tower or ([enemy_at[enemy_base]] if enemy_base in enemy_at else enemies)
+                bases = [e for e in known if e["name"] == "base"]
+                pool = near_tower or bases or known
                 if not pool:
+                    # nothing known: head for where the enemy base should be
+                    if enemy_base is not None:
+                        self._walk(plan, actions, u, [enemy_base] + neighbours(enemy_base), "search")
                     return
                 tgt = min(pool, key=lambda e: manhattan(e["pos"], pos))
                 label = "march"
@@ -4630,23 +5162,22 @@ class Match:
         self.width, self.height = game.get_width(), game.get_height()
         self.terminated = False
 
-    def world(self):
-        g = self.game.get_global_variable(["player_resources", "cam_x", "cam_y"] + TECH_VARS)
-        return WorldView(self.game.get_state(), g, self.width, self.height)
+    def world(self, pid):
+        """What player `pid` knows: the engine's fog-filtered state for that player."""
+        return WorldView(self.game.get_player_state(pid), self.width, self.height)
 
     def step(self):
-        """Both policies decide from the same state; all actions land in the same tick."""
-        world = self.world()
-        plans = {pid: self.policies[pid].act(world) for pid in (1, 2)}
-        order = (1, 2) if world.tick % 2 == 0 else (2, 1)
-        queue = [(self.players[pid], a) for pid in order for a in plans[pid][0]]
-        if not queue:
-            queue = [(self.players[1], ("move", 0, 0, 0))]
-        info = {}
-        for i, (player, (name, x, y, d)) in enumerate(queue):
-            terminated, info = player.step(name, [x, y, d], i == len(queue) - 1)
-            if terminated:
-                self.terminated = True
+        """One game tick on the engine's clock: each policy records its actions from its own player
+        state (``player.queue``), then the engine runs every recorded action together and advances
+        time once (``game.tick()``; a real-time loop would call ``game.advance_time(dt)`` instead)."""
+        plans = {pid: self.policies[pid].act(self.world(pid)) for pid in (1, 2)}
+        for pid in (1, 2):
+            for name, x, y, d in plans[pid][0]:
+                self.players[pid].queue(name, [x, y, d])
+        result = self.game.tick()
+        info = result["Info"]
+        if result["Terminated"]:
+            self.terminated = True
         return {pid: plans[pid][1] for pid in (1, 2)}, {pid: plans[pid][0] for pid in (1, 2)}, info
 
 
@@ -4661,7 +5192,8 @@ def run_match(game, p1, p2, level, seed=0, max_ticks=1500, verbose=False):
             print(t, "|", " / ".join(captions[1]), "||", " / ".join(captions[2]))
         if match.terminated:
             break
-    world = match.world()
+    # the full state, for the summary only (no policy reads it)
+    world = WorldView(game.get_state(), match.width, match.height)
     winner = info.get("PlayerResults", {})
     summary = {pid: {"workers": len(world.of("worker", pid)), "army": len([o for o in world.objects if o["player"] == pid and o["name"] in ARMY]),
                      "relays": len(world.of("relay_owned", pid)), "res": world.resources(pid)} for pid in (1, 2)}
@@ -4708,6 +5240,18 @@ Units       worker, scout (fast, cheap, weak), trooper (melee), gunner (shoots 2
 Research    Mining, Weapons (+1 damage), Armour (-1 damage taken), Gunnery (unlocks gunners),
             Vehicles (unlocks tanks), Fortify (towers hit harder and reload faster).
 Camera      each player's camera is the (cam_x, cam_y) global pair, moved with move_camera.
+Clock       Environment.TickRate (4 ticks/s): players queue actions between ticks and the engine's
+            clock runs them all together on each tick (the UI and AIs never step time themselves).
+Views       rendered by the engine from the observer config below, never drawn over by a client:
+              PlayerView  a VIEW_W x VIEW_H window on the player's camera, fog of war, health bars
+              CameraView  the same window without fog
+              MiniMap     the whole map from one player's side: fog of war + its camera outline
+              Overview    the whole map, no fog (spectators, videos)
+              GlobalMap   Block2D whole map with both players' camera outlines (spectators)
+            Fog of war (Environment.Player.FogOfWar): each owned object reveals the cells within its
+            `sight` variable. Cells seen before stay explored: terrain shown, no enemy units. The
+            engine enforces it for players, not just in pictures: get_player_state(id) returns only
+            what that player knows, and the AI / human UI read nothing else.
 Victory     destroy the enemy base.
 """
 import os
@@ -4720,6 +5264,12 @@ from fow_maps import build_all, level_text  # noqa: E402
 OUT = os.path.join(HERE, "GriddlyRTS-FoW.yaml")
 # the Studio demo's playable /rts page bundles its own copy (deploys only upload studio/griddly-demo)
 STUDIO_OUT = os.path.join(HERE, "..", "..", "..", "studio", "griddly-demo", "apps", "web", "src", "rts", "GriddlyRTS-FoW.yaml")
+
+# per-player camera window, in cells (PlayerView and the camera outlines on the mini-maps)
+VIEW_W, VIEW_H = 24, 15
+# sight radius (cells) of each owned object type, for fog of war
+SIGHT = {"worker": 4, "scout": 7, "combat": 4, "marine": 5, "medic": 4, "tank": 5,
+         "base": 6, "barracks": 4, "lab": 3, "tower": 6, "wall": 1, "relay_owned": 4}
 
 MON = "oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_"
 WF = "oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/"
@@ -4819,20 +5369,33 @@ def build_action(name, desc, key, src, obj, cost, requires=None):
 """
 
 
-def owned_object(name, char, variables, sprite, shape, scale, initial=""):
+def owned_object(name, char, variables, sprite, shape, scale, initial="", tiles=None):
+    """An object owned by a player. `tiles` are extra Sprite2D render tiles (set_tile 1, 2, ...)."""
+    variables = list(variables) + [("sight", SIGHT[name])]
     vs = "".join(f"      - Name: {k}\n        InitialValue: {v}\n" for k, v in variables)
     var_block = f"    Variables:\n{vs}" if vs else ""
+    sprites = [sprite] + list(tiles or [])
+    sp = "".join(f"        - Image: {s}\n" for s in sprites)
+    bl = "".join(f"        - Shape: {shape}\n          Color: PLAYER\n          Scale: {scale}\n" for _ in sprites)
     return f"""  - Name: {name}
     MapCharacter: {char}
     Z: 1
 {var_block}{initial}    Observers:
-      Sprite2D:
-        - Image: {sprite}
-      Block2D:
-        - Shape: {shape}
-          Color: PLAYER
-          Scale: {scale}
-"""
+{observer_blocks(sp, bl)}"""
+
+
+# every Sprite2D-style observer uses the same sprites, every Block2D-style one the same shapes
+SPRITE_OBSERVERS = ["Sprite2D", "PlayerView", "CameraView", "Overview"]
+BLOCK_OBSERVERS = ["Block2D", "MiniMap", "GlobalMap"]
+
+
+def observer_blocks(sprites, blocks):
+    out = ""
+    for name in SPRITE_OBSERVERS:
+        out += f"      {name}:\n{sprites}"
+    for name in BLOCK_OBSERVERS:
+        out += f"      {name}:\n{blocks}"
+    return out
 
 
 def scenery(name, char, sprite, color, z=0, shape="square", scale=1.0, variables=(), tiles=None):
@@ -4845,9 +5408,7 @@ def scenery(name, char, sprite, color, z=0, shape="square", scale=1.0, variables
     MapCharacter: "{char}"
     Z: {z}
 {var_block}    Observers:
-      Sprite2D:
-{sp}      Block2D:
-{bl}"""
+{observer_blocks(sp, bl)}"""
 
 
 def generate():
@@ -4873,6 +5434,7 @@ def generate():
             - sub: [ player_resources, {cost} ]
             - set: [ {var}, 1 ]
             - set: [ src.busy, {i} ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: {ticks}
@@ -4897,8 +5459,11 @@ def generate():
                      {"barracks": "b", "lab": "l", "tower": "o", "wall": "x"}[b], "worker", b, cost) + "\n"
         for b, (char, hp, cost, sprite, shape) in BUILDING_DEFS.items() if cost is not None)
 
+    # workers show their load (render tiles: 1 mineral, 2 wood, 3 gems), set by the gather action
+    unit_tiles = {"worker": [MON + "jelly_d2.png", MON + "jelly_l1.png", MON + "jelly_r1.png"]}
     unit_objects = "".join(
-        owned_object(u, char, [("health", hp), ("max_health", hp), ("damage", dmg)] + extra, sprite, shape, scale)
+        owned_object(u, char, [("health", hp), ("max_health", hp), ("damage", dmg)] + extra, sprite, shape, scale,
+                     tiles=unit_tiles.get(u))
         for u, (char, hp, dmg, cost, src, req, extra, sprite, shape, scale) in UNIT_DEFS.items())
     building_objects = ""
     for b, (char, hp, cost, sprite, shape) in BUILDING_DEFS.items():
@@ -4910,7 +5475,9 @@ def generate():
             variables.append(("busy", 0))
         if b == "tower":
             variables.append(("loaded", 1))
-        building_objects += owned_object(b, char, variables, sprite, shape, 1.0, initial)
+        # a lab shows a blue beaker while it researches (render tile 1)
+        tiles = [ITEMS + "beaker_blue.png"] if b == "lab" else None
+        building_objects += owned_object(b, char, variables, sprite, shape, 1.0, initial, tiles=tiles)
 
     gdy = f'''Version: "0.1"
 Environment:
@@ -4933,18 +5500,73 @@ Environment:
     Research  Mining, Weapons, Armour, Gunnery (needs Weapons), Vehicles (needs Armour),
               Fortify (needs Armour): stronger towers.
     Victory   destroy the enemy base.
+  # Game clock: real-time play runs this many ticks per second. Players record their actions
+  # between ticks (queue_actions / queueActions); each tick runs every player's recorded actions
+  # together, then time advances once.
+  TickRate: 4
+  # Every view is rendered by the engine. Colours are egocentric in a player's views (their objects
+  # use Colors[0], green; the enemy Colors[1], red); the global views use player 1 / player 2.
   Observers:
     Block2D:
       TileSize: 6
       BackgroundColor: [ 0.12, 0.13, 0.11 ]
     Sprite2D:
       TileSize: 16
-      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
-      # a soft player-coloured shadow under every owned object. Colours are egocentric:
-      # in a player's own view their objects use Colors[0] (green), the enemy Colors[1].
+      BackgroundTile: {TW}floor_regolith_a.png
       HighlightPlayers: true
       HighlightStyle: SHADOW
       HighlightScale: 1.6
+      HealthBars: true
+    # a player's main view: a {VIEW_W}x{VIEW_H} cell window on their camera (cam_x, cam_y), under fog of war
+    PlayerView:
+      Type: SPRITE_2D
+      TileSize: 16
+      Width: {VIEW_W}
+      Height: {VIEW_H}
+      BackgroundTile: {TW}floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+      Camera: {{ X: cam_x, Y: cam_y }}
+      FogOfWar:
+        SightVariable: sight
+        ExploredOpacity: 0.55
+    # the same camera window without fog (spectating, or playing with fog off)
+    CameraView:
+      Type: SPRITE_2D
+      TileSize: 16
+      Width: {VIEW_W}
+      Height: {VIEW_H}
+      BackgroundTile: {TW}floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+      Camera: {{ X: cam_x, Y: cam_y }}
+    # a player's mini-map: the whole map under their fog of war, with their camera window outlined
+    MiniMap:
+      Type: BLOCK_2D
+      TileSize: 4
+      BackgroundColor: [ 0.12, 0.13, 0.11 ]
+      FogOfWar:
+        SightVariable: sight
+        ExploredOpacity: 0.5
+      CameraFrame: {{ X: cam_x, Y: cam_y, Width: {VIEW_W}, Height: {VIEW_H} }}
+    # spectators: the whole map without fog
+    Overview:
+      Type: SPRITE_2D
+      TileSize: 16
+      BackgroundTile: {TW}floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+    GlobalMap:
+      Type: BLOCK_2D
+      TileSize: 6
+      BackgroundColor: [ 0.12, 0.13, 0.11 ]
+      CameraFrame: {{ X: cam_x, Y: cam_y, Width: {VIEW_W}, Height: {VIEW_H} }}
     Vector:
       IncludePlayerId: true
       IncludeVariables: true
@@ -4966,6 +5588,10 @@ Environment:
     # research state per player: 0 = not researched, 1 = in progress, 2 = done
 {tech_vars}  Player:
     Count: 2
+    # each player only knows what their objects can see: the engine filters every player's state
+    # query (get_player_state / getPlayerState) and their fog-of-war views with this
+    FogOfWar:
+      SightVariable: sight
     # egocentric player colours: each player sees itself as the first colour (green) and the
     # enemy as the second. The global mini-map uses player 1 / player 2 directly.
     Colors:
@@ -5067,6 +5693,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 1 ]
+            - set_tile: 1
         Dst:
           ObjectRules: minerals
           Commands:
@@ -5080,6 +5707,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 3 ]
+            - set_tile: 3
         Dst:
           ObjectRules: gems
           Commands:
@@ -5091,6 +5719,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 2 ]
+            - set_tile: 2
         Dst:
           ObjectRules: forest
           Commands:
@@ -5109,6 +5738,7 @@ Actions:
             - eq: {{ Arguments: [ src.carrying, 2 ], Commands: [ {{ incr: player_resources }} ] }}
             - eq: {{ Arguments: [ src.carrying, 3 ], Commands: [ {{ add: [ player_resources, 3 ] }} ] }}
             - set: [ src.carrying, 0 ]
+            - set_tile: 0
             - reward: 1
         Dst:
           ObjectRules: base
@@ -5197,6 +5827,7 @@ Actions:
           ObjectRules: lab
           Commands:
 {done_cmds}            - set: [ src.busy, 0 ]
+            - set_tile: 0
         Dst:
           ObjectRules: lab
 
@@ -5329,14 +5960,8 @@ Objects:
       - Action: init_map
         ActionId: 1
     Observers:
-      Sprite2D:
-        - Image: {TW}floor_regolith_a.png
-      Block2D:
-        - Shape: square
-          Color: [ 0.12, 0.13, 0.11 ]
-          Scale: 0.0
-{unit_objects}{building_objects}'''
-    # minerals use 3 render tiles (full / half / nearly gone)
+{observer_blocks(f"        - Image: {TW}floor_regolith_a.png" + chr(10), "        - Shape: square" + chr(10) + "          Color: [ 0.12, 0.13, 0.11 ]" + chr(10) + "          Scale: 0.0" + chr(10))}{unit_objects}{building_objects}'''
+    # minerals use 3 render tiles (full / half / nearly gone), in every sprite observer
     gdy = gdy.replace(
         f"        - Image: {ITEMS}crystal_green.png\n        - Image: {ITEMS}crystal_green.png\n        - Image: {ITEMS}crystal_green.png\n",
         f"        - Image: {ITEMS}crystal_green.png\n          Scale: 1.0\n        - Image: {ITEMS}crystal_green.png\n          Scale: 0.75\n        - Image: {ITEMS}crystal_green.png\n          Scale: 0.5\n")
@@ -5363,20 +5988,19 @@ base until one base is destroyed.
 
 Layout per frame (centered on a dark padded canvas):
     +------------------------------------------------------+
-    |   P1 camera view            P2 camera view           |
-    |   P1 caption (big)          P2 caption (big)         |
+    |   P1 PlayerView             P2 PlayerView            |
+    |   P1 mini-map + caption     P2 mini-map + caption    |
     |                                                      |
-    |            global Block2D mini-map                   |
+    |            GlobalMap (both cameras outlined)         |
     |            tick / winner line                        |
     +------------------------------------------------------+
 
-Ownership is shown by a small glow behind each unit / building, drawn by the engine
-(HighlightPlayers). Colours are egocentric: in each player's own view their units glow
-green and the enemy's glow red. The global mini-map shows player 1 green, player 2 red.
-
-Each player's view is a 20x14 tile window cropped from that player's Sprite2D render,
-centered on the player's camera (the per-player cam_x / cam_y globals that the
-policy pans with the move_camera action).
+Every picture is rendered by the engine from the GDY's observers and pasted as-is (only scaled):
+    PlayerView  each player's camera window (cam_x / cam_y globals, panned with move_camera),
+                under that player's fog of war, with health bars and ownership shadows
+                (egocentric: your units green, the enemy red)
+    MiniMap     the whole map under that player's fog of war, with their camera outlined
+    GlobalMap   the whole map without fog, both players' cameras outlined (P1 green, P2 red)
 
 Output: GriddlyRTS-FoW-demo.mp4 next to GriddlyRTS-FoW.yaml.
 
@@ -5399,13 +6023,13 @@ from fow_policy import Match  # noqa: E402
 
 OUT = os.path.join(HERE, "GriddlyRTS-FoW-demo.mp4")
 FPS = 8
-FONT_SIZE = 26
+FONT_SIZE = 20
 PAD = 30
 BG = (14, 14, 18)
 TEXT = (235, 235, 220)
 TILE = 16          # Sprite2D tile size
-VIEW = (20, 14)    # camera window in tiles (width, height)
-SCALE = 2          # upscale factor for the camera views
+SCALE = 2          # upscale factor for the camera views (PlayerView is 24x15 tiles of 16px)
+MINI_SCALE = 2     # upscale factor for the per-player mini-maps
 MAX_TICKS = 900
 HOLD_FRAMES = 3 * FPS
 
@@ -5428,17 +6052,6 @@ def to_img(obs):
     if a.ndim == 3 and a.shape[2] == 4:
         a = a[..., :3]
     return np.ascontiguousarray(a)
-
-
-def crop_around_camera(full_img, cam_xy, view=VIEW, tile=TILE):
-    """Crop a view[0] x view[1] tile window centered on the camera (clamped to the map)."""
-    h, w = full_img.shape[:2]
-    vw, vh = view[0] * tile, view[1] * tile
-    x0 = cam_xy[0] * tile - (view[0] // 2) * tile
-    y0 = cam_xy[1] * tile - (view[1] // 2) * tile
-    x0 = max(0, min(x0, w - vw))
-    y0 = max(0, min(y0, h - vh))
-    return full_img[y0:y0 + vh, x0:x0 + vw]
 
 
 def upscale(im, scale):
@@ -5473,30 +6086,34 @@ def text_block(width, lines, n_lines, fill):
 CAPTION_LINES = 4
 
 
-def compose(p1_view, p2_view, g_img, cap1, cap2, status):
+def compose(p1_view, p2_view, p1_mini, p2_mini, g_img, cap1, cap2, status):
     p1s, p2s = upscale(p1_view, SCALE), upscale(p2_view, SCALE)
-    # the mini-map is scaled to roughly the width of one camera view
-    gs = upscale(g_img, max(1, round(VIEW[0] * TILE * SCALE / g_img.shape[1])))
+    m1, m2 = upscale(p1_mini, MINI_SCALE), upscale(p2_mini, MINI_SCALE)
     pw = p1s.shape[1]
+    # the global map is scaled to roughly the width of one player view
+    gs = upscale(g_img, max(1, round(pw / g_img.shape[1])))
     gap = 60
     top_w = 2 * pw + gap
-    c1 = text_block(pw, cap1, CAPTION_LINES, TEXT)
-    c2 = text_block(pw, cap2, CAPTION_LINES, TEXT)
+    # under each view: the player's mini-map on the left, the caption beside it
+    cap_w = pw - m1.shape[1] - 10
+    c1 = text_block(cap_w, cap1, CAPTION_LINES, TEXT)
+    c2 = text_block(cap_w, cap2, CAPTION_LINES, TEXT)
     st = text_block(max(gs.shape[1], top_w), [status], 1, (220, 220, 220))
-    row_h = p1s.shape[0] + c1.shape[0]
+    under_h = max(m1.shape[0], c1.shape[0])
+    row_h = p1s.shape[0] + 10 + under_h
     width = max(top_w, gs.shape[1]) + 2 * PAD
     height = PAD + row_h + PAD + gs.shape[0] + st.shape[0] + PAD
     height += height % 2
     canvas = np.zeros((height, width, 3), dtype=np.uint8)
     canvas[:] = BG
-    # player 1 on the left, player 2 on the right, captions underneath each
+    # player 1 on the left, player 2 on the right
     x0 = (width - top_w) // 2
-    x1 = x0 + pw + gap
-    canvas[PAD:PAD + p1s.shape[0], x0:x0 + pw] = p1s
-    canvas[PAD + p1s.shape[0]:PAD + row_h, x0:x0 + pw] = c1
-    canvas[PAD:PAD + p2s.shape[0], x1:x1 + pw] = p2s
-    canvas[PAD + p2s.shape[0]:PAD + row_h, x1:x1 + pw] = c2
-    # global mini-map below, centered, with the status line under it
+    for x, view, mini, cap in ((x0, p1s, m1, c1), (x0 + pw + gap, p2s, m2, c2)):
+        canvas[PAD:PAD + view.shape[0], x:x + pw] = view
+        y = PAD + view.shape[0] + 10
+        canvas[y:y + mini.shape[0], x:x + mini.shape[1]] = mini
+        canvas[y:y + cap.shape[0], x + mini.shape[1] + 10:x + mini.shape[1] + 10 + cap.shape[1]] = cap
+    # global map below, centered, with the status line under it
     y = PAD + row_h + PAD
     gx = (width - gs.shape[1]) // 2
     canvas[y:y + gs.shape[0], gx:gx + gs.shape[1]] = gs
@@ -5520,9 +6137,9 @@ def main():
     path = os.path.join(HERE, "GriddlyRTS-FoW.yaml")
     name = (level_names(path) + [f"level {level}"] * (level + 1))[level]
     gdy = GriddlyLoader().load(path)
-    game = gdy.create_game("Block2D")                  # global observer -> mini-map
-    p1 = game.register_player("Player 1", "Sprite2D")  # full renders, cropped around the camera
-    p2 = game.register_player("Player 2", "Sprite2D")
+    game = gdy.create_game("GlobalMap")                  # global observer: whole map, both cameras
+    p1 = game.register_player("Player 1", "PlayerView")  # camera window + fog of war, per player
+    p2 = game.register_player("Player 2", "PlayerView")
     game.init(False)
     game.load_level(level)
     game.reset()
@@ -5531,25 +6148,24 @@ def main():
     frames = []
 
     def record(cap1, cap2, status):
-        world = match.world()
-        v1 = crop_around_camera(to_img(p1.observe()), world.camera(1))
-        v2 = crop_around_camera(to_img(p2.observe()), world.camera(2))
-        frames.append(compose(v1, v2, to_img(game.observe()), cap1, cap2, status))
+        frames.append(compose(to_img(p1.observe()), to_img(p2.observe()),
+                              to_img(game.observe_player(1, "MiniMap")), to_img(game.observe_player(2, "MiniMap")),
+                              to_img(game.observe()), cap1, cap2, status))
 
-    world = match.world()
+    world = match.world(1)
     start = ["START", f"res={world.resources(1)}", "camera on own base"]
     record(["P1 " + start[0]] + start[1:], ["P2 " + start[0]] + start[1:],
-           f"{name}  tick 0   map: P1 green, P2 red   views: self green, enemy red")
+           f"{name}  tick 0   map: P1 green, P2 red   views: self green, enemy red, fog of war")
 
     info = {}
     for _ in range(MAX_TICKS):
         captions, _, info = match.step()
         if match.terminated:
             break
-        tick = match.world().tick
+        tick = match.world(1).tick
         record(["P1 " + captions[1][0]] + captions[1][1:],
                ["P2 " + captions[2][0]] + captions[2][1:],
-               f"{name}  tick {tick}   map: P1 green, P2 red   views: self green, enemy red")
+               f"{name}  tick {tick}   map: P1 green, P2 red   views: self green, enemy red, fog of war")
 
     if match.terminated:
         # the game process is now terminal; render the last state before it is reset
@@ -33850,6 +34466,14 @@ Objects:
       "required": ["Name"],
       "additionalProperties": false,
       "properties": {
+        "TickRate": {
+          "$id": "#/properties/Environment/properties/TickRate",
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "title": "Tick Rate",
+          "description": "Game clock for real-time play, in ticks per second (0 = no clock). Players record actions between ticks (queue / queueActions) and every recorded action runs together on each tick (advance_time / advanceTime, or tick() to step manually). Changeable at run time with set_tick_rate / setTickRate."
+        },
         "Name": {
           "$id": "#/properties/Environment/properties/Name",
           "type": "string",
@@ -34101,6 +34725,135 @@ Objects:
                   "enum": ["OUTLINE", "GLOW", "SHADOW"],
                   "default": "OUTLINE"
                 },
+                "FogOfWar": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/FogOfWar",
+                  "title": "Fog Of War",
+                  "description": "Sprite2D / Block2D player observers only show cells within the sight radius of the player's own objects. Cells seen before stay dimmed (terrain and neutral objects shown, other players' objects hidden); never-seen cells are covered. true, or a map of options.",
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "SightVariable": {
+                          "type": "string",
+                          "description": "Object variable holding each object's sight radius in cells.",
+                          "default": "sight"
+                        },
+                        "DefaultSight": {
+                          "type": "integer",
+                          "description": "Sight radius of owned objects without the variable.",
+                          "default": 0
+                        },
+                        "Color": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 3,
+                          "maxItems": 3,
+                          "description": "RGB fog colour (0-1).",
+                          "default": [
+                            0,
+                            0,
+                            0
+                          ]
+                        },
+                        "ExploredOpacity": {
+                          "type": "number",
+                          "description": "Fog opacity over explored cells.",
+                          "default": 0.55
+                        },
+                        "UnexploredOpacity": {
+                          "type": "number",
+                          "description": "Fog opacity over never-seen cells.",
+                          "default": 1.0
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "Camera": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Camera",
+                  "type": "object",
+                  "title": "Camera",
+                  "description": "A movable camera for Sprite2D / Block2D observers: the Width x Height view is centred on the cell held in two global variables (per-player variables are read for the observing player) and clamped to the map.",
+                  "properties": {
+                    "X": {
+                      "type": "string",
+                      "description": "Global variable with the camera centre's x cell."
+                    },
+                    "Y": {
+                      "type": "string",
+                      "description": "Global variable with the camera centre's y cell."
+                    }
+                  },
+                  "required": [
+                    "X",
+                    "Y"
+                  ],
+                  "additionalProperties": false
+                },
+                "CameraFrame": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/CameraFrame",
+                  "type": "object",
+                  "title": "Camera Frame",
+                  "description": "Outline each player's camera window (Width x Height cells centred on two global variables) in the player's colour, e.g. on a mini-map. A player observer only outlines its own camera.",
+                  "properties": {
+                    "X": {
+                      "type": "string"
+                    },
+                    "Y": {
+                      "type": "string"
+                    },
+                    "Width": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "Height": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  },
+                  "required": [
+                    "X",
+                    "Y",
+                    "Width",
+                    "Height"
+                  ],
+                  "additionalProperties": false
+                },
+                "HealthBars": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/HealthBars",
+                  "title": "Health Bars",
+                  "description": "Draw a health bar over damaged objects that have the health and max health variables. true, or a map of options.",
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "Health": {
+                          "type": "string",
+                          "default": "health"
+                        },
+                        "MaxHealth": {
+                          "type": "string",
+                          "default": "max_health"
+                        },
+                        "Always": {
+                          "type": "boolean",
+                          "description": "Also draw bars at full health.",
+                          "default": false
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                },
                 "HighlightScale": {
                   "$id": "#/properties/Environment/properties/Observers/properties/HighlightScale",
                   "type": "number",
@@ -34166,6 +34919,32 @@ Objects:
           "description": "Defines how players (algorithms, agents, humans) interact with the environment.",
           "additionalProperties": false,
           "properties": {
+            "FogOfWar": {
+              "$id": "#/properties/Environment/properties/Player/properties/FogOfWar",
+              "title": "Fog Of War",
+              "description": "Each player only knows what their objects can see: cells within each owned object's sight radius. Cells seen before stay explored (terrain and neutral objects known, other players' objects not). The engine enforces it for player state queries (get_player_state / getPlayerState) and for FogOfWar observers. true, or a map of options.",
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "SightVariable": {
+                      "type": "string",
+                      "default": "sight",
+                      "description": "Object variable holding each object's sight radius in cells."
+                    },
+                    "DefaultSight": {
+                      "type": "integer",
+                      "default": 0,
+                      "description": "Sight radius of owned objects without the variable."
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
             "Count": {
               "$id": "#/properties/Environment/properties/Player/properties/Count",
               "type": "integer",

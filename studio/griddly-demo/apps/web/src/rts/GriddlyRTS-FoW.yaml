@@ -19,6 +19,12 @@ Environment:
     Research  Mining, Weapons, Armour, Gunnery (needs Weapons), Vehicles (needs Armour),
               Fortify (needs Armour): stronger towers.
     Victory   destroy the enemy base.
+  # Game clock: real-time play runs this many ticks per second. Players record their actions
+  # between ticks (queue_actions / queueActions); each tick runs every player's recorded actions
+  # together, then time advances once.
+  TickRate: 4
+  # Every view is rendered by the engine. Colours are egocentric in a player's views (their objects
+  # use Colors[0], green; the enemy Colors[1], red); the global views use player 1 / player 2.
   Observers:
     Block2D:
       TileSize: 6
@@ -26,11 +32,60 @@ Environment:
     Sprite2D:
       TileSize: 16
       BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
-      # a soft player-coloured shadow under every owned object. Colours are egocentric:
-      # in a player's own view their objects use Colors[0] (green), the enemy Colors[1].
       HighlightPlayers: true
       HighlightStyle: SHADOW
       HighlightScale: 1.6
+      HealthBars: true
+    # a player's main view: a 24x15 cell window on their camera (cam_x, cam_y), under fog of war
+    PlayerView:
+      Type: SPRITE_2D
+      TileSize: 16
+      Width: 24
+      Height: 15
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+      Camera: { X: cam_x, Y: cam_y }
+      FogOfWar:
+        SightVariable: sight
+        ExploredOpacity: 0.55
+    # the same camera window without fog (spectating, or playing with fog off)
+    CameraView:
+      Type: SPRITE_2D
+      TileSize: 16
+      Width: 24
+      Height: 15
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+      Camera: { X: cam_x, Y: cam_y }
+    # a player's mini-map: the whole map under their fog of war, with their camera window outlined
+    MiniMap:
+      Type: BLOCK_2D
+      TileSize: 4
+      BackgroundColor: [ 0.12, 0.13, 0.11 ]
+      FogOfWar:
+        SightVariable: sight
+        ExploredOpacity: 0.5
+      CameraFrame: { X: cam_x, Y: cam_y, Width: 24, Height: 15 }
+    # spectators: the whole map without fog
+    Overview:
+      Type: SPRITE_2D
+      TileSize: 16
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      HighlightPlayers: true
+      HighlightStyle: SHADOW
+      HighlightScale: 1.6
+      HealthBars: true
+    GlobalMap:
+      Type: BLOCK_2D
+      TileSize: 6
+      BackgroundColor: [ 0.12, 0.13, 0.11 ]
+      CameraFrame: { X: cam_x, Y: cam_y, Width: 24, Height: 15 }
     Vector:
       IncludePlayerId: true
       IncludeVariables: true
@@ -70,6 +125,10 @@ Environment:
       PerPlayer: true
   Player:
     Count: 2
+    # each player only knows what their objects can see: the engine filters every player's state
+    # query (get_player_state / getPlayerState) and their fog-of-war views with this
+    FogOfWar:
+      SightVariable: sight
     # egocentric player colours: each player sees itself as the first colour (green) and the
     # enemy as the second. The global mini-map uses player 1 / player 2 directly.
     Colors:
@@ -444,6 +503,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 1 ]
+            - set_tile: 1
         Dst:
           ObjectRules: minerals
           Commands:
@@ -457,6 +517,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 3 ]
+            - set_tile: 3
         Dst:
           ObjectRules: gems
           Commands:
@@ -468,6 +529,7 @@ Actions:
             - eq: [ src.carrying, 0 ]
           Commands:
             - set: [ src.carrying, 2 ]
+            - set_tile: 2
         Dst:
           ObjectRules: forest
           Commands:
@@ -486,6 +548,7 @@ Actions:
             - eq: { Arguments: [ src.carrying, 2 ], Commands: [ { incr: player_resources } ] }
             - eq: { Arguments: [ src.carrying, 3 ], Commands: [ { add: [ player_resources, 3 ] } ] }
             - set: [ src.carrying, 0 ]
+            - set_tile: 0
             - reward: 1
         Dst:
           ObjectRules: base
@@ -802,6 +865,7 @@ Actions:
             - sub: [ player_resources, 8 ]
             - set: [ res_mining, 1 ]
             - set: [ src.busy, 1 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 8
@@ -819,6 +883,7 @@ Actions:
             - sub: [ player_resources, 10 ]
             - set: [ res_weapons, 1 ]
             - set: [ src.busy, 2 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 8
@@ -836,6 +901,7 @@ Actions:
             - sub: [ player_resources, 10 ]
             - set: [ res_armor, 1 ]
             - set: [ src.busy, 3 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 8
@@ -854,6 +920,7 @@ Actions:
             - sub: [ player_resources, 12 ]
             - set: [ res_gunnery, 1 ]
             - set: [ src.busy, 4 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 10
@@ -872,6 +939,7 @@ Actions:
             - sub: [ player_resources, 12 ]
             - set: [ res_vehicles, 1 ]
             - set: [ src.busy, 5 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 10
@@ -890,6 +958,7 @@ Actions:
             - sub: [ player_resources, 10 ]
             - set: [ res_fortify, 1 ]
             - set: [ src.busy, 6 ]
+            - set_tile: 1
             - exec:
                 Action: research_done
                 Delay: 8
@@ -932,6 +1001,7 @@ Actions:
                 Commands:
                   - set: [ res_fortify, 2 ]
             - set: [ src.busy, 0 ]
+            - set_tile: 0
         Dst:
           ObjectRules: lab
 
@@ -1071,7 +1141,48 @@ Objects:
           Scale: 0.75
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
           Scale: 0.5
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 1.0
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.75
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.5
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 1.0
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.75
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.5
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 1.0
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.75
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.5
       Block2D:
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+      MiniMap:
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+        - Shape: triangle
+          Color: [ 0.2, 0.9, 0.4 ]
+          Scale: 1.0
+      GlobalMap:
         - Shape: triangle
           Color: [ 0.2, 0.9, 0.4 ]
           Scale: 1.0
@@ -1091,7 +1202,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_purple.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_purple.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_purple.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_purple.png
       Block2D:
+        - Shape: triangle
+          Color: [ 0.8, 0.4, 1.0 ]
+          Scale: 1.0
+      MiniMap:
+        - Shape: triangle
+          Color: [ 0.8, 0.4, 1.0 ]
+          Scale: 1.0
+      GlobalMap:
         - Shape: triangle
           Color: [ 0.8, 0.4, 1.0 ]
           Scale: 1.0
@@ -1102,7 +1227,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: gvgai/oryx/tree2.png
+      PlayerView:
+        - Image: gvgai/oryx/tree2.png
+      CameraView:
+        - Image: gvgai/oryx/tree2.png
+      Overview:
+        - Image: gvgai/oryx/tree2.png
       Block2D:
+        - Shape: square
+          Color: [ 0.1, 0.35, 0.15 ]
+          Scale: 0.9
+      MiniMap:
+        - Shape: square
+          Color: [ 0.1, 0.35, 0.15 ]
+          Scale: 0.9
+      GlobalMap:
         - Shape: square
           Color: [ 0.1, 0.35, 0.15 ]
           Scale: 0.9
@@ -1113,7 +1252,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_rubble_a.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_rubble_a.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_rubble_a.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_rubble_a.png
       Block2D:
+        - Shape: square
+          Color: [ 0.45, 0.42, 0.4 ]
+          Scale: 1.0
+      MiniMap:
+        - Shape: square
+          Color: [ 0.45, 0.42, 0.4 ]
+          Scale: 1.0
+      GlobalMap:
         - Shape: square
           Color: [ 0.45, 0.42, 0.4 ]
           Scale: 1.0
@@ -1124,7 +1277,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_water.png
       Block2D:
+        - Shape: square
+          Color: [ 0.15, 0.35, 0.7 ]
+          Scale: 1.0
+      MiniMap:
+        - Shape: square
+          Color: [ 0.15, 0.35, 0.7 ]
+          Scale: 1.0
+      GlobalMap:
         - Shape: square
           Color: [ 0.15, 0.35, 0.7 ]
           Scale: 1.0
@@ -1135,7 +1302,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: gvgai/newset/logm.png
+      PlayerView:
+        - Image: gvgai/newset/logm.png
+      CameraView:
+        - Image: gvgai/newset/logm.png
+      Overview:
+        - Image: gvgai/newset/logm.png
       Block2D:
+        - Shape: square
+          Color: [ 0.55, 0.4, 0.25 ]
+          Scale: 0.9
+      MiniMap:
+        - Shape: square
+          Color: [ 0.55, 0.4, 0.25 ]
+          Scale: 0.9
+      GlobalMap:
         - Shape: square
           Color: [ 0.55, 0.4, 0.25 ]
           Scale: 0.9
@@ -1146,7 +1327,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_off.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_off.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_off.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_off.png
       Block2D:
+        - Shape: hexagon
+          Color: [ 0.85, 0.85, 0.85 ]
+          Scale: 0.8
+      MiniMap:
+        - Shape: hexagon
+          Color: [ 0.85, 0.85, 0.85 ]
+          Scale: 0.8
+      GlobalMap:
         - Shape: hexagon
           Color: [ 0.85, 0.85, 0.85 ]
           Scale: 0.8
@@ -1154,6 +1349,9 @@ Objects:
   - Name: relay_owned
     MapCharacter: r
     Z: 1
+    Variables:
+      - Name: sight
+        InitialValue: 4
     InitialActions:
       - Action: relay_income
         ActionId: 1
@@ -1161,7 +1359,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_on.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_on.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_on.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_generator_on.png
       Block2D:
+        - Shape: hexagon
+          Color: PLAYER
+          Scale: 0.8
+      MiniMap:
+        - Shape: hexagon
+          Color: PLAYER
+          Scale: 0.8
+      GlobalMap:
         - Shape: hexagon
           Color: PLAYER
           Scale: 0.8
@@ -1175,7 +1387,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_regolith_a.png
       Block2D:
+        - Shape: square
+          Color: [ 0.12, 0.13, 0.11 ]
+          Scale: 0.0
+      MiniMap:
+        - Shape: square
+          Color: [ 0.12, 0.13, 0.11 ]
+          Scale: 0.0
+      GlobalMap:
         - Shape: square
           Color: [ 0.12, 0.13, 0.11 ]
           Scale: 0.0
@@ -1191,10 +1417,65 @@ Objects:
         InitialValue: 1
       - Name: carrying
         InitialValue: 0
+      - Name: sight
+        InitialValue: 4
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d2.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_l1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_r1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d2.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_l1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_r1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d2.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_l1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_r1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d2.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_l1.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_r1.png
       Block2D:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+      MiniMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+      GlobalMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.5
         - Shape: circle
           Color: PLAYER
           Scale: 0.5
@@ -1208,10 +1489,26 @@ Objects:
         InitialValue: 5
       - Name: damage
         InitialValue: 1
+      - Name: sight
+        InitialValue: 7
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_drone_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_drone_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_drone_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_drone_d1.png
       Block2D:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.7
+      MiniMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.7
+      GlobalMap:
         - Shape: circle
           Color: PLAYER
           Scale: 0.7
@@ -1225,10 +1522,26 @@ Objects:
         InitialValue: 12
       - Name: damage
         InitialValue: 3
+      - Name: sight
+        InitialValue: 4
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
       Block2D:
+        - Shape: pentagon
+          Color: PLAYER
+          Scale: 0.85
+      MiniMap:
+        - Shape: pentagon
+          Color: PLAYER
+          Scale: 0.85
+      GlobalMap:
         - Shape: pentagon
           Color: PLAYER
           Scale: 0.85
@@ -1242,10 +1555,26 @@ Objects:
         InitialValue: 8
       - Name: damage
         InitialValue: 2
+      - Name: sight
+        InitialValue: 5
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_marine_m_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_marine_m_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_marine_m_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_marine_m_d1.png
       Block2D:
+        - Shape: triangle
+          Color: PLAYER
+          Scale: 0.8
+      MiniMap:
+        - Shape: triangle
+          Color: PLAYER
+          Scale: 0.8
+      GlobalMap:
         - Shape: triangle
           Color: PLAYER
           Scale: 0.8
@@ -1259,10 +1588,26 @@ Objects:
         InitialValue: 7
       - Name: damage
         InitialValue: 1
+      - Name: sight
+        InitialValue: 4
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_scientist_f_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_scientist_f_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_scientist_f_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_scientist_f_d1.png
       Block2D:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.8
+      MiniMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 0.8
+      GlobalMap:
         - Shape: circle
           Color: PLAYER
           Scale: 0.8
@@ -1278,10 +1623,26 @@ Objects:
         InitialValue: 5
       - Name: cooldown
         InitialValue: 0
+      - Name: sight
+        InitialValue: 5
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_robot_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_robot_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_robot_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_robot_d1.png
       Block2D:
+        - Shape: fill
+          Color: PLAYER
+          Scale: 0.75
+      MiniMap:
+        - Shape: fill
+          Color: PLAYER
+          Scale: 0.75
+      GlobalMap:
         - Shape: fill
           Color: PLAYER
           Scale: 0.75
@@ -1293,13 +1654,29 @@ Objects:
         InitialValue: 50
       - Name: max_health
         InitialValue: 50
+      - Name: sight
+        InitialValue: 6
     InitialActions:
       - Action: init_camera
         ActionId: 1
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
       Block2D:
+        - Shape: hexagon
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: hexagon
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
         - Shape: hexagon
           Color: PLAYER
           Scale: 1.0
@@ -1311,10 +1688,26 @@ Objects:
         InitialValue: 25
       - Name: max_health
         InitialValue: 25
+      - Name: sight
+        InitialValue: 4
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img320.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img320.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img320.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img320.png
       Block2D:
+        - Shape: square
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: square
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
         - Shape: square
           Color: PLAYER
           Scale: 1.0
@@ -1328,10 +1721,39 @@ Objects:
         InitialValue: 20
       - Name: busy
         InitialValue: 0
+      - Name: sight
+        InitialValue: 3
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_green.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_blue.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_green.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_blue.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_green.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_blue.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_green.png
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_beaker_blue.png
       Block2D:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
+        - Shape: circle
+          Color: PLAYER
+          Scale: 1.0
         - Shape: circle
           Color: PLAYER
           Scale: 1.0
@@ -1345,10 +1767,26 @@ Objects:
         InitialValue: 20
       - Name: loaded
         InitialValue: 1
+      - Name: sight
+        InitialValue: 6
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_sentry_d1.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_sentry_d1.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_sentry_d1.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_sentry_d1.png
       Block2D:
+        - Shape: triangle
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: triangle
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
         - Shape: triangle
           Color: PLAYER
           Scale: 1.0
@@ -1360,10 +1798,26 @@ Objects:
         InitialValue: 15
       - Name: max_health
         InitialValue: 15
+      - Name: sight
+        InitialValue: 1
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
+      PlayerView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
+      CameraView:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
+      Overview:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_crate.png
       Block2D:
+        - Shape: square
+          Color: PLAYER
+          Scale: 1.0
+      MiniMap:
+        - Shape: square
+          Color: PLAYER
+          Scale: 1.0
+      GlobalMap:
         - Shape: square
           Color: PLAYER
           Scale: 1.0

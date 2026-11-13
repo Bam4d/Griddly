@@ -104,6 +104,7 @@ void IsometricSpriteObserver::updateObjectRenderItems(PartialObservableGrid& obs
 
       for (auto objectIt = objectAtLocation.begin(); objectIt != objectAtLocation.end(); ++objectIt) {
         auto object = objectIt->second;
+        if (fogHides(object)) continue;
 
         const auto& objectName = object->getObjectName();
         const auto& tileName = object->getObjectRenderTileName();

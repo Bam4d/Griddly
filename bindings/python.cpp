@@ -95,6 +95,9 @@ NB_MODULE(python_griddly, m) {
 
   // Tile size of the global observer
   game_process.def("observe", &Py_GameWrapper::observe);
+
+  // A named observer from a player's perspective (fog of war, camera): observe_player(player_id, name)
+  game_process.def("observe_player", &Py_GameWrapper::observePlayer);
   
   // Enable the history collection mode 
   game_process.def("enable_history", &Py_GameWrapper::enableHistory);
@@ -104,6 +107,9 @@ NB_MODULE(python_griddly, m) {
 
   // Get a dictionary containing the objects in the environment and their variable values
   game_process.def("get_state", &Py_GameWrapper::getState);
+
+  // The state one player may know under Environment.Player.FogOfWar (fog-filtered), with "Visibility"
+  game_process.def("get_player_state", &Py_GameWrapper::getPlayerState);
 
   // Load the state from a state object
   game_process.def("load_state", &Py_GameWrapper::loadState);
@@ -131,10 +137,23 @@ NB_MODULE(python_griddly, m) {
 
   game_process.def("seed", &Py_GameWrapper::seedRandomGenerator);
 
+  // Game clock (Environment.TickRate): players queue actions, the clock runs them together each tick
+  game_process.def("tick", &Py_GameWrapper::tick);
+  game_process.def("advance_time", &Py_GameWrapper::advanceTime, py::arg("seconds"), py::arg("max_ticks") = 1);
+  game_process.def("clear_queued_actions", &Py_GameWrapper::clearQueuedActions, py::arg("player_id") = 0);
+  game_process.def("get_queued_action_count", &Py_GameWrapper::getQueuedActionCount, py::arg("player_id") = 0);
+  game_process.def("set_tick_rate", &Py_GameWrapper::setTickRate);
+  game_process.def("get_tick_rate", &Py_GameWrapper::getTickRate);
+  game_process.def("set_paused", &Py_GameWrapper::setPaused);
+  game_process.def("is_paused", &Py_GameWrapper::isPaused);
+
 
   py::class_<Py_StepPlayerWrapper> player(m, "Player");
   player.def("step", &Py_StepPlayerWrapper::stepSingle);
   player.def("step_multi", &Py_StepPlayerWrapper::stepMulti);
+  // record actions for the next game-clock tick (see GameProcess.tick / advance_time)
+  player.def("queue", &Py_StepPlayerWrapper::queueAction);
+  player.def("queue_multi", &Py_StepPlayerWrapper::queueActions);
   player.def("observe", &Py_StepPlayerWrapper::observe);
   player.def("get_observation_description", &Py_StepPlayerWrapper::getObservationDescription);
 

@@ -1,5 +1,6 @@
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
 #include <utility>
 
 #include "GDY/Actions/Action.hpp"
@@ -65,6 +66,9 @@ void GameProcess::init(bool isCloned) {
     levelGenerator_->reset(grid_);
     spdlog::debug("Reset.");
 
+    grid_->configureVisibility(gdyFactory_->getPlayerVisibilityConfig());
+    grid_->updateVisibility();
+
     // Capture the freshly loaded level as the initial ECS state so
     // resetFromSnapshot() can restore it with a single memcpy.
     grid_->captureInitialState();
@@ -103,6 +107,8 @@ void GameProcess::init(bool isCloned) {
     resetObservers();
   }
 
+  tickRate_ = gdyFactory_->getTickRate();
+
   isInitialized_ = true;
 }
 
@@ -122,6 +128,111 @@ void GameProcess::resetObservers() {
 
   // Global observer reset
   observer_->reset();
+
+  for (auto& [key, observer] : extraPlayerObservers_) {
+    observer->reset();
+  }
+}
+
+void GameProcess::queueActions(uint32_t playerId, const std::vector<std::shared_ptr<Action>>& actions) {
+  auto& queue = queuedActions_[playerId];
+  for (const auto& action : actions) {
+    if (action != nullptr) queue.push_back(action);
+  }
+}
+
+void GameProcess::clearQueuedActions(uint32_t playerId) {
+  if (playerId == 0) {
+    queuedActions_.clear();
+  } else {
+    queuedActions_.erase(playerId);
+  }
+}
+
+size_t GameProcess::getQueuedActionCount(uint32_t playerId) const {
+  size_t count = 0;
+  for (const auto& [id, actions] : queuedActions_) {
+    if (playerId == 0 || id == playerId) count += actions.size();
+  }
+  return count;
+}
+
+TickResult GameProcess::tick() {
+  TickResult tickResult;
+  if (!isInitialized_ || requiresReset_) {
+    tickResult.result.terminated = requiresReset_;
+    return tickResult;
+  }
+  // players take turns going first, so no player always acts before the others
+  std::vector<uint32_t> order;
+  for (const auto& player : players_) order.push_back(player->getId());
+  if (!order.empty()) {
+    std::rotate(order.begin(), order.begin() + (*grid_->getTickCount() % order.size()), order.end());
+  }
+  auto queued = std::move(queuedActions_);
+  queuedActions_.clear();
+  for (size_t i = 0; i < order.size(); i++) {
+    auto& actions = queued[order[i]];
+    tickResult.actions += actions.size();
+    const bool last = i == order.size() - 1;
+    // only the last player's call advances time: every player's actions land in the same tick
+    tickResult.result = performActions(order[i], actions, last);
+  }
+  tickResult.ticks = 1;
+  return tickResult;
+}
+
+TickResult GameProcess::advanceTime(double seconds, uint32_t maxTicks) {
+  TickResult total;
+  if (paused_ || tickRate_ <= 0.0 || requiresReset_ || !isInitialized_) {
+    total.result.terminated = requiresReset_;
+    return total;
+  }
+  tickAccumulator_ += seconds * tickRate_;
+  while (tickAccumulator_ >= 1.0 && total.ticks < maxTicks) {
+    tickAccumulator_ -= 1.0;
+    auto result = tick();
+    total.ticks += result.ticks;
+    total.actions += result.actions;
+    total.result = result.result;
+    if (result.result.terminated) break;
+  }
+  // when far behind (e.g. a background tab), drop the backlog instead of fast-forwarding
+  tickAccumulator_ = std::min(tickAccumulator_, 2.0);
+  return total;
+}
+
+void GameProcess::setTickRate(double ticksPerSecond) {
+  tickRate_ = std::max(0.0, ticksPerSecond);
+  tickAccumulator_ = 0.0;
+}
+
+void GameProcess::setPaused(bool paused) {
+  paused_ = paused;
+  tickAccumulator_ = 0.0;
+}
+
+std::shared_ptr<Observer> GameProcess::getPlayerObserver(uint32_t playerId, const std::string& observerName) {
+  if (!isInitialized_) {
+    throw std::runtime_error("Cannot create player observers before the game is initialized.");
+  }
+  if (playerId == 0 || playerId > players_.size()) {
+    throw std::invalid_argument(fmt::format("No player with id {0}", playerId));
+  }
+  auto key = std::make_pair(playerId, observerName);
+  auto it = extraPlayerObservers_.find(key);
+  if (it != extraPlayerObservers_.end()) {
+    return it->second;
+  }
+  auto observer = gdyFactory_->createObserver(grid_, observerName, static_cast<uint32_t>(players_.size()), playerId);
+  std::vector<std::weak_ptr<Observer>> playerObservers;
+  for (auto& p : players_) {
+    playerObservers.push_back(p->getObserver());
+  }
+  observer->init(playerObservers);
+  observer->reset();
+  extraPlayerObservers_[key] = observer;
+  return observer;
 }
 
 void GameProcess::reset() {
@@ -141,11 +252,19 @@ void GameProcess::reset() {
   // Re-capture the initial ECS state for this level.
   grid_->captureInitialState();
 
+  // what each player sees at the start (a new episode starts unexplored)
+  grid_->configureVisibility(gdyFactory_->getPlayerVisibilityConfig());
+  grid_->updateVisibility();
+
   spdlog::debug("Resetting Observers.");
   resetObservers();
 
   spdlog::debug("Resetting Termination Handler.");
   terminationHandler_ = gdyFactory_->createTerminationHandler(grid_, players_);
+
+  // a new episode starts with an empty action queue on a fresh clock
+  queuedActions_.clear();
+  tickAccumulator_ = 0.0;
 
   requiresReset_ = false;
   spdlog::debug("Reset Complete.");
@@ -161,6 +280,9 @@ void GameProcess::resetFromSnapshot() {
   // counters, which the termination handler's condition lambdas point into).
   grid_->resetToInitialState();
 
+  grid_->configureVisibility(gdyFactory_->getPlayerVisibilityConfig());
+  grid_->updateVisibility();
+
   resetObservers();
 
   // The termination handler is NOT recreated: its resolved condition lambdas
@@ -174,6 +296,10 @@ void GameProcess::resetFromSnapshot() {
 
 void GameProcess::release() {
   observer_->release();
+  for (auto& [key, observer] : extraPlayerObservers_) {
+    observer->release();
+  }
+  extraPlayerObservers_.clear();
   for (auto& p : players_) {
     p->getObserver()->release();
   }
@@ -404,6 +530,52 @@ const GameState GameProcess::getGameState() {
   generateStateHash(gameState);
 
   return gameState;
+}
+
+const GameState GameProcess::getPlayerGameState(uint32_t playerId) {
+  const auto& visibility = grid_->getVisibility();
+  if (!visibility.enabled()) {
+    return getGameState();
+  }
+  if (playerId == 0 || playerId > grid_->getPlayerCount()) {
+    throw std::invalid_argument(fmt::format("No player with id {0}", playerId));
+  }
+
+  GameState gameState;
+  const auto& stateMapping = getGameStateMapping();
+  gameState.tickCount = *grid_->getTickCount();
+  gameState.playerCount = grid_->getPlayerCount();
+  gameState.grid.height = grid_->getHeight();
+  gameState.grid.width = grid_->getWidth();
+
+  // global variables: shared values, and only this player's slot of per-player values
+  const auto& globalVariables = grid_->getGlobalVariables();
+  gameState.globalData.resize(globalVariables.size());
+  for (const auto& [variableName, values] : globalVariables) {
+    const auto variableNameIdx = stateMapping.globalVariableNameToIdx.at(variableName);
+    auto& data = gameState.globalData[variableNameIdx];
+    data.resize(values.size());
+    const bool perPlayer = values.size() > 1;
+    for (const auto& [owner, value] : values) {
+      data[owner] = (!perPlayer || owner == playerId) ? *value : 0;
+    }
+  }
+
+  std::vector<std::shared_ptr<ObjectRules>> visibleObjects;
+  for (const auto& object : grid_->getObjects()) {
+    if (visibility.canSee(playerId, object)) visibleObjects.push_back(object);
+  }
+  std::sort(visibleObjects.begin(), visibleObjects.end(), SortObjects());
+  for (const auto& object : visibleObjects) {
+    gameState.objectData.push_back(gdyFactory_->getObjectGenerator()->toObjectData(object));
+  }
+
+  generateStateHash(gameState);
+  return gameState;
+}
+
+const std::vector<uint8_t>& GameProcess::getPlayerVisibility(uint32_t playerId) const {
+  return grid_->getVisibility().cells(playerId);
 }
 
 const GameStateMapping& GameProcess::getGameStateMapping() const {

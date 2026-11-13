@@ -22,11 +22,14 @@ class GriddlyJSPlayerWrapper {
 
   e::val stepSingle(std::string actionName, std::vector<int32_t> actionArray, bool updateTicks);
 
+  // Build an engine action for this player (nullptr for an unknown action id)
+  std::shared_ptr<griddly::Action> buildAction(std::string actionName, std::vector<int32_t> actionArray);
+
+  static e::val buildInfo(griddly::ActionResult actionResult);
+
  private:
   const std::shared_ptr<griddly::Player> player_;
   const std::shared_ptr<griddly::GDYFactory> gdyFactory_;
   const std::shared_ptr<griddly::GameProcess> gameProcess_;
 
-  e::val buildInfo(griddly::ActionResult actionResult);
-  std::shared_ptr<griddly::Action> buildAction(std::string actionName, std::vector<int32_t> actionArray);
 };

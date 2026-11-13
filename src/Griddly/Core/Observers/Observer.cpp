@@ -115,6 +115,10 @@ PartialObservableGrid Observer::getObservableGrid() const {
   return observableGrid;
 }
 
+bool Observer::playerCanSee(const std::shared_ptr<ObjectRules>& object) const {
+  return grid_->getVisibility().canSee(config_.playerId, object);
+}
+
 uint32_t Observer::getEgocentricPlayerId(uint32_t objectPlayerId) const {
   // if we are including the player ID, we always set player = 1 from the perspective of the agent being controlled.
   // e.g if this is observer is owned by player 3 then objects owned by player 3 will be rendered as "player 1".
