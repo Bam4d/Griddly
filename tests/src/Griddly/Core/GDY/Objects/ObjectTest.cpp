@@ -1,6 +1,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "Griddly/Core/GridCollisionDetector.hpp"
 #include "Griddly/Core/GDY/Objects/ObjectRules.hpp"
 #include "Griddly/Core/GDY/Objects/ObjectGenerator.hpp"
 #include "Mocks/Griddly/Core/GDY/Actions/MockAction.hpp"
@@ -1321,6 +1322,10 @@ TEST(ObjectTest, command_exec_search) {
 
   auto invokeCollisionDetector = [this, searchObjectPtr](std::unordered_set<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) -> void {
     ASSERT_EQ(objectNames, std::unordered_set<std::string>({"search_object"}));
+    // what Grid::addCollisionDetector does: grid-occupancy detectors only match the registered names
+    if (auto gridDetector = std::dynamic_pointer_cast<GridCollisionDetector>(collisionDetector)) {
+      gridDetector->addObjectNames(objectNames);
+    }
     collisionDetector->upsert(searchObjectPtr);
   };
 

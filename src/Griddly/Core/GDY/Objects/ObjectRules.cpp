@@ -869,7 +869,9 @@ PathFinderConfig ObjectRules::configurePathFinder(YAML::Node &searchNode, std::s
     const auto &actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
     auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
 
-    config.maxSearchDepth = searchNode["MaxDepth"].as<uint32_t>(100);
+    // Budget of A* node expansions. The default must cover a typical level: states are
+    // (location, orientation), so a 40x25 map with rotating actions has up to 4000 of them.
+    config.maxSearchDepth = searchNode["MaxDepth"].as<uint32_t>(10000);
     config.mode = getPathFinderModeFromString(searchNode["Mode"].as<std::string>("SEEK"));
     config.pathFinder = std::make_shared<AStarPathFinder>(AStarPathFinder(grid(), impassableObjectsSet, actionInputDefinitionIt->second, config.mode));
 

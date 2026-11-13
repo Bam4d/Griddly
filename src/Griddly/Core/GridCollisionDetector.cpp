@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "GDY/Objects/ObjectRules.hpp"
+
 namespace griddly {
 
 GridCollisionDetector::GridCollisionDetector(uint32_t gridWidth, uint32_t gridHeight, uint32_t range, TriggerType triggerType)
@@ -24,6 +26,9 @@ SearchResult GridCollisionDetector::search(glm::ivec2 location) {
       const auto& tileObjects = grid_->getObjectsAt({x, y});
       for (const auto& zAndObject : tileObjects) {
         const auto& object = zAndObject.second;
+        if (objectNames_.find(object->getObjectName()) == objectNames_.end()) {
+          continue;
+        }
         const auto& collisionLocation = object->getLocation();
         auto dx = std::abs(location.x - collisionLocation.x);
         auto dy = std::abs(location.y - collisionLocation.y);

@@ -13089,7 +13089,7 @@ Objects:
           Scale: 0.9
 Version: "0.1"
 Environment:
-  Name: Frost & Flame
+  Name: Frost and Flame
   Description: |
     An elemental push puzzle on a frozen mountain. Ice is slippery: you and ice blocks slide until
     something stops you. Push an ice block into open water to freeze it into an ice bridge. Push a
@@ -14231,7 +14231,7 @@ Objects:
           Scale: 0.7
 Version: "0.1"
 Environment:
-  Name: Timber & Tide
+  Name: Timber and Tide
   Description: |
     A lumberjack must rescue the lost hens. Chop trees for logs (carry 3; old oaks take two chops),
     build log bridges over rivers (deep water takes 2 logs) or drop log piles on the ground, and
@@ -22589,7 +22589,8 @@ Objects:
                             "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Search/MaxDepth",
                             "type": "integer",
                             "title": "Max Depth",
-                            "description": "Budget for AStar search depth."
+                            "description": "Budget for the A* search: the maximum number of search nodes (location + orientation) expanded per decision. If the target is not reached within the budget, the first action towards the most promising explored node is used.",
+                            "default": 10000
                           },
                           "Mode": {
                             "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Search/Mode",

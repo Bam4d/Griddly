@@ -1,4 +1,5 @@
 #include "Grid.hpp"
+#include "GridCollisionDetector.hpp"
 
 #define SPDLOG_HEADER_ONLY
 #include <spdlog/fmt/fmt.h>
@@ -706,6 +707,11 @@ void Grid::addCollisionDetector(std::unordered_set<std::string> objectNames, std
   }
 
   collisionDetector->setGrid(this);
+  // Grid-occupancy detectors read locations straight from the grid; tell them which object types they
+  // match so a search only returns objects this detector was added for (see GridCollisionDetector).
+  if (auto gridDetector = std::dynamic_pointer_cast<GridCollisionDetector>(collisionDetector)) {
+    gridDetector->addObjectNames(objectNames);
+  }
   collisionDetectors_.insert({actionName, collisionDetector});
 
   // If we are adding an collision detector, make sure that all required objects are added to it.

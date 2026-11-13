@@ -168,4 +168,131 @@ TEST(AStarPathFinderTest, searchRotationActions) {
   ASSERT_EQ(left.actionId, 1);
 }
 
+// --- Regression tests for the rewritten search (detours, budgets, unreachable targets) ---------------
+
+// A grid backed by an ASCII map: '#' cells hold an impassable "wall" object, everything else is empty.
+struct AsciiGrid {
+  std::vector<std::string> rows;
+  std::shared_ptr<MockGrid> grid = std::make_shared<MockGrid>();
+  std::shared_ptr<MockObjectRules> wall = std::make_shared<MockObjectRules>();
+  std::string wallName = "wall";
+  TileObjects wallTile;
+  TileObjects emptyTile;
+
+  explicit AsciiGrid(std::vector<std::string> r) : rows(std::move(r)) {
+    EXPECT_CALL(*wall, getObjectName).WillRepeatedly(::testing::ReturnRef(wallName));
+    wallTile = {{0, wall}};
+    EXPECT_CALL(*grid, getHeight).WillRepeatedly(Return(static_cast<uint32_t>(rows.size())));
+    EXPECT_CALL(*grid, getWidth).WillRepeatedly(Return(static_cast<uint32_t>(rows[0].size())));
+    EXPECT_CALL(*grid, getObjectsAt).WillRepeatedly(::testing::Invoke([this](glm::ivec2 l) -> const TileObjects& {
+      return rows[l.y][l.x] == '#' ? wallTile : emptyTile;
+    }));
+  }
+};
+
+// Follow the path finder step by step (applying each returned action) and count moves to the goal.
+static int32_t walkToGoal(AStarPathFinder& pf, const ActionInputsDefinition& inputs, glm::ivec2 start, glm::ivec2 goal, glm::ivec2 facing, uint32_t maxDepth, int32_t maxSteps = 500) {
+  auto location = start;
+  auto orientation = facing;
+  for (int32_t step = 0; step < maxSteps; step++) {
+    if (location == goal) return step;
+    auto out = pf.search(location, goal, orientation, maxDepth);
+    if (out.actionId == 0) return -1;
+    const auto& mapping = inputs.inputMappings.at(out.actionId);
+    auto rot = DiscreteOrientation(orientation).getRotationMatrix();
+    location += inputs.relative ? mapping.vectorToDest * rot : mapping.vectorToDest;
+    orientation = inputs.relative ? mapping.orientationVector * rot : mapping.orientationVector;
+  }
+  return -2;
+}
+
+TEST(AStarPathFinderTest, searchFindsDetourAroundWalls) {
+  // The straight line to the goal is blocked; the shortest path leaves through the gap (5 moves).
+  AsciiGrid g({"........",
+               "..####..",
+               "..#S.#..",
+               "..#..#..",
+               "..##.#..",
+               "...G....",
+               "........"});
+  auto inputs = getUpDownLeftRightActions();
+  AStarPathFinder pf(g.grid, {"wall"}, inputs, PathFinderMode::SEEK);
+  // S=(3,2) G=(3,5): right, down through the gap at (4,4), down, left = 5 (BFS optimum)
+  ASSERT_EQ(walkToGoal(pf, inputs, {3, 2}, {3, 5}, {0, 0}, 10000), 5);
+}
+
+TEST(AStarPathFinderTest, searchLongMazeBeyondOldDepthBudget) {
+  // A serpentine corridor: the goal is 53 moves away (BFS optimum), well past the old 100-node budget.
+  AsciiGrid g({"S.........",
+               "#########.",
+               "..........",
+               ".#########",
+               "..........",
+               "#########.",
+               "..........",
+               ".#########",
+               ".........G"});
+  auto inputs = getUpDownLeftRightActions();
+  AStarPathFinder pf(g.grid, {"wall"}, inputs, PathFinderMode::SEEK);
+  ASSERT_EQ(walkToGoal(pf, inputs, {0, 0}, {9, 8}, {0, 0}, 10000), 53);
+}
+
+TEST(AStarPathFinderTest, searchRotationActionsThroughMaze) {
+  AsciiGrid g({"S.........",
+               "#########.",
+               "..........",
+               ".#########",
+               ".........G"});
+  auto inputs = getRotateAndForwardActions();
+  AStarPathFinder pf(g.grid, {"wall"}, inputs, PathFinderMode::SEEK);
+  // facing right: 9 fwd, turn right, 2 fwd, turn right, 9 fwd, turn left, 2 fwd, turn left, 9 fwd = 35
+  ASSERT_EQ(walkToGoal(pf, inputs, {0, 0}, {9, 4}, {1, 0}, 10000), 35);
+}
+
+TEST(AStarPathFinderTest, searchUnreachableGoalMovesCloserButNeverIntoWalls) {
+  AsciiGrid g({"S...#...",
+               "....#.G.",
+               "....#..."});
+  auto inputs = getUpDownLeftRightActions();
+  AStarPathFinder pf(g.grid, {"wall"}, inputs, PathFinderMode::SEEK);
+  // Unreachable: it heads to the closest reachable cell (next to the wall) and then stays (action 0).
+  glm::ivec2 location{0, 0};
+  for (int i = 0; i < 20; i++) {
+    auto out = pf.search(location, {6, 1}, {0, 0}, 10000);
+    if (out.actionId == 0) break;
+    location += inputs.inputMappings.at(out.actionId).vectorToDest;
+    ASSERT_NE(g.rows[location.y][location.x], '#');
+  }
+  ASSERT_EQ(location.x, 3);
+}
+
+TEST(AStarPathFinderTest, searchTargetCellIsEnterableEvenIfImpassable) {
+  // The chased object may itself be in the impassable set; the search must still path next to/into it.
+  AsciiGrid g({"S..#"});
+  auto inputs = getUpDownLeftRightActions();
+  AStarPathFinder pf(g.grid, {"wall"}, inputs, PathFinderMode::SEEK);
+  ASSERT_EQ(pf.search({0, 0}, {3, 0}, {0, 0}, 10000).actionId, 2);
+  ASSERT_EQ(walkToGoal(pf, inputs, {0, 0}, {3, 0}, {0, 0}, 10000), 3);
+}
+
+TEST(AStarPathFinderTest, searchAtGoalReturnsNoAction) {
+  AsciiGrid g({"...."});
+  auto inputs = getUpDownLeftRightActions();
+  AStarPathFinder pf(g.grid, {"wall"}, inputs, PathFinderMode::SEEK);
+  ASSERT_EQ(pf.search({1, 0}, {1, 0}, {0, 0}, 10000).actionId, 0);
+}
+
+TEST(AStarPathFinderTest, searchFleeRunsAwayAroundWalls) {
+  AsciiGrid g({"......",
+               ".####.",
+               ".#..#.",
+               ".#..#.",
+               "......"});
+  auto inputs = getUpDownLeftRightActions();
+  AStarPathFinder pf(g.grid, {"wall"}, inputs, PathFinderMode::FLEE);
+  // Chaser at (0,0); the fleeing object at (1,0) should move away (right), not into the wall below.
+  auto out = pf.search({1, 0}, {0, 0}, {0, 0}, 10000);
+  ASSERT_EQ(out.actionId, 2);
+}
+
 }  // namespace griddly

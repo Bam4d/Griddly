@@ -1271,7 +1271,8 @@
                             "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Search/MaxDepth",
                             "type": "integer",
                             "title": "Max Depth",
-                            "description": "Budget for AStar search depth."
+                            "description": "Budget for the A* search: the maximum number of search nodes (location + orientation) expanded per decision. If the target is not reached within the budget, the first action towards the most promising explored node is used.",
+                            "default": 10000
                           },
                           "Mode": {
                             "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Search/Mode",
